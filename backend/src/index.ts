@@ -1,10 +1,20 @@
 import { Hono } from "hono";
+import mongoose from "mongoose";
 import { connectDB, disconnectDB } from "./db";
 import { logger } from "hono/logger";
 import { prettyJSON } from "hono/pretty-json";
 import { cors } from "hono/cors";
-import authRoutes from "./routes/auth";
 import { HTTPException } from "hono/http-exception";
+import { AuthUserData } from "./services/auth.service";
+
+import authRoutes from "./routes/auth";
+import contentRoutes from "./routes/content";
+
+declare module "hono" {
+  interface ContextVariableMap {
+    user: AuthUserData;
+  }
+}
 
 const app = new Hono();
 
@@ -36,11 +46,16 @@ app.get("/", (c) => {
 
 // A simple health check endpoint
 app.get("/health", (c) => {
-  return c.text("OK");
+  const isDbConnected = mongoose.connection.readyState === 1;
+  return c.json({
+    status: "ok",
+    dbConnected: isDbConnected,
+  });
 });
 
 // Auth routes
 app.route("/api/auth", authRoutes);
+app.route("/api/content", contentRoutes);
 
 // --- Custom Error Handling for HTTPExceptions ---
 app.onError((err, c) => {
