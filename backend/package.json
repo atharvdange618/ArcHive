@@ -4,8 +4,10 @@
     "dev": "bun run --hot src/index.ts"
   },
   "dependencies": {
+    "argon2": "^0.43.0",
     "hono": "^4.7.11",
-    "mongoose": "^8.15.2"
+    "mongoose": "^8.15.2",
+    "zod": "^3.25.64"
   },
   "devDependencies": {
     "@types/bun": "latest"
