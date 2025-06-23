@@ -32,7 +32,6 @@ export async function connectDB(): Promise<void> {
  * This function can be called when the application is shutting down
  * @returns {Promise<void>}
  */
-
 export async function disconnectDB(): Promise<void> {
   try {
     await mongoose.disconnect();

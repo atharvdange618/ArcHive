@@ -9,6 +9,28 @@ import {
 } from "../validation/auth.validation";
 import { registerUser, loginUser } from "../services/auth.service";
 
+/**
+ * Defines authentication routes for user registration and login.
+ *
+ * @module authRoutes
+ *
+ * @remarks
+ * - POST `/register`: Registers a new user. Validates the request body using `registerSchema` (Zod).
+ *   Returns a success message, user object, and JWT token on success.
+ *   Responds with HTTP 400 and validation errors if input is invalid.
+ *
+ * - POST `/login`: Authenticates a user. Validates the request body using `loginSchema` (Zod).
+ *   Returns a success message, user object, and JWT token on success.
+ *   Responds with HTTP 400 and validation errors if input is invalid.
+ *
+ * @throws {HTTPException} If validation fails or service errors occur.
+ *
+ * @see registerSchema
+ * @see loginSchema
+ * @see registerUser
+ * @see loginUser
+ */
+
 const authRoutes = new Hono();
 
 // Register a new user

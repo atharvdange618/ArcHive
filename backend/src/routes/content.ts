@@ -19,6 +19,39 @@ import {
   SearchContentQuery,
 } from "../validation/content.validation";
 
+/**
+ * Defines routes for managing content items in the application.
+ *
+ * @module contentRoutes
+ * @description
+ * This module provides RESTful API endpoints for creating, retrieving, updating, and deleting content items.
+ * All routes are protected by JWT authentication middleware and validate input using Zod schemas.
+ *
+ * ## Routes
+ * - `POST /api/content` - Create a new content item. Requires a valid request body matching `createContentSchema`.
+ * - `GET /api/content` - Retrieve all content items for the authenticated user, with support for search and pagination via query parameters validated by `searchContentQuerySchema`.
+ * - `GET /api/content/:id` - Retrieve a single content item by its ID for the authenticated user.
+ * - `PUT /api/content/:id` - Update an existing content item by its ID. Requires a valid request body matching `updateContentSchema`.
+ * - `DELETE /api/content/:id` - Delete a content item by its ID for the authenticated user.
+ *
+ * ## Middleware
+ * - JWT authentication is enforced for all routes. The user's information is extracted from the JWT payload and attached to the context.
+ * - Input validation is performed using Zod schemas for both request bodies and query parameters. Validation errors result in a 400 HTTP response with detailed error messages.
+ *
+ * ## Error Handling
+ * - Throws `HTTPException` with appropriate status codes and messages for authentication failures and validation errors.
+ * - Service-level errors are propagated and should be handled by the application's global error handler.
+ *
+ * @see createContent
+ * @see getContents
+ * @see getContentById
+ * @see updateContent
+ * @see deleteContent
+ * @see createContentSchema
+ * @see updateContentSchema
+ * @see searchContentQuerySchema
+ */
+
 const JWT_SECRET = Bun.env.JWT_SECRET as string;
 
 const contentRoutes = new Hono();
