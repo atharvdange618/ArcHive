@@ -52,7 +52,7 @@ import {
  * @see searchContentQuerySchema
  */
 
-const JWT_SECRET = Bun.env.JWT_SECRET as string;
+const JWT_SECRET = process.env.JWT_SECRET as string;
 
 const contentRoutes = new Hono();
 

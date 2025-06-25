@@ -9,7 +9,7 @@ import mongoose from "mongoose";
  */
 
 export async function connectDB(): Promise<void> {
-  const mongoURI = Bun.env.MONGODB_URI;
+  const mongoURI = process.env.MONGODB_URI;
 
   if (!mongoURI) {
     console.error(

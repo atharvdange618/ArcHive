@@ -5,7 +5,7 @@ import { sign, verify } from "hono/jwt";
 import { RegisterInput, LoginInput } from "../validation/auth.validation";
 
 // Get JWT secret from environment variables
-const JWT_SECRET = Bun.env.JWT_SECRET as string;
+const JWT_SECRET = process.env.JWT_SECRET as string;
 if (!JWT_SECRET) {
   console.error("Error: JWT_SECRET environment variable is not defined.");
   process.exit(1);

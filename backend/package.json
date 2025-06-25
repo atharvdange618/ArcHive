@@ -1,7 +1,8 @@
 {
   "name": "backend",
   "scripts": {
-    "dev": "bun run --hot src/index.ts"
+    "dev": "bun run --hot src/index.ts",
+    "test": "npx vitest"
   },
   "dependencies": {
     "argon2": "^0.43.0",
@@ -14,6 +15,7 @@
     "@types/node": "^24.0.4",
     "@types/supertest": "^6.0.3",
     "@vitest/ui": "^3.2.4",
+    "dotenv": "^16.5.0",
     "supertest": "^7.1.1",
     "vitest": "^3.2.4"
   }
