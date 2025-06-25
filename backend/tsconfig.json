@@ -2,6 +2,13 @@
   "compilerOptions": {
     "strict": true,
     "jsx": "react-jsx",
-    "jsxImportSource": "hono/jsx"
-  }
+    "jsxImportSource": "hono/jsx",
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "esModuleInterop": true,
+    "types": ["vitest/globals", "bun"],
+    "baseUrl": "."
+  },
+  "include": ["src", "tests"]
 }

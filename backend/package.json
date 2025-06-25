@@ -10,6 +10,11 @@
     "zod": "^3.25.64"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "^1.2.17",
+    "@types/node": "^24.0.4",
+    "@types/supertest": "^6.0.3",
+    "@vitest/ui": "^3.2.4",
+    "supertest": "^7.1.1",
+    "vitest": "^3.2.4"
   }
 }
