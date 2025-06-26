@@ -1,4 +1,4 @@
-import "dotenv/config";
+import { config } from "./config";
 import app from "./app";
 import { connectDB, disconnectDB } from "./db";
 
@@ -6,7 +6,7 @@ import { connectDB, disconnectDB } from "./db";
   // Connect to DB once when the server starts
   await connectDB();
 
-  const port = parseInt(process.env.PORT || "3000", 10);
+  const port = config.PORT;
 
   Bun.serve({
     fetch: app.fetch,

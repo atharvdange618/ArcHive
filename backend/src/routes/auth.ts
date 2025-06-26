@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
-import { validator } from "hono/validator";
+import { validate } from "../middleware/validator";
 import {
   registerSchema,
   loginSchema,
@@ -34,23 +34,7 @@ import { registerUser, loginUser } from "../services/auth.service";
 const authRoutes = new Hono();
 
 // Register a new user
-authRoutes.post(
-  "/register",
-  validator("json", (value, c) => {
-    const parsed = registerSchema.safeParse(value);
-    if (!parsed.success) {
-      // format zod errors
-      const errors = parsed.error.issues.map((issue) => ({
-        path: issue.path.join("."),
-        message: issue.message,
-      }));
-      throw new HTTPException(400, {
-        message: `Validation failed: ${JSON.stringify(errors)}`,
-      });
-    }
-    return parsed.data;
-  }),
-  async (c) => {
+authRoutes.post("/register", validate("json", registerSchema), async (c) => {
     const { username, email, password } = c.req.valid("json") as RegisterInput;
 
     try {
@@ -64,22 +48,7 @@ authRoutes.post(
 );
 
 // User Login
-authRoutes.post(
-  "/login",
-  validator("json", (value, c) => {
-    const parsed = loginSchema.safeParse(value);
-    if (!parsed.success) {
-      const errors = parsed.error.issues.map((issue) => ({
-        path: issue.path.join("."),
-        message: issue.message,
-      }));
-      throw new HTTPException(400, {
-        message: `Validation failed: ${JSON.stringify(errors)}`,
-      });
-    }
-    return parsed.data; // Return the validated data
-  }),
-  async (c) => {
+authRoutes.post("/login", validate("json", loginSchema), async (c) => {
     const { email, password } = c.req.valid("json") as LoginInput;
 
     try {

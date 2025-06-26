@@ -50,13 +50,12 @@ app.route("/api/content", contentRoutes);
 // --- Custom Error Handling for HTTPExceptions ---
 app.onError((err, c) => {
   if (err instanceof HTTPException) {
-    const errorResponse: { message: string; errors?: any } = {
+    const errorResponse: { message: string; errors?: any; cause?: any } = {
       message: err.message,
     };
-    if ((err as any).errors) {
-      errorResponse.errors = (err as any).errors;
+    if (err.cause) {
+      errorResponse.cause = err.cause;
     }
-    console.error(`HTTP Error (${err.status}):`, errorResponse);
     return c.json(errorResponse, err.status);
   }
   console.error(`An unexpected server error occurred: ${err.message}`, err);

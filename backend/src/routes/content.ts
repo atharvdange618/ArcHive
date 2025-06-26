@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { jwt } from "hono/jwt";
 import { HTTPException } from "hono/http-exception";
-import { validator } from "hono/validator";
+import { validate } from "../middleware/validator";
 
 import {
   createContent,
@@ -52,11 +52,11 @@ import {
  * @see searchContentQuerySchema
  */
 
-const JWT_SECRET = process.env.JWT_SECRET as string;
+import { config } from "../config";
 
 const contentRoutes = new Hono();
 
-contentRoutes.use("*", jwt({ secret: JWT_SECRET }), async (c, next) => {
+contentRoutes.use("*", jwt({ secret: config.JWT_SECRET }), async (c, next) => {
   const payload = c.get("jwtPayload");
   if (!payload || !payload._id) {
     throw new HTTPException(401, {
@@ -72,24 +72,7 @@ contentRoutes.use("*", jwt({ secret: JWT_SECRET }), async (c, next) => {
 });
 
 // CREATE Content Item (POST /api/content)
-contentRoutes.post(
-  "/",
-  validator("json", (value, c) => {
-    const parsed = createContentSchema.safeParse(value);
-    if (!parsed.success) {
-      const errors = parsed.error.issues.map((issue) => ({
-        path: issue.path.join("."),
-        message: issue.message,
-      }));
-      throw new HTTPException(400, {
-        message: `Validation failed for content creation: ${JSON.stringify(
-          errors
-        )}`,
-      });
-    }
-    return parsed.data;
-  }),
-  async (c) => {
+contentRoutes.post("/", validate("json", createContentSchema), async (c) => {
     const userId = c.get("user")?._id;
     const data = c.req.valid("json") as CreateContentInput;
 
@@ -110,25 +93,7 @@ contentRoutes.post(
 );
 
 // GET All Content Items with Search & Pagination (GET /api/content)
-contentRoutes.get(
-  "/",
-
-  validator("query", (value, c) => {
-    const parsed = searchContentQuerySchema.safeParse(value);
-    if (!parsed.success) {
-      const errors = parsed.error.issues.map((issue) => ({
-        path: issue.path.join("."),
-        message: issue.message,
-      }));
-      throw new HTTPException(400, {
-        message: `Validation failed for search query: ${JSON.stringify(
-          errors
-        )}`,
-      });
-    }
-    return parsed.data;
-  }),
-  async (c) => {
+contentRoutes.get("/", validate("query", searchContentQuerySchema), async (c) => {
     const userId = c.get("user")?._id;
     const queryParams = c.req.valid("query") as SearchContentQuery;
 
@@ -173,24 +138,7 @@ contentRoutes.get("/:id", async (c) => {
 });
 
 // UPDATE Content Item (PUT /api/content/:id)
-contentRoutes.put(
-  "/:id",
-  validator("json", (value, c) => {
-    const parsed = updateContentSchema.safeParse(value);
-    if (!parsed.success) {
-      const errors = parsed.error.issues.map((issue) => ({
-        path: issue.path.join("."),
-        message: issue.message,
-      }));
-      throw new HTTPException(400, {
-        message: `Validation failed for content update: ${JSON.stringify(
-          errors
-        )}`,
-      });
-    }
-    return parsed.data;
-  }),
-  async (c) => {
+contentRoutes.put("/:id", validate("json", updateContentSchema), async (c) => {
     const userId = c.get("user")?._id;
     const contentId = c.req.param("id");
     const updates = c.req.valid("json") as UpdateContentInput;

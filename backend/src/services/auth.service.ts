@@ -3,13 +3,7 @@ import User, { IUser } from "../db/models/User";
 import { HTTPException } from "hono/http-exception";
 import { sign, verify } from "hono/jwt";
 import { RegisterInput, LoginInput } from "../validation/auth.validation";
-
-// Get JWT secret from environment variables
-const JWT_SECRET = process.env.JWT_SECRET as string;
-if (!JWT_SECRET) {
-  console.error("Error: JWT_SECRET environment variable is not defined.");
-  process.exit(1);
-}
+import { config } from "../config";
 
 export interface AuthUserData {
   _id: string;
@@ -50,7 +44,7 @@ async function generateToken(user: AuthUserData): Promise<string> {
       iat: now,
     };
 
-    const token = await sign(payload, JWT_SECRET);
+    const token = await sign(payload, config.JWT_SECRET);
     return token;
   } catch (error) {
     console.error("Failed to generate token:", error);
@@ -58,46 +52,7 @@ async function generateToken(user: AuthUserData): Promise<string> {
   }
 }
 
-/**
- * Verifies a JWT and returns the decoded payload.
- * @param token The JWT string to verify.
- * @returns The decoded token payload as AuthUserData.
- * @throws HTTPException if the token is invalid, expired, or verification fails.
- */
-async function verifyToken(token: string): Promise<AuthUserData> {
-  try {
-    const payload = await verify(token, JWT_SECRET);
 
-    if (payload.exp && Date.now() / 1000 > payload.exp) {
-      throw new HTTPException(401, {
-        message: "Authentication token expired. Please log in again.",
-      });
-    }
-
-    if (!payload._id || !payload.username || !payload.email) {
-      throw new HTTPException(401, { message: "Invalid token payload." });
-    }
-
-    return {
-      _id: payload._id as string,
-      username: payload.username as string,
-      email: payload.email as string,
-    };
-  } catch (error) {
-    if (error instanceof HTTPException) {
-      throw error;
-    } else if (error instanceof Error && error.message.includes("expired")) {
-      throw new HTTPException(401, {
-        message: "Authentication token expired. Please log in again.",
-      });
-    } else {
-      console.error("Token verification failed:", error);
-      throw new HTTPException(401, {
-        message: "Invalid authentication token.",
-      });
-    }
-  }
-}
 
 /**
  * Registers a new user.
@@ -204,4 +159,4 @@ async function loginUser(credentials: LoginInput) {
   }
 }
 
-export { registerUser, loginUser, verifyToken };
+export { registerUser, loginUser };

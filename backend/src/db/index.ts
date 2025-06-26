@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { config } from "../config";
 
 /**
  * Establishes a connection to the MongoDB database using Mongoose.
@@ -9,14 +10,7 @@ import mongoose from "mongoose";
  */
 
 export async function connectDB(): Promise<void> {
-  const mongoURI = process.env.MONGODB_URI;
-
-  if (!mongoURI) {
-    console.error(
-      "Error: MONGODB_URI is not defined in environment variables."
-    );
-    process.exit(1);
-  }
+  const mongoURI = config.MONGODB_URI;
 
   try {
     await mongoose.connect(mongoURI);

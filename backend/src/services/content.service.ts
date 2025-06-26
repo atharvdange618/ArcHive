@@ -166,47 +166,51 @@ async function updateContent(
     throw new HTTPException(400, { message: "Invalid content ID format." });
   }
 
-  try {
-    const existingContent = await ContentItem.findOne({
+  // Prevent changing content type after creation
+  if (updates.type) {
+    const existing = await ContentItem.findOne({
       _id: contentId,
       userId: new mongoose.Types.ObjectId(userId),
-    });
+    }).select("type");
 
-    if (!existingContent) {
+    if (existing && existing.type !== updates.type) {
+      throw new HTTPException(400, {
+        message: `Content type cannot be changed. Expected ${existing.type}, got ${updates.type}.`,
+      });
+    }
+  }
+
+  try {
+    const updatedContent = await ContentItem.findOneAndUpdate(
+      {
+        _id: contentId,
+        userId: new mongoose.Types.ObjectId(userId),
+      },
+      { $set: updates },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedContent) {
       throw new HTTPException(404, {
         message:
           "Content item not found or you do not have access to update it.",
       });
     }
 
-    // Prevent changing content type after creation.
-    // If 'type' is provided in updates, it must match existing.
-    if (updates.type && updates.type !== existingContent.type) {
-      throw new HTTPException(400, {
-        message: "Content type cannot be changed after creation.",
-      });
-    }
-
-    Object.assign(existingContent, updates);
-
-    if (updates.tags !== undefined) {
-      existingContent.tags = updates.tags;
-    }
-    await existingContent.save();
-    return existingContent;
+    return updatedContent;
   } catch (error) {
     if (error instanceof HTTPException) {
       throw error;
     }
-    console.error(
-      `Error updating content item ${contentId} for user ${userId}:`,
-      error
-    );
     if (error instanceof mongoose.Error.ValidationError) {
       throw new HTTPException(400, {
         message: `Validation failed: ${error.message}`,
       });
     }
+    console.error(
+      `Error updating content item ${contentId} for user ${userId}:`,
+      error
+    );
     throw new HTTPException(500, { message: "Failed to update content item." });
   }
 }
