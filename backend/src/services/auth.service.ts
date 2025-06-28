@@ -1,10 +1,13 @@
 import { hash } from "argon2";
 import User, { IUser } from "../db/models/User";
+import RefreshToken from "../db/models/RefreshToken";
+import BlacklistedToken from "../db/models/BlacklistedToken";
 import { HTTPException } from "hono/http-exception";
-import { sign } from "hono/jwt";
+import { sign, decode } from "hono/jwt";
 import { RegisterInput, LoginInput } from "../validation/auth.validation";
 import { config } from "../config";
 import { Types } from "mongoose";
+import { randomBytes } from "crypto";
 
 export interface AuthUserData {
   _id: string;
@@ -12,11 +15,6 @@ export interface AuthUserData {
   email: string;
 }
 
-/**
- * Hashes a plain text password using Argon2.
- * @param password The plain text password to hash.
- * @returns The hashed password string.
- */
 async function hashPassword(password: string): Promise<string> {
   try {
     return await hash(password);
@@ -28,42 +26,48 @@ async function hashPassword(password: string): Promise<string> {
   }
 }
 
-/**
- * Generates a JSON Web Token (JWT) for a given user.
- * @param user The user object (AuthUserData) to include in the token payload.
- * @returns The signed JWT string.
- * @throws {Error} if token signing fails.
- */
-async function generateToken(user: AuthUserData): Promise<string> {
+async function generateRefreshToken(userId: Types.ObjectId): Promise<string> {
+  const token = randomBytes(40).toString("hex");
+  const expiresAt = new Date();
+  expiresAt.setDate(expiresAt.getDate() + 30); // Refresh token valid for 30 days
+
+  const refreshToken = new RefreshToken({
+    user: userId,
+    token,
+    expiresAt,
+  });
+
+  await refreshToken.save();
+  return token;
+}
+
+async function generateTokens(user: AuthUserData) {
   try {
     const now = Math.floor(Date.now() / 1000);
     const payload = {
       _id: user._id,
       username: user.username,
       email: user.email,
-      exp: now + 60 * 60 * 24 * 7, // 7 days
+      exp: now + 60 * 15, // Access token valid for 15 minutes
       iat: now,
     };
 
-    const token = await sign(payload, config.JWT_SECRET);
-    return token;
+    const accessToken = await sign(payload, config.JWT_SECRET);
+    const refreshToken = await generateRefreshToken(
+      new Types.ObjectId(user._id)
+    );
+
+    return { accessToken, refreshToken };
   } catch (error) {
-    console.error("Failed to generate token:", error);
+    console.error("Failed to generate tokens:", error);
     throw new Error("Token generation failed");
   }
 }
 
-/**
- * Registers a new user.
- * @param userData The validated user registration input.
- * @returns The newly created user document (without password hash) and a JWT.
- * @throws HTTPException if username or email already exists, or other server errors.
- */
 async function registerUser(userData: RegisterInput) {
   const { username, email, password } = userData;
 
   try {
-    // check if user already exists by email or username
     const existingUserByEmail = await User.findOne({ email });
     if (existingUserByEmail) {
       throw new HTTPException(409, { message: "Email already registered." });
@@ -73,10 +77,8 @@ async function registerUser(userData: RegisterInput) {
       throw new HTTPException(409, { message: "Username already taken." });
     }
 
-    // Hash the password securely
     const passwordHash = await hashPassword(password);
 
-    // Create the new user document
     const newUser = new User({
       username,
       email,
@@ -85,8 +87,7 @@ async function registerUser(userData: RegisterInput) {
 
     await newUser.save();
 
-    // Generate a JWT for the new user
-    const token = await generateToken({
+    const { accessToken, refreshToken } = await generateTokens({
       _id: (newUser._id as Types.ObjectId).toString(),
       username: newUser.username as string,
       email: newUser.email,
@@ -100,7 +101,8 @@ async function registerUser(userData: RegisterInput) {
         createdAt: newUser.createdAt,
         updatedAt: newUser.updatedAt,
       },
-      token,
+      accessToken,
+      refreshToken,
     };
   } catch (error) {
     if (error instanceof HTTPException) {
@@ -113,12 +115,6 @@ async function registerUser(userData: RegisterInput) {
   }
 }
 
-/**
- * Logs in a user.
- * @param credentials The validated login credentials.
- * @returns The authenticated user document (without password hash) and a JWT.
- * @throws HTTPException if invalid credentials or server errors.
- */
 async function loginUser(credentials: LoginInput) {
   const { email, password } = credentials;
 
@@ -131,7 +127,7 @@ async function loginUser(credentials: LoginInput) {
     if (!isMatch)
       throw new HTTPException(401, { message: "Invalid credentials." });
 
-    const token = await generateToken({
+    const { accessToken, refreshToken } = await generateTokens({
       _id: (user._id as Types.ObjectId).toString(),
       username: user.username as string,
       email: user.email,
@@ -145,7 +141,8 @@ async function loginUser(credentials: LoginInput) {
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
       },
-      token,
+      accessToken,
+      refreshToken,
     };
   } catch (error) {
     if (error instanceof HTTPException) {
@@ -175,7 +172,7 @@ async function OAuthHandler(c: any) {
   });
 
   const tokenData = await tokenRes.json();
-  if (!tokenRes.ok) {
+  if (!tokenData.ok) {
     console.error("Token error", tokenData);
     throw new HTTPException(401, { message: "Failed to get access token" });
   }
@@ -193,10 +190,8 @@ async function OAuthHandler(c: any) {
     throw new HTTPException(401, { message: "Failed to get user info" });
   }
 
-  // --- Step 3: Lookup or Create User ---
   let user = await User.findOne({ googleId: googleUser.id });
   if (!user) {
-    // fallback username logic
     const fallbackUsername =
       googleUser.name?.replace(/\s+/g, "") || googleUser.email.split("@")[0];
 
@@ -214,7 +209,7 @@ async function OAuthHandler(c: any) {
     }
   }
 
-  const token = await generateToken({
+  const { accessToken, refreshToken } = await generateTokens({
     _id: (user._id as Types.ObjectId).toString(),
     email: user.email,
     username: user.username as string,
@@ -222,7 +217,8 @@ async function OAuthHandler(c: any) {
 
   return c.json({
     message: "Google login successful",
-    token,
+    accessToken,
+    refreshToken,
     user: {
       id: (user._id as Types.ObjectId).toString(),
       email: user.email,
@@ -231,4 +227,79 @@ async function OAuthHandler(c: any) {
   });
 }
 
-export { registerUser, loginUser, OAuthHandler };
+async function refreshAccessToken(oldRefreshToken: string) {
+  try {
+    const storedToken = await RefreshToken.findOne({
+      token: oldRefreshToken,
+    }).populate("user");
+
+    if (!storedToken) {
+      throw new HTTPException(401, { message: "Invalid refresh token." });
+    }
+
+    if (storedToken.expiresAt < new Date()) {
+      await RefreshToken.findByIdAndDelete(storedToken._id);
+      throw new HTTPException(401, { message: "Refresh token expired." });
+    }
+
+    const user = storedToken.user as IUser & { _id: any };
+    if (!user) {
+      throw new HTTPException(401, { message: "User not found for token." });
+    }
+
+    const now = Math.floor(Date.now() / 1000);
+    const payload = {
+      _id: user._id.toString(),
+      username: user.username,
+      email: user.email,
+      exp: now + 60 * 15, // New access token valid for 15 minutes
+      iat: now,
+    };
+
+    const accessToken = await sign(payload, config.JWT_SECRET);
+
+    return { accessToken };
+  } catch (error) {
+    if (error instanceof HTTPException) {
+      throw error;
+    }
+    console.error("Error in refreshAccessToken service:", error);
+    throw new HTTPException(500, {
+      message: "Failed to refresh token due to server error.",
+    });
+  }
+}
+
+async function logoutUser(accessToken: string, refreshToken: string) {
+  try {
+    const { payload } = decode(accessToken);
+    if (!payload || !payload.exp) {
+      throw new HTTPException(400, { message: "Invalid access token." });
+    }
+
+    const expiresAt = new Date(payload.exp * 1000);
+    const blacklistedToken = new BlacklistedToken({
+      token: accessToken,
+      expiresAt,
+    });
+    await blacklistedToken.save();
+
+    await RefreshToken.deleteOne({ token: refreshToken });
+  } catch (error) {
+    if (error instanceof HTTPException) {
+      throw error;
+    }
+    console.error("Error in logoutUser service:", error);
+    throw new HTTPException(500, {
+      message: "Failed to logout due to server error.",
+    });
+  }
+}
+
+export {
+  registerUser,
+  loginUser,
+  OAuthHandler,
+  refreshAccessToken,
+  logoutUser,
+};

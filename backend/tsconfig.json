@@ -8,7 +8,10 @@
     "moduleResolution": "Bundler",
     "esModuleInterop": true,
     "types": ["vitest/globals", "bun"],
-    "baseUrl": "."
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "outDir": "dist"
   },
-  "include": ["src", "tests"]
+  "include": ["src", "tests"],
+  "exclude": ["node_modules"]
 }

@@ -30,7 +30,8 @@ test("Auth: POST /api/auth/register - Successfully registers a new user", async 
   expect(data.user).toHaveProperty("username", "testuser");
   expect(data.user).toHaveProperty("email", "register@example.com");
   expect(data.user).toHaveProperty("_id");
-  expect(data).toHaveProperty("token");
+  expect(data).toHaveProperty("accessToken");
+  expect(data).toHaveProperty("refreshToken");
 
   // Verify if the user exists in the db
   const userInDb = await User.findOne({ email: "register@example.com" });
@@ -209,7 +210,8 @@ test("Auth: POST /api/auth/login - Successfully logs in an existing user", async
   expect(data).toHaveProperty("message", "Login successful!");
   expect(data).toHaveProperty("user");
   expect(data.user).toHaveProperty("email", "login@example.com");
-  expect(data).toHaveProperty("token");
+  expect(data).toHaveProperty("accessToken");
+  expect(data).toHaveProperty("refreshToken");
 });
 
 test("Auth: POST /api/auth/login - Fails with invalid password", async () => {

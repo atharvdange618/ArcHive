@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { jwt } from "hono/jwt";
 import { HTTPException } from "hono/http-exception";
 import { validate } from "../middleware/validator";
+import { checkBlacklist } from "../middleware/auth.middleware";
 
 import {
   createContent,
@@ -56,20 +57,25 @@ import { config } from "../config";
 
 const contentRoutes = new Hono();
 
-contentRoutes.use("*", jwt({ secret: config.JWT_SECRET }), async (c, next) => {
-  const payload = c.get("jwtPayload");
-  if (!payload || !payload._id) {
-    throw new HTTPException(401, {
-      message: "Invalid or missing JWT payload.",
+contentRoutes.use(
+  "*",
+  jwt({ secret: config.JWT_SECRET }),
+  checkBlacklist,
+  async (c, next) => {
+    const payload = c.get("jwtPayload");
+    if (!payload || !payload._id) {
+      throw new HTTPException(401, {
+        message: "Invalid or missing JWT payload.",
+      });
+    }
+    c.set("user", {
+      _id: payload._id,
+      username: payload.username,
+      email: payload.email,
     });
+    await next();
   }
-  c.set("user", {
-    _id: payload._id,
-    username: payload.username,
-    email: payload.email,
-  });
-  await next();
-});
+);
 
 // CREATE Content Item (POST /api/content)
 contentRoutes.post("/", validate("json", createContentSchema), async (c) => {
