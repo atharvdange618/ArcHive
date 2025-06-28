@@ -7,7 +7,12 @@ import {
   RegisterInput,
   LoginInput,
 } from "../validation/auth.validation";
-import { registerUser, loginUser } from "../services/auth.service";
+import {
+  registerUser,
+  loginUser,
+  OAuthHandler,
+} from "../services/auth.service";
+import { config } from "src/config";
 
 /**
  * Defines authentication routes for user registration and login.
@@ -35,30 +40,43 @@ const authRoutes = new Hono();
 
 // Register a new user
 authRoutes.post("/register", validate("json", registerSchema), async (c) => {
-    const { username, email, password } = c.req.valid("json") as RegisterInput;
+  const { username, email, password } = c.req.valid("json") as RegisterInput;
 
-    try {
-      const { user, token } = await registerUser({ username, email, password });
+  try {
+    const { user, token } = await registerUser({ username, email, password });
 
-      return c.json({ message: "Registration successful!", user, token }, 201);
-    } catch (error) {
-      throw error;
-    }
+    return c.json({ message: "Registration successful!", user, token }, 201);
+  } catch (error) {
+    throw error;
   }
-);
+});
 
 // User Login
 authRoutes.post("/login", validate("json", loginSchema), async (c) => {
-    const { email, password } = c.req.valid("json") as LoginInput;
+  const { email, password } = c.req.valid("json") as LoginInput;
 
-    try {
-      const { user, token } = await loginUser({ email, password });
+  try {
+    const { user, token } = await loginUser({ email, password });
 
-      return c.json({ message: "Login successful!", user, token }, 200);
-    } catch (error) {
-      throw error;
-    }
+    return c.json({ message: "Login successful!", user, token }, 200);
+  } catch (error) {
+    throw error;
   }
-);
+});
+
+// Google OAuth
+authRoutes.get("/google", (c) => {
+  const redirectUri = encodeURIComponent(
+    "http://localhost:3000/api/auth/google/callback"
+  ); // update in prod
+  const clientId = config.GOOGLE_CLIENT_ID;
+  const scope = encodeURIComponent("openid profile email");
+
+  const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}`;
+
+  return c.redirect(url);
+});
+
+authRoutes.get("/google/callback", OAuthHandler);
 
 export default authRoutes;

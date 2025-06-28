@@ -1,4 +1,3 @@
-
 import { z } from "zod";
 import "dotenv/config";
 
@@ -6,10 +5,14 @@ import "dotenv/config";
  * Zod schema for validating environment variables.
  */
 const envSchema = z.object({
-  NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
+  NODE_ENV: z
+    .enum(["development", "production", "test"])
+    .default("development"),
   PORT: z.coerce.number().int().positive().default(3000),
   MONGODB_URI: z.string().min(1, "MONGODB_URI is required"),
   JWT_SECRET: z.string().min(1, "JWT_SECRET is required"),
+  GOOGLE_CLIENT_ID: z.string().min(1, "GOOGLE_CLIENT_ID is required"),
+  GOOGLE_CLIENT_SECRET: z.string().min(1, "GOOGLE_CLIENT_SECRET is required"),
 });
 
 /**

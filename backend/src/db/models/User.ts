@@ -2,9 +2,10 @@ import mongoose, { Schema, Document } from "mongoose";
 import { verify } from "argon2";
 
 export interface IUser extends Document {
-  username: string;
+  googleId?: string;
+  username?: string;
   email: string;
-  password: string;
+  password?: string;
   createdAt: Date;
   updatedAt: Date;
   comparePassword(userPass: string): Promise<boolean>;
@@ -12,13 +13,24 @@ export interface IUser extends Document {
 
 const UserSchema: Schema = new Schema(
   {
+    googleId: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
     username: {
       type: String,
-      required: [true, "Username is required"],
+      required: [
+        function (this: IUser) {
+          return !this.googleId;
+        },
+        "Username is required",
+      ],
       unique: true,
       trim: true,
       minlength: [3, "Username must be at least 3 characters long"],
       maxlength: [30, "Username cannot exceed 30 characters"],
+      sparse: true,
     },
     email: {
       type: String,
@@ -30,7 +42,12 @@ const UserSchema: Schema = new Schema(
     },
     password: {
       type: String,
-      required: [true, "Password is required"],
+      required: [
+        function (this: IUser) {
+          return !this.googleId;
+        },
+        "Password is required",
+      ],
     },
   },
   {
@@ -45,6 +62,9 @@ UserSchema.methods.comparePassword = async function (
   this: IUser,
   userPass: string
 ): Promise<boolean> {
+  if (!this.password) {
+    throw new Error("Password is not set for this user.");
+  }
   return await verify(this.password, userPass);
 };
 

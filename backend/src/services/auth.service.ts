@@ -1,9 +1,10 @@
 import { hash } from "argon2";
 import User, { IUser } from "../db/models/User";
 import { HTTPException } from "hono/http-exception";
-import { sign, verify } from "hono/jwt";
+import { sign } from "hono/jwt";
 import { RegisterInput, LoginInput } from "../validation/auth.validation";
 import { config } from "../config";
+import { Types } from "mongoose";
 
 export interface AuthUserData {
   _id: string;
@@ -52,8 +53,6 @@ async function generateToken(user: AuthUserData): Promise<string> {
   }
 }
 
-
-
 /**
  * Registers a new user.
  * @param userData The validated user registration input.
@@ -88,14 +87,14 @@ async function registerUser(userData: RegisterInput) {
 
     // Generate a JWT for the new user
     const token = await generateToken({
-      _id: newUser._id.toString(),
-      username: newUser.username,
+      _id: (newUser._id as Types.ObjectId).toString(),
+      username: newUser.username as string,
       email: newUser.email,
     });
 
     return {
       user: {
-        _id: newUser._id.toString(),
+        _id: (newUser._id as Types.ObjectId).toString(),
         username: newUser.username,
         email: newUser.email,
         createdAt: newUser.createdAt,
@@ -133,14 +132,14 @@ async function loginUser(credentials: LoginInput) {
       throw new HTTPException(401, { message: "Invalid credentials." });
 
     const token = await generateToken({
-      _id: user._id.toString(),
-      username: user.username,
+      _id: (user._id as Types.ObjectId).toString(),
+      username: user.username as string,
       email: user.email,
     });
 
     return {
       user: {
-        _id: user._id.toString(),
+        _id: (user._id as Types.ObjectId).toString(),
         username: user.username,
         email: user.email,
         createdAt: user.createdAt,
@@ -159,4 +158,77 @@ async function loginUser(credentials: LoginInput) {
   }
 }
 
-export { registerUser, loginUser };
+async function OAuthHandler(c: any) {
+  const code = c.req.query("code");
+  if (!code) throw new HTTPException(400, { message: "No code provided" });
+
+  const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      code,
+      client_id: config.GOOGLE_CLIENT_ID,
+      client_secret: config.GOOGLE_CLIENT_SECRET,
+      redirect_uri: "http://localhost:3000/api/auth/google/callback",
+      grant_type: "authorization_code",
+    }),
+  });
+
+  const tokenData = await tokenRes.json();
+  if (!tokenRes.ok) {
+    console.error("Token error", tokenData);
+    throw new HTTPException(401, { message: "Failed to get access token" });
+  }
+
+  const userInfoRes = await fetch(
+    "https://www.googleapis.com/oauth2/v2/userinfo",
+    {
+      headers: { Authorization: `Bearer ${tokenData.access_token}` },
+    }
+  );
+
+  const googleUser = await userInfoRes.json();
+  if (!userInfoRes.ok) {
+    console.error("User info error", googleUser);
+    throw new HTTPException(401, { message: "Failed to get user info" });
+  }
+
+  // --- Step 3: Lookup or Create User ---
+  let user = await User.findOne({ googleId: googleUser.id });
+  if (!user) {
+    // fallback username logic
+    const fallbackUsername =
+      googleUser.name?.replace(/\s+/g, "") || googleUser.email.split("@")[0];
+
+    user = new User({
+      googleId: googleUser.id,
+      email: googleUser.email,
+      username: fallbackUsername,
+    });
+
+    try {
+      await user.save();
+    } catch (err: any) {
+      console.error("User creation failed", err);
+      throw new HTTPException(500, { message: "User creation failed" });
+    }
+  }
+
+  const token = await generateToken({
+    _id: (user._id as Types.ObjectId).toString(),
+    email: user.email,
+    username: user.username as string,
+  });
+
+  return c.json({
+    message: "Google login successful",
+    token,
+    user: {
+      id: (user._id as Types.ObjectId).toString(),
+      email: user.email,
+      username: user.username as string,
+    },
+  });
+}
+
+export { registerUser, loginUser, OAuthHandler };

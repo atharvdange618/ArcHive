@@ -73,27 +73,29 @@ contentRoutes.use("*", jwt({ secret: config.JWT_SECRET }), async (c, next) => {
 
 // CREATE Content Item (POST /api/content)
 contentRoutes.post("/", validate("json", createContentSchema), async (c) => {
-    const userId = c.get("user")?._id;
-    const data = c.req.valid("json") as CreateContentInput;
+  const userId = c.get("user")?._id;
+  const data = c.req.valid("json") as CreateContentInput;
 
-    try {
-      const newContent = await createContent(userId, data);
+  try {
+    const newContent = await createContent(userId, data);
 
-      return c.json(
-        {
-          message: "Content created successfully",
-          content: newContent.toObject(),
-        },
-        201
-      );
-    } catch (error) {
-      throw error;
-    }
+    return c.json(
+      {
+        message: "Content created successfully",
+        content: newContent.toObject(),
+      },
+      201
+    );
+  } catch (error) {
+    throw error;
   }
-);
+});
 
 // GET All Content Items with Search & Pagination (GET /api/content)
-contentRoutes.get("/", validate("query", searchContentQuerySchema), async (c) => {
+contentRoutes.get(
+  "/",
+  validate("query", searchContentQuerySchema),
+  async (c) => {
     const userId = c.get("user")?._id;
     const queryParams = c.req.valid("query") as SearchContentQuery;
 
@@ -139,24 +141,23 @@ contentRoutes.get("/:id", async (c) => {
 
 // UPDATE Content Item (PUT /api/content/:id)
 contentRoutes.put("/:id", validate("json", updateContentSchema), async (c) => {
-    const userId = c.get("user")?._id;
-    const contentId = c.req.param("id");
-    const updates = c.req.valid("json") as UpdateContentInput;
+  const userId = c.get("user")?._id;
+  const contentId = c.req.param("id");
+  const updates = c.req.valid("json") as UpdateContentInput;
 
-    try {
-      const updatedContent = await updateContent(userId, contentId, updates);
-      return c.json(
-        {
-          message: "Content item updated successfully!",
-          content: updatedContent.toObject(),
-        },
-        200
-      );
-    } catch (error) {
-      throw error;
-    }
+  try {
+    const updatedContent = await updateContent(userId, contentId, updates);
+    return c.json(
+      {
+        message: "Content item updated successfully!",
+        content: updatedContent.toObject(),
+      },
+      200
+    );
+  } catch (error) {
+    throw error;
   }
-);
+});
 
 // DELETE Content Item (DELETE /api/content/:id)
 contentRoutes.delete("/:id", async (c) => {
