@@ -98,10 +98,4 @@ To get ArcHive up and running on your local machine, follow these steps:
     ```
     This will open a new tab in your browser with the Expo Dev Tools. You can then scan the QR code with the Expo Go app on your phone, or choose to run it on an Android emulator or iOS simulator.
 
-## 👨‍💻 About the Creator
-
-ArcHive is a passion project by **Atharv Dange** ([atharvdange618](https://github.com/atharvdange618) on GitHub).
-
-As a Full Stack Engineer, I find immense joy in building robust and elegant software solutions. Beyond the lines of code, I'm an avid enthusiast of movies and anime, constantly drawing inspiration for creative problem-solving and storytelling from these art forms. For me, technology and music aren't just fields of study or entertainment; they are profound expressions of art.
-
 ---
