@@ -3,10 +3,11 @@ import { StyleSheet, Text, TouchableOpacity, ViewStyle } from "react-native";
 import { useThemeColors } from "../constants/useColorScheme";
 
 interface ButtonProps {
-  title: string;
+  title: string | React.ReactNode;
   onPress: () => void;
   style?: ViewStyle;
   variant?: "primary" | "secondary" | "outline";
+  disabled?: boolean;
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -14,6 +15,7 @@ const Button: React.FC<ButtonProps> = ({
   onPress,
   style,
   variant = "primary",
+  disabled,
 }) => {
   const colors = useThemeColors();
 
@@ -57,6 +59,7 @@ const Button: React.FC<ButtonProps> = ({
     <TouchableOpacity
       style={[styles.button, getButtonStyles(), style]}
       onPress={onPress}
+      disabled={disabled}
     >
       <Text style={[styles.buttonText, getButtonTextStyles()]}>{title}</Text>
     </TouchableOpacity>

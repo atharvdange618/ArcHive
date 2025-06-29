@@ -3,10 +3,12 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import ContentList from "../../components/ContentList";
 import Fab from "../../components/Fab";
 import { useThemeColors } from "../../constants/useColorScheme";
+import useAuthStore from "../../stores/authStore";
 import { ContentType, IContentItem } from "../../types";
 
 export default function TabOneScreen() {
   const colors = useThemeColors();
+  const user = useAuthStore((state) => state.user);
 
   // Dummy data for demonstration
   const dummyContent: IContentItem[] = [
@@ -63,7 +65,7 @@ export default function TabOneScreen() {
       {/* Header */}
       <View style={[styles.header, { borderBottomColor: colors.subtleBorder }]}>
         <Text style={[styles.headerTitle, { color: colors.text }]}>
-          ArcHive 💙
+          Hello, {`${user?.username}!` || "ArcHive 💙"}
         </Text>
         <TouchableOpacity onPress={() => console.log("Search pressed")}>
           <FontAwesome name="search" size={24} color={colors.text} />
