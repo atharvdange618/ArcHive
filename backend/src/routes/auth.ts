@@ -22,29 +22,30 @@ import {
 import { config } from "src/config";
 import { jwt } from "hono/jwt";
 
+const authRoutes = new Hono();
+
 /**
- * Defines authentication routes for user registration and login.
+ * Defines authentication-related routes for user registration, login, OAuth, token refresh, and logout.
  *
  * @module authRoutes
  *
  * @remarks
- * - POST `/register`: Registers a new user. Validates the request body using `registerSchema` (Zod).
- *   Returns a success message, user object, and JWT token on success.
- *   Responds with HTTP 400 and validation errors if input is invalid.
+ * It includes middleware for validation and JWT authentication, and delegates business logic to service functions.
  *
- * - POST `/login`: Authenticates a user. Validates the request body using `loginSchema` (Zod).
- *   Returns a success message, user object, and JWT token on success.
- *   Responds with HTTP 400 and validation errors if input is invalid.
+ * @routes
+ * - POST /register: Register a new user.
+ * - POST /login: Authenticate a user and issue tokens.
+ * - GET /google: Initiate Google OAuth flow.
+ * - GET /google/callback: Handle Google OAuth callback.
+ * - POST /refresh: Refresh access token using a refresh token.
+ * - POST /logout: Log out a user and invalidate tokens.
  *
- * @throws {HTTPException} If validation fails or service errors occur.
- *
- * @see registerSchema
- * @see loginSchema
- * @see registerUser
- * @see loginUser
+ * @see {@link registerUser}
+ * @see {@link loginUser}
+ * @see {@link OAuthHandler}
+ * @see {@link refreshAccessToken}
+ * @see {@link logoutUser}
  */
-
-const authRoutes = new Hono();
 
 // Register a new user
 authRoutes.post("/register", validate("json", registerSchema), async (c) => {

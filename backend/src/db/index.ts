@@ -8,7 +8,6 @@ import { config } from "../config";
  * @returns {Promise<void>} A promise that resolves when the connection is successful.,
  * or rejects if an error occurs.
  */
-
 export async function connectDB(): Promise<void> {
   const mongoURI = config.MONGODB_URI;
 
