@@ -24,7 +24,9 @@ export default function RegisterScreen() {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Stack.Screen options={{ headerShown: false }} />
-      <Text style={[styles.title, { color: colors.text }]}>Join ArcHive</Text>
+      <Text style={[styles.title, { color: colors.text }]}>
+        Join ArcHive 💙
+      </Text>
 
       <InputField
         label="Username"

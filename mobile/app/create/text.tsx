@@ -24,7 +24,7 @@ export default function CreateTextScreen() {
           },
         ]}
         placeholder="Title (optional)"
-        placeholderTextColor={colors.subtleBorder}
+        placeholderTextColor={colors.placeholderText}
       />
       <TextInput
         style={[
@@ -36,7 +36,7 @@ export default function CreateTextScreen() {
           },
         ]}
         placeholder="Your text content..."
-        placeholderTextColor={colors.subtleBorder}
+        placeholderTextColor={colors.placeholderText}
         multiline
         textAlignVertical="top"
       />
@@ -50,7 +50,7 @@ export default function CreateTextScreen() {
           },
         ]}
         placeholder="Tags (comma-separated)"
-        placeholderTextColor={colors.subtleBorder}
+        placeholderTextColor={colors.placeholderText}
       />
       <TouchableOpacity
         style={[styles.button, { backgroundColor: colors.tint }]}

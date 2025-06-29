@@ -24,7 +24,7 @@ export default function CreateLinkScreen() {
           },
         ]}
         placeholder="URL (required)"
-        placeholderTextColor={colors.subtleBorder}
+        placeholderTextColor={colors.placeholderText}
       />
       <TextInput
         style={[
@@ -36,7 +36,7 @@ export default function CreateLinkScreen() {
           },
         ]}
         placeholder="Title (optional)"
-        placeholderTextColor={colors.subtleBorder}
+        placeholderTextColor={colors.placeholderText}
       />
       <TextInput
         style={[
@@ -48,7 +48,7 @@ export default function CreateLinkScreen() {
           },
         ]}
         placeholder="Description (optional)"
-        placeholderTextColor={colors.subtleBorder}
+        placeholderTextColor={colors.placeholderText}
         multiline
         textAlignVertical="top"
       />
@@ -62,7 +62,7 @@ export default function CreateLinkScreen() {
           },
         ]}
         placeholder="Tags (comma-separated)"
-        placeholderTextColor={colors.subtleBorder}
+        placeholderTextColor={colors.placeholderText}
       />
       <TouchableOpacity
         style={[styles.button, { backgroundColor: colors.tint }]}
