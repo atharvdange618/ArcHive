@@ -2,6 +2,7 @@ import { test, expect } from "vitest";
 import app from "../app";
 import { handle } from "hono/vercel";
 import User from "../db/models/User";
+import BlacklistedToken from "../db/models/BlacklistedToken";
 
 const handler = handle(app);
 
@@ -299,4 +300,142 @@ test("Auth: POST /api/auth/login - Fails with missing password", async () => {
       e.message.includes("Password is required")
     )
   ).toBe(true);
+});
+
+test("Auth: POST /api/auth/logout - Successfully logs out a user and blacklists the token", async () => {
+  await handler(
+    new Request("http://localhost/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        username: "logoutuser",
+        email: "logout@example.com",
+        password: "LogoutPassword@123",
+      }),
+    })
+  );
+
+  const loginRes = await handler(
+    new Request("http://localhost/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: "logout@example.com",
+        password: "LogoutPassword@123",
+      }),
+    })
+  );
+  const { accessToken, refreshToken } = await loginRes.json();
+
+  const logoutReq = new Request("http://localhost/api/auth/logout", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ refreshToken }),
+  });
+
+  const logoutRes = await handler(logoutReq);
+
+  expect(logoutRes.status).toBe(200);
+  const logoutData = await logoutRes.json();
+  expect(logoutData).toHaveProperty("message", "Logout successful.");
+
+  const blacklisted = await BlacklistedToken.findOne({ token: accessToken });
+  expect(blacklisted).not.toBeNull();
+  expect(blacklisted?.token).toBe(accessToken);
+});
+
+test("Auth: POST /api/auth/logout - Fails if no token is provided", async () => {
+  const logoutReq = new Request("http://localhost/api/auth/logout", {
+    method: "POST",
+  });
+
+  const logoutRes = await handler(logoutReq);
+
+  expect(logoutRes.status).toBe(401);
+  const logoutData = await logoutRes.json();
+  expect(logoutData).toHaveProperty(
+    "message",
+    "no authorization included in request"
+  );
+});
+
+test("Auth: POST /api/auth/refresh - Successfully refreshes the access token", async () => {
+  await handler(
+    new Request("http://localhost/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        username: "refreshuser",
+        email: "refresh@example.com",
+        password: "RefreshPassword@123",
+      }),
+    })
+  );
+
+  const loginRes = await handler(
+    new Request("http://localhost/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: "refresh@example.com",
+        password: "RefreshPassword@123",
+      }),
+    })
+  );
+  const { refreshToken } = await loginRes.json();
+
+  const refreshReq = new Request("http://localhost/api/auth/refresh", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ refreshToken }),
+  });
+
+  const refreshRes = await handler(refreshReq);
+
+  expect(refreshRes.status).toBe(200);
+  const refreshData = await refreshRes.json();
+  expect(refreshData).toHaveProperty(
+    "message",
+    "Token refreshed successfully!"
+  );
+  expect(refreshData).toHaveProperty("accessToken");
+  expect(refreshData.accessToken).not.toBeNull();
+});
+
+test("Auth: POST /api/auth/refresh - Fails with an invalid or expired refresh token", async () => {
+  const refreshReq = new Request("http://localhost/api/auth/refresh", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ refreshToken: "invalidtoken" }),
+  });
+
+  const refreshRes = await handler(refreshReq);
+
+  expect(refreshRes.status).toBe(401);
+  const refreshData = await refreshRes.json();
+  expect(refreshData).toHaveProperty("message", "Invalid refresh token.");
+});
+
+test("Auth: POST /api/auth/refresh - Fails if refresh token is missing", async () => {
+  const refreshReq = new Request("http://localhost/api/auth/refresh", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({}), // No refreshToken provided
+  });
+
+  const refreshRes = await handler(refreshReq);
+
+  expect(refreshRes.status).toBe(400);
+  const refreshData = await refreshRes.json();
+  expect(refreshData.message).toContain("Validation failed");
+  expect(refreshData.cause.errors[0].message).toBe("Refresh token is required");
 });
