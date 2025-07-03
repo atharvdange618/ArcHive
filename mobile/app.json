@@ -45,7 +45,7 @@
       "eas": {
         "projectId": "8e0c6da8-f210-4548-8737-c417cd7fb3d7"
       },
-      "EXPO_PUBLIC_API_BASE_URL": "http://localhost:3000/api"
+      "EXPO_PUBLIC_API_BASE_URL": "https://archive-ctld.onrender.com/api"
     },
     "owner": "atharvdange618"
   }

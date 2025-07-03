@@ -89,20 +89,22 @@ authRoutes.post("/login", validate("json", loginSchema), async (c) => {
 // Google OAuth
 authRoutes.get("/google", (c) => {
   const redirectUri = encodeURIComponent(
-    "http://localhost:3000/api/auth/google/callback"
+    "https://archive-ctld.onrender.com/api/auth/google/callback"
   );
   const clientId = config.GOOGLE_CLIENT_ID;
   const scope = encodeURIComponent("openid profile email");
 
-  const appRedirectPrefix = c.req.query("appRedirectPrefix");
+  const appRedirectPrefix = c.req.query("appRedirectPrefix") || "archive://";
+  const statePayload = JSON.stringify({ appRedirectPrefix });
+  const state = encodeURIComponent(statePayload);
 
-  const statePayload = {
-    appRedirectPrefix: appRedirectPrefix || "archive://",
-  };
-
-  const state = encodeURIComponent(JSON.stringify(statePayload));
-
-  const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&state=${state}`;
+  const url =
+    `https://accounts.google.com/o/oauth2/v2/auth` +
+    `?client_id=${config.GOOGLE_CLIENT_ID}` +
+    `&redirect_uri=${redirectUri}` +
+    `&response_type=code` +
+    `&scope=openid%20profile%20email` +
+    `&state=${state}`;
 
   return c.redirect(url);
 });
