@@ -185,11 +185,13 @@ async function OAuthHandler(c: any) {
     }),
   });
 
-  const tokenData = await tokenRes.json();
-  if (!tokenData.ok) {
-    console.error("Token error", tokenData);
+  if (!tokenRes.ok) {
+    const errorBody = await tokenRes.text();
+    console.error("Token error response:", errorBody);
     throw new HTTPException(401, { message: "Failed to get access token" });
   }
+
+  const tokenData = await tokenRes.json();
 
   const userInfoRes = await fetch(
     "https://www.googleapis.com/oauth2/v2/userinfo",
