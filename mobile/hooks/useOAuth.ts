@@ -3,6 +3,7 @@ import * as Linking from "expo-linking";
 import { useCallback, useState } from "react";
 import useAuthStore from "@/stores/authStore";
 import { router } from "expo-router";
+import Constants from "expo-constants";
 
 export function useOAuth(): {
   loginWithGoogle: () => Promise<void>;
@@ -14,27 +15,25 @@ export function useOAuth(): {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const apiBaseUrl = Constants.expoConfig?.extra?.EXPO_PUBLIC_API_BASE_URL as
+    | string
+    | undefined;
+
   const loginWithGoogle = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
     const redirectUrl = Linking.createURL("auth-callback");
 
-    console.log({ redirectUrlFromFrontend: redirectUrl });
-
     try {
+      if (!apiBaseUrl) {
+        throw new Error("API Base URL not configured.");
+      }
+
       const urlObj = new URL(redirectUrl);
       const appSchemeAndHost = `${urlObj.protocol}//${urlObj.host}`;
 
-      const authUrl = new URL(
-        `${process.env.EXPO_PUBLIC_API_BASE_URL}/auth/google`
-      );
-      console.log(
-        "EXPO_PUBLIC_API_BASE_URL:",
-        process.env.EXPO_PUBLIC_API_BASE_URL
-      );
-      console.log("Full authUrl being used:", authUrl.toString());
-
+      const authUrl = new URL(`${apiBaseUrl}/auth/google`);
       authUrl.searchParams.append("appRedirectPrefix", appSchemeAndHost);
 
       const result = await WebBrowser.openAuthSessionAsync(
@@ -70,7 +69,7 @@ export function useOAuth(): {
     } finally {
       setIsLoading(false);
     }
-  }, [setTokens, setUser]);
+  }, [apiBaseUrl, setTokens, setUser]);
 
   return {
     loginWithGoogle,

@@ -96,7 +96,13 @@ authRoutes.get("/google", (c) => {
 
   const appRedirectPrefix = c.req.query("appRedirectPrefix");
 
-  const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}`;
+  const statePayload = {
+    appRedirectPrefix: appRedirectPrefix || "archive://",
+  };
+
+  const state = encodeURIComponent(JSON.stringify(statePayload));
+
+  const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&state=${state}`;
 
   return c.redirect(url);
 });

@@ -157,9 +157,20 @@ async function loginUser(credentials: LoginInput) {
 
 async function OAuthHandler(c: any) {
   const code = c.req.query("code");
-  if (!code) throw new HTTPException(400, { message: "No code provided" });
+  const stateParam = c.req.query("state");
 
-  const appRedirectPrefixFromFrontend = c.req.query("appRedirectPrefix");
+  if (!code) throw new HTTPException(400, { message: "No code provided" });
+  if (!stateParam)
+    throw new HTTPException(400, { message: "No state parameter provided" });
+
+  let appRedirectPrefix: string | undefined;
+  try {
+    const statePayload = JSON.parse(decodeURIComponent(stateParam));
+    appRedirectPrefix = statePayload.appRedirectPrefix;
+  } catch (error) {
+    console.error("Failed to parse state parameter:", error);
+    throw new HTTPException(400, { message: "Invalid state parameter" });
+  }
 
   const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
     method: "POST",
@@ -217,7 +228,7 @@ async function OAuthHandler(c: any) {
     username: user.username as string,
   });
 
-  const finalAppRedirectPrefix = appRedirectPrefixFromFrontend || "archive://";
+  const finalAppRedirectPrefix = appRedirectPrefix;
 
   const appRedirect = new URL(`${finalAppRedirectPrefix}auth-callback`);
 
