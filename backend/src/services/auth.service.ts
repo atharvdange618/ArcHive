@@ -179,7 +179,8 @@ async function OAuthHandler(c: any) {
       code,
       client_id: config.GOOGLE_CLIENT_ID,
       client_secret: config.GOOGLE_CLIENT_SECRET,
-      redirect_uri: "http://localhost:3000/api/auth/google/callback",
+      redirect_uri:
+        "https://archive-ctld.onrender.com/api/auth/google/callback",
       grant_type: "authorization_code",
     }),
   });
