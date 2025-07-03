@@ -1,9 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 import { login } from "@/apis/login";
-import { API_BASE_URL } from "@/constants";
 import { useMutation } from "@tanstack/react-query";
 import { Link, Stack, router } from "expo-router";
-import * as WebBrowser from "expo-web-browser";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
@@ -16,12 +14,18 @@ import Button from "../components/Button";
 import InputField from "../components/InputField";
 import { useThemeColors } from "../constants/useColorScheme";
 import useAuthStore from "../stores/authStore";
+import { useOAuth } from "@/hooks/useOAuth";
 
 export default function LoginScreen() {
   const colors = useThemeColors();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const {
+    loginWithGoogle,
+    isLoading: oauthLoading,
+    error: oauthError,
+  } = useOAuth();
 
   const setTokens = useAuthStore((state) => state.setTokens);
   const setUser = useAuthStore((state) => state.setUser);
@@ -39,37 +43,11 @@ export default function LoginScreen() {
     },
   });
 
-  const googleLoginMutation = useMutation({
-    mutationFn: async () => {
-      const result = await WebBrowser.openAuthSessionAsync(
-        `${API_BASE_URL}/auth/google`,
-        `${API_BASE_URL}/auth/google/callback`
-      );
-
-      if (result.type === "success") {
-        console.log("Google login successful:", result);
-        router.replace("/(tabs)");
-      } else if (result.type === "cancel") {
-        throw new Error("Google login cancelled.");
-      } else {
-        throw new Error("Google login failed.");
-      }
-    },
-    onSuccess: () => {},
-    onError: (err: any) => {
-      setError(err.message);
-    },
-  });
-
   const handleLogin = () => {
     loginMutation.mutate({ email, password });
   };
 
-  const handleGoogleLogin = () => {
-    googleLoginMutation.mutate();
-  };
-
-  const isLoading = loginMutation.isPending || googleLoginMutation.isPending;
+  const isLoading = loginMutation.isPending || oauthLoading;
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -115,17 +93,19 @@ export default function LoginScreen() {
 
       <Button
         title={
-          isLoading ? (
+          oauthLoading ? (
             <ActivityIndicator color={colors.tint} />
           ) : (
             "Sign in with Google"
           )
         }
-        onPress={handleGoogleLogin}
+        onPress={loginWithGoogle}
         variant="outline"
         style={styles.googleButton}
-        disabled={isLoading}
+        disabled={oauthLoading}
       />
+
+      {oauthError && <Text style={styles.errorText}>{oauthError}</Text>}
 
       <View style={styles.footerTextContainer}>
         <Text style={{ color: colors.text }}>Don't have an account? </Text>

@@ -159,6 +159,8 @@ async function OAuthHandler(c: any) {
   const code = c.req.query("code");
   if (!code) throw new HTTPException(400, { message: "No code provided" });
 
+  const appRedirectPrefixFromFrontend = c.req.query("appRedirectPrefix");
+
   const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -215,16 +217,16 @@ async function OAuthHandler(c: any) {
     username: user.username as string,
   });
 
-  return c.json({
-    message: "Google login successful",
-    accessToken,
-    refreshToken,
-    user: {
-      id: (user._id as Types.ObjectId).toString(),
-      email: user.email,
-      username: user.username as string,
-    },
-  });
+  const finalAppRedirectPrefix = appRedirectPrefixFromFrontend || "archive://";
+
+  const appRedirect = new URL(`${finalAppRedirectPrefix}auth-callback`);
+
+  appRedirect.searchParams.set("accessToken", accessToken);
+  appRedirect.searchParams.set("refreshToken", refreshToken);
+  appRedirect.searchParams.set("email", user.email);
+  appRedirect.searchParams.set("username", user.username as string);
+
+  return c.redirect(appRedirect.toString());
 }
 
 async function refreshAccessToken(oldRefreshToken: string) {

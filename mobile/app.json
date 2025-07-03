@@ -5,7 +5,8 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/logo-arc-hive-final.png",
-    "scheme": "mymind",
+    "scheme": "archive",
+    "deepLinking": true,
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -16,7 +17,8 @@
         "foregroundImage": "./assets/images/logo-arc-hive-final.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.atharvdange618.archive"
     },
     "web": {
       "bundler": "metro",
@@ -37,6 +39,14 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "8e0c6da8-f210-4548-8737-c417cd7fb3d7"
+      },
+      "EXPO_PUBLIC_API_BASE_URL": "http://localhost:3000/api"
+    },
+    "owner": "atharvdange618"
   }
 }
