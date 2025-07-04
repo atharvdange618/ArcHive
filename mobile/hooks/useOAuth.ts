@@ -30,11 +30,10 @@ export function useOAuth(): {
         throw new Error("API Base URL not configured.");
       }
 
-      const urlObj = new URL(redirectUrl);
-      const appSchemeAndHost = `${urlObj.protocol}//${urlObj.host}`;
+      const appRedirectPrefix = redirectUrl.replace(/\/auth-callback$/, "");
 
       const authUrl = new URL(`${apiBaseUrl}/auth/google`);
-      authUrl.searchParams.append("appRedirectPrefix", appSchemeAndHost);
+      authUrl.searchParams.append("appRedirectPrefix", appRedirectPrefix);
 
       const result = await WebBrowser.openAuthSessionAsync(
         authUrl.toString(),
