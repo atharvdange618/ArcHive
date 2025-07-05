@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { validate } from "../middleware/validator";
+import { authRateLimiter, strictRateLimiter } from "../middleware/rateLimiter";
 import {
   registerSchema,
   loginSchema,
@@ -48,48 +49,63 @@ const authRoutes = new Hono();
  */
 
 // Register a new user
-authRoutes.post("/register", validate("json", registerSchema), async (c) => {
-  const { username, email, password } = c.req.valid("json") as RegisterInput;
+authRoutes.post(
+  "/register",
+  authRateLimiter,
+  validate("json", registerSchema),
+  async (c) => {
+    const { username, email, password } = c.req.valid("json") as RegisterInput;
 
-  try {
-    const { user, accessToken, refreshToken } = await registerUser({
-      username,
-      email,
-      password,
-    });
+    try {
+      const { user, accessToken, refreshToken } = await registerUser({
+        username,
+        email,
+        password,
+      });
 
-    return c.json(
-      { message: "Registration successful!", user, accessToken, refreshToken },
-      201
-    );
-  } catch (error) {
-    throw error;
+      return c.json(
+        {
+          message: "Registration successful!",
+          user,
+          accessToken,
+          refreshToken,
+        },
+        201
+      );
+    } catch (error) {
+      throw error;
+    }
   }
-});
+);
 
 // User Login
-authRoutes.post("/login", validate("json", loginSchema), async (c) => {
-  const { email, password } = c.req.valid("json") as LoginInput;
+authRoutes.post(
+  "/login",
+  authRateLimiter,
+  validate("json", loginSchema),
+  async (c) => {
+    const { email, password } = c.req.valid("json") as LoginInput;
 
-  try {
-    const { user, accessToken, refreshToken } = await loginUser({
-      email,
-      password,
-    });
+    try {
+      const { user, accessToken, refreshToken } = await loginUser({
+        email,
+        password,
+      });
 
-    return c.json(
-      { message: "Login successful!", user, accessToken, refreshToken },
-      200
-    );
-  } catch (error) {
-    throw error;
+      return c.json(
+        { message: "Login successful!", user, accessToken, refreshToken },
+        200
+      );
+    } catch (error) {
+      throw error;
+    }
   }
-});
+);
 
 // Google OAuth
 authRoutes.get("/google", (c) => {
   const redirectUri = encodeURIComponent(
-    "https://archive-ctld.onrender.com/api/auth/google/callback"
+    `${config.OAUTH_REDIRECT_BASE_URL}/api/auth/google/callback`
   );
   const clientId = config.GOOGLE_CLIENT_ID;
   const scope = encodeURIComponent("openid profile email");
@@ -100,10 +116,10 @@ authRoutes.get("/google", (c) => {
 
   const url =
     `https://accounts.google.com/o/oauth2/v2/auth` +
-    `?client_id=${config.GOOGLE_CLIENT_ID}` +
+    `?client_id=${clientId}` +
     `&redirect_uri=${redirectUri}` +
     `&response_type=code` +
-    `&scope=openid%20profile%20email` +
+    `&scope=${scope}` +
     `&state=${state}`;
 
   return c.redirect(url);
@@ -113,16 +129,21 @@ authRoutes.get("/google", (c) => {
 authRoutes.get("/google/callback", OAuthHandler);
 
 // Refresh Access Token
-authRoutes.post("/refresh", validate("json", refreshTokenSchema), async (c) => {
-  const { refreshToken } = c.req.valid("json") as RefreshTokenInput;
+authRoutes.post(
+  "/refresh",
+  strictRateLimiter,
+  validate("json", refreshTokenSchema),
+  async (c) => {
+    const { refreshToken } = c.req.valid("json") as RefreshTokenInput;
 
-  try {
-    const { accessToken } = await refreshAccessToken(refreshToken);
-    return c.json({ message: "Token refreshed successfully!", accessToken });
-  } catch (error) {
-    throw error;
+    try {
+      const { accessToken } = await refreshAccessToken(refreshToken);
+      return c.json({ message: "Token refreshed successfully!", accessToken });
+    } catch (error) {
+      throw error;
+    }
   }
-});
+);
 
 // User Logout
 authRoutes.post(

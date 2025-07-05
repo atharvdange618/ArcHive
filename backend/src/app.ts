@@ -4,7 +4,9 @@ import { logger } from "hono/logger";
 import { prettyJSON } from "hono/pretty-json";
 import { cors } from "hono/cors";
 import { HTTPException } from "hono/http-exception";
+import { bodyLimit } from "hono/body-limit";
 
+import { config } from "./config";
 import { AuthUserData } from "./services/auth.service";
 import authRoutes from "./routes/auth";
 import contentRoutes from "./routes/content";
@@ -20,16 +22,45 @@ const app = new Hono();
 // --- Global Middleware ---
 app.use(
   cors({
-    origin: "*",
+    origin: (origin, c) => {
+      if (!origin) return "*";
+
+      const allowedOrigins = config.CORS_ORIGINS;
+      if (allowedOrigins.includes(origin)) {
+        return origin;
+      }
+
+      if (
+        config.NODE_ENV === "development" &&
+        (origin.startsWith("http://localhost:") ||
+          origin.startsWith("http://127.0.0.1:"))
+      ) {
+        return origin;
+      }
+
+      return null;
+    },
     allowHeaders: ["Content-Type", "Authorization"],
     allowMethods: ["POST", "GET", "PUT", "DELETE", "OPTIONS"],
     exposeHeaders: ["Content-Length"],
     maxAge: 600,
+    credentials: true,
   })
 );
 
 app.use(logger());
 app.use(prettyJSON());
+
+app.use(
+  bodyLimit({
+    maxSize: 1 * 1024 * 1024, // 1MB
+    onError: (c) => {
+      throw new HTTPException(413, {
+        message: "Request body too large. Maximum size is 1MB.",
+      });
+    },
+  })
+);
 
 // --- Routes ---
 app.get("/", (c) => {

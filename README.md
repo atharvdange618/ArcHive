@@ -27,6 +27,18 @@ My goal with ArcHive is to empower creators, thinkers, and anyone passionate abo
 - **Intuitive Content Capture:** A dynamic Floating Action Button (FAB) allows for quick and delightful capture of new content, adapting to your needs.
 - **Cross-Platform Accessibility:** Access your ArcHive from anywhere with dedicated mobile applications (iOS & Android) and a planned web interface.
 
+## 🔒 Security Features
+
+ArcHive implements several security best practices to protect your data:
+
+- **Secure Authentication:** Argon2 password hashing with JWT tokens
+- **Rate Limiting:** Protection against brute force and DoS attacks
+- **CORS Protection:** Configurable allowed origins to prevent unauthorized access
+- **Request Size Limits:** 1MB body size limit to prevent resource exhaustion
+- **Token Blacklisting:** Secure logout with token invalidation
+- **Environment Validation:** Zod-based validation for all configuration
+- **OAuth 2.0:** Secure Google authentication integration
+
 ## 🛠️ Technologies Used
 
 ArcHive is built with a modern, robust, and scalable technology stack:
@@ -71,15 +83,19 @@ To get ArcHive up and running on your local machine, follow these steps:
     ```bash
     bun install
     ```
-3.  Create a `.env` file in the `backend` directory based on `.env.example` (you'll need to create this example file if it doesn't exist, or just create `.env` directly):
+3.  Copy the example environment file and configure it:
+    ```bash
+    cp .env.example .env
     ```
-    PORT=3000
-    MONGODB_URI=your_mongodb_connection_string
-    JWT_SECRET=a_strong_secret_key_for_jwt
-    MONGODB_URI_TEST=your_mongodb_test_connection_string # For running tests
-    ```
-    _Replace `your_mongodb_connection_string` and `a_strong_secret_key_for_jwt` with your actual values._
-4.  Start the backend server:
+4.  Edit `.env` and configure all required values:
+    - `MONGODB_URI`: Your MongoDB connection string
+    - `JWT_SECRET`: A strong secret key (generate with `openssl rand -base64 32`)
+    - `GOOGLE_CLIENT_ID` & `GOOGLE_CLIENT_SECRET`: From Google Cloud Console
+    - `OAUTH_REDIRECT_BASE_URL`: Your backend URL (e.g., `http://localhost:3000`)
+    - `CORS_ORIGINS`: Comma-separated list of allowed frontend origins
+    
+    See `.env.example` for detailed descriptions of each variable.
+5.  Start the backend server:
     ```bash
     bun run dev
     ```

@@ -3,6 +3,7 @@ import { jwt } from "hono/jwt";
 import { HTTPException } from "hono/http-exception";
 import { validate } from "../middleware/validator";
 import { checkBlacklist } from "../middleware/auth.middleware";
+import { apiRateLimiter, searchRateLimiter } from "../middleware/rateLimiter";
 
 import {
   createContent,
@@ -78,28 +79,34 @@ contentRoutes.use(
 );
 
 // CREATE Content Item (POST /api/content)
-contentRoutes.post("/", validate("json", createContentSchema), async (c) => {
-  const userId = c.get("user")?._id;
-  const data = c.req.valid("json") as CreateContentInput;
+contentRoutes.post(
+  "/",
+  apiRateLimiter,
+  validate("json", createContentSchema),
+  async (c) => {
+    const userId = c.get("user")?._id;
+    const data = c.req.valid("json") as CreateContentInput;
 
-  try {
-    const newContent = await createContent(userId, data);
+    try {
+      const newContent = await createContent(userId, data);
 
-    return c.json(
-      {
-        message: "Content created successfully",
-        content: newContent.toObject(),
-      },
-      201
-    );
-  } catch (error) {
-    throw error;
+      return c.json(
+        {
+          message: "Content created successfully",
+          content: newContent.toObject(),
+        },
+        201
+      );
+    } catch (error) {
+      throw error;
+    }
   }
-});
+);
 
 // GET All Content Items with Search & Pagination (GET /api/content)
 contentRoutes.get(
   "/",
+  searchRateLimiter,
   validate("query", searchContentQuerySchema),
   async (c) => {
     const userId = c.get("user")?._id;
@@ -146,27 +153,32 @@ contentRoutes.get("/:id", async (c) => {
 });
 
 // UPDATE Content Item (PUT /api/content/:id)
-contentRoutes.put("/:id", validate("json", updateContentSchema), async (c) => {
-  const userId = c.get("user")?._id;
-  const contentId = c.req.param("id");
-  const updates = c.req.valid("json") as UpdateContentInput;
+contentRoutes.put(
+  "/:id",
+  apiRateLimiter,
+  validate("json", updateContentSchema),
+  async (c) => {
+    const userId = c.get("user")?._id;
+    const contentId = c.req.param("id");
+    const updates = c.req.valid("json") as UpdateContentInput;
 
-  try {
-    const updatedContent = await updateContent(userId, contentId, updates);
-    return c.json(
-      {
-        message: "Content item updated successfully!",
-        content: updatedContent.toObject(),
-      },
-      200
-    );
-  } catch (error) {
-    throw error;
+    try {
+      const updatedContent = await updateContent(userId, contentId, updates);
+      return c.json(
+        {
+          message: "Content item updated successfully!",
+          content: updatedContent.toObject(),
+        },
+        200
+      );
+    } catch (error) {
+      throw error;
+    }
   }
-});
+);
 
 // DELETE Content Item (DELETE /api/content/:id)
-contentRoutes.delete("/:id", async (c) => {
+contentRoutes.delete("/:id", apiRateLimiter, async (c) => {
   const userId = c.get("user")?._id;
   const contentId = c.req.param("id");
 

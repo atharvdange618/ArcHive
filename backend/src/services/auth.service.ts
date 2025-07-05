@@ -179,8 +179,7 @@ async function OAuthHandler(c: any) {
       code,
       client_id: config.GOOGLE_CLIENT_ID,
       client_secret: config.GOOGLE_CLIENT_SECRET,
-      redirect_uri:
-        "https://archive-ctld.onrender.com/api/auth/google/callback",
+      redirect_uri: `${config.OAUTH_REDIRECT_BASE_URL}/api/auth/google/callback`,
       grant_type: "authorization_code",
     }),
   });
