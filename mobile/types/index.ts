@@ -4,6 +4,12 @@ export enum ContentType {
   Code = "code",
 }
 
+export interface IUser {
+  _id: string;
+  username: string;
+  email: string;
+}
+
 export interface IContentItem {
   _id: string;
   userId: string;
