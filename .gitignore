@@ -36,3 +36,7 @@ yarn-error.log*
 dist/
 build/
 *.tsbuildinfo
+
+screenshot-prototype
+
+link-parser-prototype

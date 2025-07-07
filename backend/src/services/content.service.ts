@@ -1,5 +1,7 @@
 import ContentItem, { IContentItem } from "../db/models/ContentItem";
 import { HTTPException } from "hono/http-exception";
+import { parseUrl } from "../parsers";
+import { queue } from "../config/bullmq";
 import {
   CreateContentInput,
   UpdateContentInput,
@@ -14,17 +16,34 @@ import mongoose from "mongoose";
  * @returns The newly created content item document.
  * @throws HTTPException if creation fails.
  */
+
 async function createContent(
   userId: string,
   data: CreateContentInput
 ): Promise<IContentItem> {
   try {
+    let finalData: any = { ...data };
+
+    // If a URL is provided, parse it to enrich the content
+    if (data.url) {
+      const parsedData = await parseUrl(data.url);
+      finalData = { ...finalData, ...parsedData };
+    }
+
     const newContent = new ContentItem({
-      ...data,
+      ...finalData,
       userId: new mongoose.Types.ObjectId(userId),
     });
 
     await newContent.save();
+
+    if (newContent.url) {
+      await queue.add('screenshot-queue', {
+        contentId: newContent._id,
+        url: newContent.url,
+      });
+    }
+
     return newContent;
   } catch (error) {
     console.error("Error creating content:", error);

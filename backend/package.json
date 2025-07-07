@@ -1,16 +1,23 @@
 {
   "name": "backend",
+  "version": "1.0.0",
   "scripts": {
     "dev": "bun run --hot src/index.ts",
     "start": "bun run src/index.ts",
-    "test": "npx vitest"
+    "test": "npx vitest",
+    "start:worker": "bun run src/workers/screenshot.worker.ts"
   },
   "dependencies": {
     "argon2": "^0.43.0",
+    "axios": "^1.10.0",
+    "cheerio": "^1.1.0",
     "hono": "^4.7.11",
     "hono-rate-limiter": "^0.4.2",
     "mongoose": "^8.15.2",
-    "zod": "^3.25.64"
+    "zod": "^3.25.64",
+    "bullmq": "^5.10.2",
+    "puppeteer": "^22.15.0",
+    "ioredis": "^5.4.1"
   },
   "devDependencies": {
     "@types/bun": "^1.2.17",
