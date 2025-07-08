@@ -36,18 +36,13 @@ const textContentSchema = baseContentSchema.extend({
 
 // Schema for Link content type
 const linkContentSchema = baseContentSchema.extend({
-  type: z.literal(ContentType.Link),
+  type: z.literal(ContentType.Link).optional(),
   url: z
     .string()
     .trim()
     .url("Invalid URL format")
     .min(1, "URL cannot be empty"),
   content: z.never().optional(),
-  previewImageUrl: z
-    .string()
-    .url("Invalid URL for preview image")
-    .optional()
-    .nullable(),
 });
 
 // Schema for Code content type

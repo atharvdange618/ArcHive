@@ -1,7 +1,7 @@
 import { Worker } from "bullmq";
 import { connection } from "../config/bullmq";
 import puppeteer from "puppeteer";
-import ContentItem from "../db/models/ContentItem";
+import { extractInstagramImage } from "src/utils/extractInstagramImage";
 
 const worker = new Worker(
   "screenshot-queue",
@@ -9,29 +9,32 @@ const worker = new Worker(
     const { contentId, url } = job.data;
     const outputPath = "example-screenshot.png";
 
-    console.log(`Processing job ${job.id} for URL: ${url}`);
+    console.log(`Processing job ${contentId} for URL: ${url}`);
 
     const browser = await puppeteer.launch({
       defaultViewport: { width: 1920, height: 1080 },
     });
 
     const page = await browser.newPage();
-    await page.goto(url, { waitUntil: "networkidle2" });
 
-    await page.screenshot({
-      path: outputPath,
-      fullPage: false,
-    });
+    try {
+      await page.goto(url, { waitUntil: "networkidle2" });
 
-    await browser.close();
+      if (/instagram\.com\//.test(url)) {
+        await extractInstagramImage(page, outputPath);
+      } else {
+        await page.screenshot({
+          path: outputPath,
+          fullPage: false,
+        });
+      }
 
-    // await ContentItem.findByIdAndUpdate(contentId, {
-    //   $set: {
-    //     previewImageUrl: screenshotBuffer.toString("base64") // TODO: convert this buffer into a url, through some service, will do this later,
-    //   },
-    // });
-
-    console.log(`Job ${job.id} completed`);
+      console.log(`Job ${contentId} completed`);
+    } catch (err) {
+      console.error(`Job ${contentId} failed:`, err);
+    } finally {
+      await browser.close();
+    }
   },
   { connection }
 );
