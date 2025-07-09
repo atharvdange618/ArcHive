@@ -104,6 +104,14 @@ authRoutes.post(
 
 // Google OAuth
 authRoutes.get("/google", (c) => {
+  if (
+    !config.GOOGLE_CLIENT_ID ||
+    !config.OAUTH_REDIRECT_BASE_URL
+  ) {
+    throw new HTTPException(503, {
+      message: "Google OAuth is not configured.",
+    });
+  }
   const redirectUri = encodeURIComponent(
     `${config.OAUTH_REDIRECT_BASE_URL}/api/auth/google/callback`
   );

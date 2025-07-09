@@ -14,18 +14,18 @@ import Button from "../components/Button";
 import InputField from "../components/InputField";
 import { useThemeColors } from "../constants/useColorScheme";
 import useAuthStore from "../stores/authStore";
-import { useOAuth } from "@/hooks/useOAuth";
+// import { useOAuth } from "@/hooks/useOAuth";
 
 export default function LoginScreen() {
   const colors = useThemeColors();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const {
-    loginWithGoogle,
-    isLoading: oauthLoading,
-    error: oauthError,
-  } = useOAuth();
+  // const {
+  //   loginWithGoogle,
+  //   isLoading: oauthLoading,
+  //   error: oauthError,
+  // } = useOAuth();
 
   const setTokens = useAuthStore((state) => state.setTokens);
   const setUser = useAuthStore((state) => state.setUser);
@@ -47,7 +47,7 @@ export default function LoginScreen() {
     loginMutation.mutate({ email, password });
   };
 
-  const isLoading = loginMutation.isPending || oauthLoading;
+  const isLoading = loginMutation.isPending;
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -81,7 +81,7 @@ export default function LoginScreen() {
         disabled={isLoading}
       />
 
-      <View style={styles.dividerContainer}>
+      {/* <View style={styles.dividerContainer}>
         <View
           style={[styles.divider, { backgroundColor: colors.subtleBorder }]}
         ></View>
@@ -89,9 +89,9 @@ export default function LoginScreen() {
         <View
           style={[styles.divider, { backgroundColor: colors.subtleBorder }]}
         ></View>
-      </View>
+      </View> */}
 
-      <Button
+      {/* <Button
         title={
           oauthLoading ? (
             <ActivityIndicator color={colors.tint} />
@@ -103,9 +103,9 @@ export default function LoginScreen() {
         variant="outline"
         style={styles.googleButton}
         disabled={oauthLoading}
-      />
+      /> */}
 
-      {oauthError && <Text style={styles.errorText}>{oauthError}</Text>}
+      {/* {oauthError && <Text style={styles.errorText}>{oauthError}</Text>} */}
 
       <View style={styles.footerTextContainer}>
         <Text style={{ color: colors.text }}>Don't have an account? </Text>

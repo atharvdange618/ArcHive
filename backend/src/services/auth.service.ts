@@ -156,6 +156,15 @@ async function loginUser(credentials: LoginInput) {
 }
 
 async function OAuthHandler(c: any) {
+  if (
+    !config.GOOGLE_CLIENT_ID ||
+    !config.GOOGLE_CLIENT_SECRET ||
+    !config.OAUTH_REDIRECT_BASE_URL
+  ) {
+    throw new HTTPException(503, {
+      message: "Google OAuth is not configured.",
+    });
+  }
   const code = c.req.query("code");
   const stateParam = c.req.query("state");
 

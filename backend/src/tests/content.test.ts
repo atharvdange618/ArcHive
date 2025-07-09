@@ -11,7 +11,7 @@ const getAuthToken = async (
   usernamePrefix = "testuser",
   emailPrefix = "test",
   password = "Password123!"
-): Promise<{ accessToken: string; email: string }> => {
+): Promise<{ accessToken: string; email: string; userId: string }> => {
   const uniqueId = Date.now();
   const username = `${usernamePrefix}_${uniqueId}`;
   const email = `${emailPrefix}_${uniqueId}@example.com`;
@@ -25,6 +25,7 @@ const getAuthToken = async (
   });
   const registerRes = await handler(registerReq);
   expect(registerRes.status).toBe(201);
+  const registerData = (await registerRes.json()) as { user: { _id: string } };
 
   const loginReq = new Request("http://localhost/api/auth/login", {
     method: "POST",
@@ -35,7 +36,7 @@ const getAuthToken = async (
   expect(loginRes.status).toBe(200);
 
   const loginData = (await loginRes.json()) as { accessToken: string };
-  return { accessToken: loginData.accessToken, email };
+  return { accessToken: loginData.accessToken, email, userId: registerData.user._id };
 };
 
 let authToken: string;
@@ -46,8 +47,7 @@ beforeAll(async () => {
   const result = await getAuthToken("contentuser", "contentuser");
   authToken = result.accessToken;
   testEmail = result.email;
-  const user = await User.findOne({ email: testEmail });
-  userId = (user!._id as Types.ObjectId).toString();
+  userId = result.userId;
 });
 
 beforeEach(async () => {

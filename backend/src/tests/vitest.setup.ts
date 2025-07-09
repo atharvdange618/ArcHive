@@ -1,6 +1,24 @@
 import "dotenv/config";
 import { connectDB, disconnectDB } from "../db";
 import User from "../db/models/User";
+import { vi } from "vitest";
+
+vi.mock("bullmq", () => ({
+  Queue: vi.fn(() => ({
+    add: vi.fn(),
+    close: vi.fn(),
+  })),
+  Worker: vi.fn(() => ({
+    on: vi.fn(),
+    close: vi.fn(),
+  })),
+}));
+
+vi.mock("hono-rate-limiter", () => ({
+  rateLimiter: vi.fn(() => {
+    return async (c: any, next: any) => await next();
+  }),
+}));
 
 beforeAll(async () => {
   console.log("Vitest setup: Connecting to DB...");
