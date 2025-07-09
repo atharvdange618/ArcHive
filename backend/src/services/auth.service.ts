@@ -3,6 +3,7 @@ import User, { IUser } from "../db/models/User";
 import RefreshToken from "../db/models/RefreshToken";
 import BlacklistedToken from "../db/models/BlacklistedToken";
 import { HTTPException } from "hono/http-exception";
+import { AppError, ServiceUnavailableError, ConflictError, UnauthorizedError, ValidationError } from "../utils/errors";
 import { sign, decode } from "hono/jwt";
 import { RegisterInput, LoginInput } from "../validation/auth.validation";
 import { config } from "../config";
@@ -20,9 +21,7 @@ async function hashPassword(password: string): Promise<string> {
     return await hash(password);
   } catch (error) {
     console.error("Password hashing failed:", error);
-    throw new HTTPException(500, {
-      message: "Failed to securely store password.",
-    });
+    throw new AppError(500, "Failed to securely store password.");
   }
 }
 
@@ -60,7 +59,7 @@ async function generateTokens(user: AuthUserData) {
     return { accessToken, refreshToken };
   } catch (error) {
     console.error("Failed to generate tokens:", error);
-    throw new Error("Token generation failed");
+    throw new AppError(500, "Token generation failed");
   }
 }
 
@@ -70,11 +69,11 @@ async function registerUser(userData: RegisterInput) {
   try {
     const existingUserByEmail = await User.findOne({ email });
     if (existingUserByEmail) {
-      throw new HTTPException(409, { message: "Email already registered." });
+      throw new ConflictError("Email already registered.");
     }
     const existingUserByUsername = await User.findOne({ username });
     if (existingUserByUsername) {
-      throw new HTTPException(409, { message: "Username already taken." });
+      throw new ConflictError("Username already taken.");
     }
 
     const passwordHash = await hashPassword(password);
@@ -109,9 +108,7 @@ async function registerUser(userData: RegisterInput) {
       throw error;
     }
     console.error("Error in registerUser service:", error);
-    throw new HTTPException(500, {
-      message: "Failed to register user due to server error.",
-    });
+    throw new AppError(500, "Failed to register user due to server error.");
   }
 }
 
@@ -120,12 +117,10 @@ async function loginUser(credentials: LoginInput) {
 
   try {
     const user = (await User.findOne({ email })) as IUser & { _id: any };
-    if (!user)
-      throw new HTTPException(401, { message: "Invalid credentials." });
+    if (!user) throw new UnauthorizedError("Invalid credentials.");
 
     const isMatch = await user.comparePassword(password);
-    if (!isMatch)
-      throw new HTTPException(401, { message: "Invalid credentials." });
+    if (!isMatch) throw new UnauthorizedError("Invalid credentials.");
 
     const { accessToken, refreshToken } = await generateTokens({
       _id: (user._id as Types.ObjectId).toString(),
@@ -149,9 +144,7 @@ async function loginUser(credentials: LoginInput) {
       throw error;
     }
     console.error("Error in loginUser service:", error);
-    throw new HTTPException(500, {
-      message: "Failed to log in due to server error.",
-    });
+    throw new AppError(500, "Failed to log in due to server error.");
   }
 }
 
@@ -161,16 +154,13 @@ async function OAuthHandler(c: any) {
     !config.GOOGLE_CLIENT_SECRET ||
     !config.OAUTH_REDIRECT_BASE_URL
   ) {
-    throw new HTTPException(503, {
-      message: "Google OAuth is not configured.",
-    });
+    throw new ServiceUnavailableError("Google OAuth is not configured.");
   }
   const code = c.req.query("code");
   const stateParam = c.req.query("state");
 
-  if (!code) throw new HTTPException(400, { message: "No code provided" });
-  if (!stateParam)
-    throw new HTTPException(400, { message: "No state parameter provided" });
+  if (!code) throw new ValidationError("No code provided");
+  if (!stateParam) throw new ValidationError("No state parameter provided");
 
   let appRedirectPrefix: string | undefined;
   try {
@@ -178,7 +168,7 @@ async function OAuthHandler(c: any) {
     appRedirectPrefix = statePayload.appRedirectPrefix;
   } catch (error) {
     console.error("Failed to parse state parameter:", error);
-    throw new HTTPException(400, { message: "Invalid state parameter" });
+    throw new ValidationError("Invalid state parameter");
   }
 
   const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
@@ -196,7 +186,7 @@ async function OAuthHandler(c: any) {
   if (!tokenRes.ok) {
     const errorBody = await tokenRes.text();
     console.error("Token error response:", errorBody);
-    throw new HTTPException(401, { message: "Failed to get access token" });
+    throw new UnauthorizedError("Failed to get access token");
   }
 
   const tokenData = await tokenRes.json();
@@ -211,7 +201,7 @@ async function OAuthHandler(c: any) {
   const googleUser = await userInfoRes.json();
   if (!userInfoRes.ok) {
     console.error("User info error", googleUser);
-    throw new HTTPException(401, { message: "Failed to get user info" });
+    throw new UnauthorizedError("Failed to get user info");
   }
 
   let user = await User.findOne({ googleId: googleUser.id });
@@ -229,7 +219,7 @@ async function OAuthHandler(c: any) {
       await user.save();
     } catch (err: any) {
       console.error("User creation failed", err);
-      throw new HTTPException(500, { message: "User creation failed" });
+      throw new AppError(500, "User creation failed");
     }
   }
 
@@ -258,17 +248,17 @@ async function refreshAccessToken(oldRefreshToken: string) {
     }).populate("user");
 
     if (!storedToken) {
-      throw new HTTPException(401, { message: "Invalid refresh token." });
+      throw new UnauthorizedError("Invalid refresh token.");
     }
 
     if (storedToken.expiresAt < new Date()) {
       await RefreshToken.findByIdAndDelete(storedToken._id);
-      throw new HTTPException(401, { message: "Refresh token expired." });
+      throw new UnauthorizedError("Refresh token expired.");
     }
 
     const user = storedToken.user as IUser & { _id: any };
     if (!user) {
-      throw new HTTPException(401, { message: "User not found for token." });
+      throw new UnauthorizedError("User not found for token.");
     }
 
     const now = Math.floor(Date.now() / 1000);
@@ -288,9 +278,7 @@ async function refreshAccessToken(oldRefreshToken: string) {
       throw error;
     }
     console.error("Error in refreshAccessToken service:", error);
-    throw new HTTPException(500, {
-      message: "Failed to refresh token due to server error.",
-    });
+    throw new AppError(500, "Failed to refresh token due to server error.");
   }
 }
 
@@ -298,7 +286,7 @@ async function logoutUser(accessToken: string, refreshToken: string) {
   try {
     const { payload } = decode(accessToken);
     if (!payload || !payload.exp) {
-      throw new HTTPException(400, { message: "Invalid access token." });
+      throw new ValidationError("Invalid access token.");
     }
 
     const expiresAt = new Date(payload.exp * 1000);
@@ -314,9 +302,7 @@ async function logoutUser(accessToken: string, refreshToken: string) {
       throw error;
     }
     console.error("Error in logoutUser service:", error);
-    throw new HTTPException(500, {
-      message: "Failed to logout due to server error.",
-    });
+    throw new AppError(500, "Failed to logout due to server error.");
   }
 }
 

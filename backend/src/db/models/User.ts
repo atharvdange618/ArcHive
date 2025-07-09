@@ -1,5 +1,6 @@
 import mongoose, { Schema, Document } from "mongoose";
 import { verify } from "argon2";
+import { ConflictError } from "src/utils/errors";
 
 export interface IUser extends Document {
   googleId?: string;
@@ -63,7 +64,7 @@ UserSchema.methods.comparePassword = async function (
   userPass: string
 ): Promise<boolean> {
   if (!this.password) {
-    throw new Error("Password is not set for this user.");
+    throw new ConflictError("Password is not set for this user.");
   }
   return await verify(this.password, userPass);
 };

@@ -1,5 +1,5 @@
 import { rateLimiter } from "hono-rate-limiter";
-import { HTTPException } from "hono/http-exception";
+import { TooManyRequestsError } from "../utils/errors";
 import { MiddlewareHandler } from "hono";
 import { config } from "../config";
 
@@ -27,9 +27,9 @@ export const authRateLimiter = createRateLimiter({
     );
   },
   handler: (c: any) => {
-    throw new HTTPException(429, {
-      message: "Too many authentication attempts. Please try again later.",
-    });
+    throw new TooManyRequestsError(
+      "Too many authentication attempts. Please try again later."
+    );
   },
 });
 
@@ -45,9 +45,7 @@ export const apiRateLimiter = createRateLimiter({
     return user ? `${user._id}-${ip}` : ip;
   },
   handler: (c: any) => {
-    throw new HTTPException(429, {
-      message: "Too many requests. Please slow down.",
-    });
+    throw new TooManyRequestsError("Too many requests. Please slow down.");
   },
 });
 
@@ -63,9 +61,9 @@ export const searchRateLimiter = createRateLimiter({
     return user ? `${user._id}-${ip}` : ip;
   },
   handler: (c: any) => {
-    throw new HTTPException(429, {
-      message: "Too many search requests. Please slow down.",
-    });
+    throw new TooManyRequestsError(
+      "Too many search requests. Please slow down."
+    );
   },
 });
 
@@ -80,8 +78,8 @@ export const strictRateLimiter = createRateLimiter({
     );
   },
   handler: (c: any) => {
-    throw new HTTPException(429, {
-      message: "Too many attempts. Please try again after an hour.",
-    });
+    throw new TooManyRequestsError(
+      "Too many attempts. Please try again after an hour."
+    );
   },
 });

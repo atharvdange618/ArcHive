@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { validator } from "hono/validator";
-import { HTTPException } from "hono/http-exception";
+import { ValidationError } from "../utils/errors";
 
 /**
  * Creates a Hono middleware for validating request data against a Zod schema.
@@ -23,10 +23,7 @@ export const validate = <T extends z.ZodType<any, any, any>>(
         message: issue.message,
       }));
 
-      throw new HTTPException(400, {
-        message: "Validation failed",
-        cause: { errors },
-      });
+      throw new ValidationError("Validation failed", { errors });
     }
 
     return parsed.data;

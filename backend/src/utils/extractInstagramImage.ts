@@ -1,6 +1,7 @@
 import { Page } from "puppeteer";
-import axios from "axios";
+import { NotFoundError } from "../utils/errors";
 import fs from "fs";
+import axios from "axios";
 
 export async function extractInstagramImage(
   page: Page,
@@ -12,7 +13,7 @@ export async function extractInstagramImage(
   });
 
   if (!ogImageUrl) {
-    throw new Error("og:image not found on Instagram page");
+    throw new NotFoundError("og:image not found on Instagram page");
   }
 
   const response = await axios.get(ogImageUrl, { responseType: "arraybuffer" });

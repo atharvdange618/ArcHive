@@ -4,6 +4,7 @@ import { logger } from "hono/logger";
 import { prettyJSON } from "hono/pretty-json";
 import { cors } from "hono/cors";
 import { HTTPException } from "hono/http-exception";
+import { AppError } from "./utils/errors";
 import { bodyLimit } from "hono/body-limit";
 
 import { config } from "./config";
@@ -78,19 +79,47 @@ app.get("/health", (c) => {
 app.route("/api/auth", authRoutes);
 app.route("/api/content", contentRoutes);
 
-// --- Custom Error Handling for HTTPExceptions ---
+// --- Custom Error Handling ---
 app.onError((err, c) => {
-  if (err instanceof HTTPException) {
-    const errorResponse: { message: string; errors?: any; cause?: any } = {
+  if (err instanceof AppError) {
+    const errorResponse: {
+      success: boolean;
+      message: string;
+      statusCode: number;
+      details?: any;
+      errorCode?: string;
+    } = {
+      success: false,
       message: err.message,
+      statusCode: err.statusCode,
     };
-    if (err.cause) {
-      errorResponse.cause = err.cause;
+
+    if (err.details) {
+      errorResponse.details = err.details;
     }
-    return c.json(errorResponse, err.status);
+    if (err.errorCode) {
+      errorResponse.errorCode = err.errorCode;
+    }
+
+    console.error(`AppError: ${err.message}`, err);
+    return c.json(errorResponse, err.statusCode);
   }
+
+  if (err instanceof HTTPException) {
+    return c.json({ message: err.message }, err.status);
+  }
+
+  // Handle other unexpected errors
   console.error(`An unexpected server error occurred: ${err.message}`, err);
-  return c.json({ message: "An unexpected server error occurred." }, 500);
+  return c.json(
+    {
+      success: false,
+      message: "An unexpected server error occurred.",
+      statusCode: 500,
+      errorCode: "INTERNAL_SERVER_ERROR",
+    },
+    500
+  );
 });
 
 export default app;

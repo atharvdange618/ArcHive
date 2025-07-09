@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { HTTPException } from "hono/http-exception";
+import { AppError, ServiceUnavailableError, UnauthorizedError } from "../utils/errors";
 import { validate } from "../middleware/validator";
 import { authRateLimiter, strictRateLimiter } from "../middleware/rateLimiter";
 import {
@@ -73,7 +73,10 @@ authRoutes.post(
         201
       );
     } catch (error) {
-      throw error;
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError(500, "Internal Server Error");
     }
   }
 );
@@ -97,7 +100,10 @@ authRoutes.post(
         200
       );
     } catch (error) {
-      throw error;
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError(500, "Internal Server Error");
     }
   }
 );
@@ -108,9 +114,7 @@ authRoutes.get("/google", (c) => {
     !config.GOOGLE_CLIENT_ID ||
     !config.OAUTH_REDIRECT_BASE_URL
   ) {
-    throw new HTTPException(503, {
-      message: "Google OAuth is not configured.",
-    });
+    throw new ServiceUnavailableError("Google OAuth is not configured.");
   }
   const redirectUri = encodeURIComponent(
     `${config.OAUTH_REDIRECT_BASE_URL}/api/auth/google/callback`
@@ -148,7 +152,10 @@ authRoutes.post(
       const { accessToken } = await refreshAccessToken(refreshToken);
       return c.json({ message: "Token refreshed successfully!", accessToken });
     } catch (error) {
-      throw error;
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError(500, "Internal Server Error");
     }
   }
 );
@@ -164,14 +171,17 @@ authRoutes.post(
     const { refreshToken } = c.req.valid("json") as LogoutInput;
 
     if (!token) {
-      throw new HTTPException(401, { message: "Access token not provided." });
+      throw new UnauthorizedError("Access token not provided.");
     }
 
     try {
       await logoutUser(token, refreshToken);
       return c.json({ message: "Logout successful." });
     } catch (error) {
-      throw error;
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError(500, "Internal Server Error");
     }
   }
 );

@@ -1,6 +1,7 @@
 import { Worker } from "bullmq";
 import { connection } from "../config/bullmq";
 import puppeteer from "puppeteer";
+import { AppError } from "../utils/errors";
 import { extractInstagramImage } from "src/utils/extractInstagramImage";
 
 const worker = new Worker(
@@ -30,8 +31,17 @@ const worker = new Worker(
       }
 
       console.log(`Job ${contentId} completed`);
-    } catch (err) {
+    } catch (err: any) {
       console.error(`Job ${contentId} failed:`, err);
+      if (!(err instanceof AppError)) {
+        throw new AppError(
+          500,
+          `Screenshot job failed: ${err.message || "Unknown error"}`,
+          err
+        );
+      } else {
+        throw err;
+      }
     } finally {
       await browser.close();
     }

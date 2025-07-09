@@ -1,5 +1,5 @@
 import ContentItem, { IContentItem } from "../db/models/ContentItem";
-import { HTTPException } from "hono/http-exception";
+import { AppError, ValidationError, NotFoundError } from "../utils/errors";
 import { parseUrl } from "../parsers";
 import { queue } from "../config/bullmq";
 import {
@@ -8,6 +8,7 @@ import {
   SearchContentQuery,
 } from "../validation/content.validation";
 import mongoose from "mongoose";
+import { HTTPException } from "hono/http-exception";
 
 /**
  * Creates a new content item for a specific user.
@@ -48,11 +49,9 @@ async function createContent(
   } catch (error) {
     console.error("Error creating content:", error);
     if (error instanceof mongoose.Error.ValidationError) {
-      throw new HTTPException(400, {
-        message: `Validation failed: ${error.message}`,
-      });
+      throw new ValidationError(`Validation failed: ${error.message}`);
     }
-    throw new HTTPException(500, { message: "Failed to create content item." });
+    throw new AppError(500, "Failed to create content item.");
   }
 }
 
@@ -69,7 +68,7 @@ async function getContentById(
   contentId: string
 ): Promise<IContentItem> {
   if (!mongoose.Types.ObjectId.isValid(contentId)) {
-    throw new HTTPException(400, { message: "Invalid content ID format." });
+    throw new ValidationError("Invalid content ID format.");
   }
   try {
     const content = await ContentItem.findOne({
@@ -78,9 +77,7 @@ async function getContentById(
     });
 
     if (!content) {
-      throw new HTTPException(404, {
-        message: "Content item not found or you do not have access.",
-      });
+      throw new NotFoundError("Content item not found or you do not have access.");
     }
     return content;
   } catch (error) {
@@ -91,9 +88,7 @@ async function getContentById(
       `Error getting content item ${contentId} for user ${userId}:`,
       error
     );
-    throw new HTTPException(500, {
-      message: "Failed to retrieve content item.",
-    });
+    throw new AppError(500, "Failed to retrieve content item.");
   }
 }
 
@@ -161,9 +156,7 @@ async function getContents(userId: string, query: SearchContentQuery) {
       )}:`,
       error
     );
-    throw new HTTPException(500, {
-      message: "Failed to retrieve content items.",
-    });
+    throw new AppError(500, "Failed to retrieve content items.");
   }
 }
 
@@ -182,7 +175,7 @@ async function updateContent(
   updates: UpdateContentInput
 ): Promise<IContentItem> {
   if (!mongoose.Types.ObjectId.isValid(contentId)) {
-    throw new HTTPException(400, { message: "Invalid content ID format." });
+    throw new ValidationError("Invalid content ID format.");
   }
 
   // Prevent changing content type after creation
@@ -193,9 +186,9 @@ async function updateContent(
     }).select("type");
 
     if (existing && existing.type !== updates.type) {
-      throw new HTTPException(400, {
-        message: `Content type cannot be changed. Expected ${existing.type}, got ${updates.type}.`,
-      });
+      throw new ValidationError(
+        `Content type cannot be changed. Expected ${existing.type}, got ${updates.type}.`
+      );
     }
   }
 
@@ -210,10 +203,9 @@ async function updateContent(
     );
 
     if (!updatedContent) {
-      throw new HTTPException(404, {
-        message:
-          "Content item not found or you do not have access to update it.",
-      });
+      throw new NotFoundError(
+        "Content item not found or you do not have access to update it."
+      );
     }
 
     return updatedContent;
@@ -222,15 +214,13 @@ async function updateContent(
       throw error;
     }
     if (error instanceof mongoose.Error.ValidationError) {
-      throw new HTTPException(400, {
-        message: `Validation failed: ${error.message}`,
-      });
+      throw new ValidationError(`Validation failed: ${error.message}`);
     }
     console.error(
       `Error updating content item ${contentId} for user ${userId}:`,
       error
     );
-    throw new HTTPException(500, { message: "Failed to update content item." });
+    throw new AppError(500, "Failed to update content item.");
   }
 }
 
@@ -243,7 +233,7 @@ async function updateContent(
  */
 async function deleteContent(userId: string, contentId: string): Promise<void> {
   if (!mongoose.Types.ObjectId.isValid(contentId)) {
-    throw new HTTPException(400, { message: "Invalid content ID format." });
+    throw new ValidationError("Invalid content ID format.");
   }
 
   try {
@@ -253,10 +243,9 @@ async function deleteContent(userId: string, contentId: string): Promise<void> {
     });
 
     if (result.deletedCount === 0) {
-      throw new HTTPException(404, {
-        message:
-          "Content item not found or you do not have access to delete it.",
-      });
+      throw new NotFoundError(
+        "Content item not found or you do not have access to delete it."
+      );
     }
   } catch (error) {
     if (error instanceof HTTPException) {
@@ -266,7 +255,7 @@ async function deleteContent(userId: string, contentId: string): Promise<void> {
       `Error deleting content item ${contentId} for user ${userId}:`,
       error
     );
-    throw new HTTPException(500, { message: "Failed to delete content item." });
+    throw new AppError(500, "Failed to delete content item.");
   }
 }
 

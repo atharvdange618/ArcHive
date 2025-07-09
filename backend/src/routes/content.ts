@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { jwt } from "hono/jwt";
-import { HTTPException } from "hono/http-exception";
+import { AppError, UnauthorizedError } from "../utils/errors";
 import { validate } from "../middleware/validator";
 import { checkBlacklist } from "../middleware/auth.middleware";
 import { apiRateLimiter, searchRateLimiter } from "../middleware/rateLimiter";
@@ -65,9 +65,7 @@ contentRoutes.use(
   async (c, next) => {
     const payload = c.get("jwtPayload");
     if (!payload || !payload._id) {
-      throw new HTTPException(401, {
-        message: "Invalid or missing JWT payload.",
-      });
+      throw new UnauthorizedError("Invalid or missing JWT payload.");
     }
     c.set("user", {
       _id: payload._id,
@@ -98,7 +96,10 @@ contentRoutes.post(
         201
       );
     } catch (error) {
-      throw error;
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError(500, "Internal Server Error");
     }
   }
 );
@@ -128,7 +129,10 @@ contentRoutes.get(
         200
       );
     } catch (error) {
-      throw error;
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError(500, "Internal Server Error");
     }
   }
 );
@@ -148,7 +152,10 @@ contentRoutes.get("/:id", async (c) => {
       200
     );
   } catch (error) {
-    throw error;
+    if (error instanceof AppError) {
+      throw error;
+    }
+    throw new AppError(500, "Internal Server Error");
   }
 });
 
@@ -172,7 +179,10 @@ contentRoutes.put(
         200
       );
     } catch (error) {
-      throw error;
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError(500, "Internal Server Error");
     }
   }
 );
@@ -191,7 +201,10 @@ contentRoutes.delete("/:id", apiRateLimiter, async (c) => {
       200
     );
   } catch (error) {
-    throw error;
+    if (error instanceof AppError) {
+      throw error;
+    }
+    throw new AppError(500, "Internal Server Error");
   }
 });
 

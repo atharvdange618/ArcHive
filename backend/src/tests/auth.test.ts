@@ -113,10 +113,10 @@ test("Auth: POST /api/auth/register - Fails with invalid username (too short)", 
   const data = await res.json();
 
   expect(data.message).toContain("Validation failed");
-  expect(data).toHaveProperty("cause");
-  expect(Array.isArray(data.cause.errors)).toBe(true);
+  expect(data).toHaveProperty("details");
+  expect(Array.isArray(data.details.errors)).toBe(true);
   expect(
-    data.cause.errors.some((e: any) =>
+    data.details.errors.some((e: any) =>
       e.message.includes("Username must be at least 3 characters long.")
     )
   ).toBe(true);
@@ -141,10 +141,10 @@ test("Auth: POST /api/auth/register - Fails with invalid email format", async ()
   const data = await res.json();
 
   expect(data.message).toContain("Validation failed");
-  expect(data).toHaveProperty("cause");
-  expect(Array.isArray(data.cause.errors)).toBe(true);
+  expect(data).toHaveProperty("details");
+  expect(Array.isArray(data.details.errors)).toBe(true);
   expect(
-    data.cause.errors.some((e: any) =>
+    data.details.errors.some((e: any) =>
       e.message.includes("Invalid email address")
     )
   ).toBe(true);
@@ -169,10 +169,10 @@ test("Auth: POST /api/auth/register - Fails with weak password (missing uppercas
   const data = await res.json();
 
   expect(data.message).toContain("Validation failed");
-  expect(data).toHaveProperty("cause");
-  expect(Array.isArray(data.cause.errors)).toBe(true);
+  expect(data).toHaveProperty("details");
+  expect(Array.isArray(data.details.errors)).toBe(true);
   expect(
-    data.cause.errors.some((e: any) =>
+    data.details.errors.some((e: any) =>
       e.message.includes("Password must contain at least one uppercase letter")
     )
   ).toBe(true);
@@ -236,7 +236,7 @@ test("Auth: POST /api/auth/login - Fails with invalid password", async () => {
     },
     body: JSON.stringify({
       email: "badpass@example.com",
-      password: "WrongPassword@123", // Incorrect password
+      password: "Password123!", // Incorrect password
     }),
   });
 
@@ -266,10 +266,10 @@ test("Auth: POST /api/auth/login - Fails with invalid email format", async () =>
   const data = await res.json();
 
   expect(data.message).toContain("Validation failed");
-  expect(data).toHaveProperty("cause");
-  expect(Array.isArray(data.cause.errors)).toBe(true);
+  expect(data).toHaveProperty("details");
+  expect(Array.isArray(data.details.errors)).toBe(true);
   expect(
-    data.cause.errors.some((e: any) =>
+    data.details.errors.some((e: any) =>
       e.message.includes("Invalid email address")
     )
   ).toBe(true);
@@ -293,10 +293,10 @@ test("Auth: POST /api/auth/login - Fails with missing password", async () => {
   const data = await res.json();
 
   expect(data.message).toContain("Validation failed");
-  expect(data).toHaveProperty("cause");
-  expect(Array.isArray(data.cause.errors)).toBe(true);
+  expect(data).toHaveProperty("details");
+  expect(Array.isArray(data.details.errors)).toBe(true);
   expect(
-    data.cause.errors.some((e: any) =>
+    data.details.errors.some((e: any) =>
       e.message.includes("Password is required")
     )
   ).toBe(true);
@@ -437,5 +437,5 @@ test("Auth: POST /api/auth/refresh - Fails if refresh token is missing", async (
   expect(refreshRes.status).toBe(400);
   const refreshData = await refreshRes.json();
   expect(refreshData.message).toContain("Validation failed");
-  expect(refreshData.cause.errors[0].message).toBe("Refresh token is required");
+  expect(refreshData.details.errors[0].message).toBe("Refresh token is required");
 });
