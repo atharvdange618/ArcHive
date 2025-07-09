@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import { logger } from "hono/logger";
 import { prettyJSON } from "hono/pretty-json";
 import { cors } from "hono/cors";
+import { secureHeaders } from "hono/secure-headers";
 import { HTTPException } from "hono/http-exception";
 import { AppError } from "./utils/errors";
 import { bodyLimit } from "hono/body-limit";
@@ -51,6 +52,7 @@ app.use(
 
 app.use(logger());
 app.use(prettyJSON());
+app.use(secureHeaders());
 
 app.use(
   bodyLimit({

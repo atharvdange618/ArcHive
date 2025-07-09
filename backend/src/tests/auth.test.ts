@@ -437,5 +437,7 @@ test("Auth: POST /api/auth/refresh - Fails if refresh token is missing", async (
   expect(refreshRes.status).toBe(400);
   const refreshData = await refreshRes.json();
   expect(refreshData.message).toContain("Validation failed");
-  expect(refreshData.details.errors[0].message).toBe("Refresh token is required");
+  expect(refreshData.details.errors[0].message).toBe(
+    "Refresh token is required"
+  );
 });

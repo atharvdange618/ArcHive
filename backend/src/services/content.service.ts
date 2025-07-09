@@ -17,7 +17,6 @@ import { HTTPException } from "hono/http-exception";
  * @returns The newly created content item document.
  * @throws HTTPException if creation fails.
  */
-
 async function createContent(
   userId: string,
   data: CreateContentInput
@@ -39,17 +38,24 @@ async function createContent(
     await newContent.save();
 
     if (newContent.url) {
-      await queue.add('screenshot-queue', {
-        contentId: newContent._id,
-        url: newContent.url,
-      });
+      queue
+        .add("screenshot-queue", {
+          contentId: newContent._id,
+          url: newContent.url,
+        })
+        .catch((err) =>
+          console.error("Failed to enqueue screenshot job", {
+            contentId: newContent._id,
+            error: err,
+          })
+        );
     }
 
     return newContent;
   } catch (error) {
     console.error("Error creating content:", error);
     if (error instanceof mongoose.Error.ValidationError) {
-      throw new ValidationError(`Validation failed: ${error.message}`);
+      throw new ValidationError("Validation failed", error.errors);
     }
     throw new AppError(500, "Failed to create content item.");
   }
@@ -77,7 +83,9 @@ async function getContentById(
     });
 
     if (!content) {
-      throw new NotFoundError("Content item not found or you do not have access.");
+      throw new NotFoundError(
+        "Content item not found or you do not have access."
+      );
     }
     return content;
   } catch (error) {
@@ -102,19 +110,18 @@ async function getContentById(
 async function getContents(userId: string, query: SearchContentQuery) {
   const { q, type, tag, limit = 20, page = 1 } = query;
 
-  const findCriteria: any = {
+  const findCriteria: mongoose.FilterQuery<IContentItem> = {
     userId: new mongoose.Types.ObjectId(userId),
   };
 
   if (q) {
-    // for full-text search using the text index
     findCriteria.$text = { $search: q };
   }
   if (type) {
     findCriteria.type = type;
   }
   if (tag) {
-    findCriteria.tags = tag;
+    findCriteria.tags = { $in: [tag] };
   }
 
   try {
@@ -214,7 +221,7 @@ async function updateContent(
       throw error;
     }
     if (error instanceof mongoose.Error.ValidationError) {
-      throw new ValidationError(`Validation failed: ${error.message}`);
+      throw new ValidationError("Validation failed", error.errors);
     }
     console.error(
       `Error updating content item ${contentId} for user ${userId}:`,

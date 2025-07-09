@@ -1,8 +1,8 @@
 import axios from "axios";
 import * as cheerio from "cheerio";
 
-export const genericParser = async (url: string) => {
-  const response = await axios.get(url);
+export const genericParser = async (url: string, headers?: any) => {
+  const response = await axios.get(url, { headers });
   const html = response.data;
   const $ = cheerio.load(html);
 

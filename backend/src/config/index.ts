@@ -30,7 +30,7 @@ const env = envSchema.safeParse(process.env);
 
 if (!env.success) {
   console.error(
-    "❌ Invalid environment variables:",
+    "Invalid environment variables:",
     env.error.flatten().fieldErrors
   );
   process.exit(1);

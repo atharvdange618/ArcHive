@@ -20,16 +20,14 @@ export class AppError extends HTTPException {
   ) {
     super(statusCode, { message, cause });
     this.statusCode = statusCode;
-    this.isOperational = true; // All errors created with AppError are operational
+    this.isOperational = true;
     this.details = details;
     this.errorCode = errorCode;
 
-    // Restore prototype chain
     Object.setPrototypeOf(this, AppError.prototype);
   }
 }
 
-// Specific error types extending AppError
 export class ValidationError extends AppError {
   constructor(message: string = "Validation Error", details?: ErrorDetails) {
     super(400, message, details, "VALIDATION_ERROR");

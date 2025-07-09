@@ -20,6 +20,12 @@ vi.mock("hono-rate-limiter", () => ({
   }),
 }));
 
+vi.mock("hono/cors", () => ({
+  cors: vi.fn(() => {
+    return async (c: any, next: any) => await next();
+  }),
+}));
+
 beforeAll(async () => {
   console.log("Vitest setup: Connecting to DB...");
   process.env.MONGODB_URI = process.env.MONGODB_URI_TEST;

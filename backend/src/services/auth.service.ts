@@ -21,6 +21,9 @@ async function hashPassword(password: string): Promise<string> {
     return await hash(password);
   } catch (error) {
     console.error("Password hashing failed:", error);
+    if (error instanceof AppError || error instanceof HTTPException) {
+      throw error;
+    }
     throw new AppError(500, "Failed to securely store password.");
   }
 }
@@ -59,6 +62,9 @@ async function generateTokens(user: AuthUserData) {
     return { accessToken, refreshToken };
   } catch (error) {
     console.error("Failed to generate tokens:", error);
+    if (error instanceof AppError || error instanceof HTTPException) {
+      throw error;
+    }
     throw new AppError(500, "Token generation failed");
   }
 }
@@ -104,7 +110,7 @@ async function registerUser(userData: RegisterInput) {
       refreshToken,
     };
   } catch (error) {
-    if (error instanceof HTTPException) {
+    if (error instanceof AppError || error instanceof HTTPException) {
       throw error;
     }
     console.error("Error in registerUser service:", error);
@@ -140,7 +146,7 @@ async function loginUser(credentials: LoginInput) {
       refreshToken,
     };
   } catch (error) {
-    if (error instanceof HTTPException) {
+    if (error instanceof AppError || error instanceof HTTPException) {
       throw error;
     }
     console.error("Error in loginUser service:", error);
@@ -219,6 +225,9 @@ async function OAuthHandler(c: any) {
       await user.save();
     } catch (err: any) {
       console.error("User creation failed", err);
+      if (err instanceof AppError || err instanceof HTTPException) {
+        throw err;
+      }
       throw new AppError(500, "User creation failed");
     }
   }
@@ -274,7 +283,7 @@ async function refreshAccessToken(oldRefreshToken: string) {
 
     return { accessToken };
   } catch (error) {
-    if (error instanceof HTTPException) {
+    if (error instanceof AppError || error instanceof HTTPException) {
       throw error;
     }
     console.error("Error in refreshAccessToken service:", error);
@@ -298,7 +307,7 @@ async function logoutUser(accessToken: string, refreshToken: string) {
 
     await RefreshToken.deleteOne({ token: refreshToken });
   } catch (error) {
-    if (error instanceof HTTPException) {
+    if (error instanceof AppError || error instanceof HTTPException) {
       throw error;
     }
     console.error("Error in logoutUser service:", error);
