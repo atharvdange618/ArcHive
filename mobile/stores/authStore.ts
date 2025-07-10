@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { logout as logoutApi } from "@/apis/logout";
 import { IUser } from "@/types";
+import * as SecureStore from "expo-secure-store";
 
 interface AuthState {
   accessToken: string | null;
@@ -9,13 +10,18 @@ interface AuthState {
   setTokens: (accessToken: string, refreshToken: string) => void;
   setUser: (user: IUser) => void;
   logout: () => Promise<void>;
+  initializeAuth: () => Promise<void>;
 }
 
 const useAuthStore = create<AuthState>((set, get) => ({
   accessToken: null,
   refreshToken: null,
   user: null,
-  setTokens: (accessToken, refreshToken) => set({ accessToken, refreshToken }),
+  setTokens: (accessToken, refreshToken) => {
+    set({ accessToken, refreshToken });
+    SecureStore.setItemAsync("accessToken", accessToken);
+    SecureStore.setItemAsync("refreshToken", refreshToken);
+  },
   setUser: (user) => set({ user }),
   logout: async () => {
     const { accessToken, refreshToken } = get();
@@ -27,6 +33,17 @@ const useAuthStore = create<AuthState>((set, get) => ({
       }
     }
     set({ accessToken: null, refreshToken: null, user: null });
+    SecureStore.deleteItemAsync("accessToken");
+    SecureStore.deleteItemAsync("refreshToken");
+  },
+  initializeAuth: async () => {
+    const accessToken = await SecureStore.getItemAsync("accessToken");
+    const refreshToken = await SecureStore.getItemAsync("refreshToken");
+    if (accessToken && refreshToken) {
+      set({ accessToken, refreshToken });
+      // Optionally, you might want to fetch user data here if not stored securely
+      // or if it can change.
+    }
   },
 }));
 

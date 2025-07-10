@@ -2,18 +2,20 @@ import { API_BASE_URL } from "@/constants";
 import axiosInstance from "@/utils/axiosInstance";
 import { isAxiosError } from "axios";
 
-export const login = async ({
+export const register = async ({
+  username,
   email,
   password,
 }: {
+  username: string;
   email: string;
   password: string;
 }) => {
-  const payload = { email, password };
+  const payload = { username, email, password };
 
   try {
     const response = await axiosInstance.post(
-      `${API_BASE_URL}/auth/login`,
+      `${API_BASE_URL}/auth/register`,
       payload
     );
 
@@ -21,7 +23,7 @@ export const login = async ({
   } catch (error: any) {
     if (isAxiosError(error)) {
       const message =
-        error.response?.data?.message || error.message || "Login failed";
+        error.response?.data?.message || error.message || "Registration failed";
       const status = error.response?.status;
 
       const err = new Error(message);

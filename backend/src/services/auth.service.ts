@@ -3,7 +3,13 @@ import User, { IUser } from "../db/models/User";
 import RefreshToken from "../db/models/RefreshToken";
 import BlacklistedToken from "../db/models/BlacklistedToken";
 import { HTTPException } from "hono/http-exception";
-import { AppError, ServiceUnavailableError, ConflictError, UnauthorizedError, ValidationError } from "../utils/errors";
+import {
+  AppError,
+  ServiceUnavailableError,
+  ConflictError,
+  UnauthorizedError,
+  ValidationError,
+} from "../utils/errors";
 import { sign, decode } from "hono/jwt";
 import { RegisterInput, LoginInput } from "../validation/auth.validation";
 import { config } from "../config";
@@ -265,6 +271,9 @@ async function refreshAccessToken(oldRefreshToken: string) {
       throw new UnauthorizedError("Refresh token expired.");
     }
 
+    // Invalidate the old refresh token
+    await RefreshToken.findByIdAndDelete(storedToken._id);
+
     const user = storedToken.user as IUser & { _id: any };
     if (!user) {
       throw new UnauthorizedError("User not found for token.");
@@ -280,8 +289,11 @@ async function refreshAccessToken(oldRefreshToken: string) {
     };
 
     const accessToken = await sign(payload, config.JWT_SECRET);
+    const newRefreshToken = await generateRefreshToken(
+      new Types.ObjectId(user._id)
+    );
 
-    return { accessToken };
+    return { accessToken, refreshToken: newRefreshToken };
   } catch (error) {
     if (error instanceof AppError || error instanceof HTTPException) {
       throw error;

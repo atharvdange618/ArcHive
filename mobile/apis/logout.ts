@@ -1,18 +1,9 @@
-import { API_BASE_URL } from "@/constants";
-import axios, { isAxiosError } from "axios";
+import axiosInstance from "@/utils/axiosInstance";
+import { isAxiosError } from "axios";
 
-export const logout = async (accessToken: string, refreshToken: string) => {
+export const logout = async (refreshToken: string) => {
   try {
-    const response = await axios.post(
-      `${API_BASE_URL}/auth/logout`,
-      { refreshToken },
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    const response = await axiosInstance.post(`/auth/logout`, { refreshToken });
 
     return response.data;
   } catch (error: any) {
