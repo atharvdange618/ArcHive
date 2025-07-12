@@ -20,24 +20,27 @@ My goal with ArcHive is to empower creators, thinkers, and anyone passionate abo
 
 ## ✨ Features
 
-- **Secure User Authentication:** Your personal knowledge is private. ArcHive ensures secure registration and login to keep your data safe.
-- **Multi-Content Type Support:** Seamlessly save text notes, web links (with rich previews), and code snippets, all within one unified system.
+- **Secure User Authentication:** Your personal knowledge is private. ArcHive ensures secure registration and login, with a complete authentication flow on the mobile app.
+- **User Profiles:** Manage your account and view your archived content from a dedicated user profile screen.
+- **Multi-Content Type Support:** Seamlessly save text notes, web links, and code snippets, all within one unified system.
+- **Intelligent Content Parsing:** ArcHive automatically parses web links to extract rich metadata. It includes specialized parsers for platforms like GitHub and Instagram.
+- **Automatic Screenshot Generation:** For every link you save, ArcHive generates a screenshot to provide a visual reference.
 - **Rich Metadata & Tagging:** Organize your content with titles, descriptions, and flexible tagging to ensure easy categorization and retrieval.
-- **Powerful Full-Text Search:** Find exactly what you need, when you need it, with an intelligent search engine that understands the context of your archived items.
-- **Intuitive Content Capture:** A dynamic Floating Action Button (FAB) allows for quick and delightful capture of new content, adapting to your needs.
+- **Powerful Full-Text Search:** Find exactly what you need, when you need it, with an intelligent search engine.
+- **Intuitive Content Capture:** A dynamic Floating Action Button (FAB) allows for quick and delightful capture of new content.
 - **Cross-Platform Accessibility:** Access your ArcHive from anywhere with dedicated mobile applications (iOS & Android) and a planned web interface.
 
 ## 🔒 Security Features
 
 ArcHive implements several security best practices to protect your data:
 
-- **Secure Authentication:** Argon2 password hashing with JWT tokens
-- **Rate Limiting:** Protection against brute force and DoS attacks
-- **CORS Protection:** Configurable allowed origins to prevent unauthorized access
-- **Request Size Limits:** 1MB body size limit to prevent resource exhaustion
-- **Token Blacklisting:** Secure logout with token invalidation
-- **Environment Validation:** Zod-based validation for all configuration
-- **OAuth 2.0:** Secure Google authentication integration
+- **Secure Authentication:** Argon2 password hashing with JWT tokens.
+- **Rate Limiting:** Protection against brute force and DoS attacks.
+- **CORS Protection:** Configurable allowed origins to prevent unauthorized access.
+- **Request Size Limits:** 1MB body size limit to prevent resource exhaustion.
+- **Token Blacklisting:** Secure logout with token invalidation.
+- **Custom Error Handling:** A robust error handling mechanism to prevent information leaks.
+- **Environment Validation:** Zod-based validation for all configuration.
 
 ## 🛠️ Technologies Used
 
@@ -49,6 +52,7 @@ ArcHive is built with a modern, robust, and scalable technology stack:
 - **Bun:** The incredibly fast JavaScript runtime powering the backend.
 - **MongoDB:** A flexible NoSQL database for storing diverse content types.
 - **Mongoose:** An elegant ODM (Object Data Modeling) for MongoDB, simplifying data interactions.
+- **Puppeteer & Cheerio:** For robust web scraping, content parsing, and screenshot generation.
 - **Argon2:** For secure and robust password hashing.
 - **Zod:** A TypeScript-first schema declaration and validation library, ensuring data integrity.
 
@@ -75,46 +79,68 @@ To get ArcHive up and running on your local machine, follow these steps:
 
 ### Backend Setup
 
-1.  Navigate to the `backend` directory:
-    ```bash
-    cd backend
-    ```
-2.  Install dependencies:
-    ```bash
-    bun install
-    ```
-3.  Copy the example environment file and configure it:
-    ```bash
-    cp .env.example .env
-    ```
-4.  Edit `.env` and configure all required values:
-    - `MONGODB_URI`: Your MongoDB connection string
-    - `JWT_SECRET`: A strong secret key (generate with `openssl rand -base64 32`)
-    - `GOOGLE_CLIENT_ID` & `GOOGLE_CLIENT_SECRET`: From Google Cloud Console
-    - `OAUTH_REDIRECT_BASE_URL`: Your backend URL (e.g., `http://localhost:3000`)
-    - `CORS_ORIGINS`: Comma-separated list of allowed frontend origins
-    
-    See `.env.example` for detailed descriptions of each variable.
-5.  Start the backend server:
-    ```bash
-    bun run dev
-    ```
-    The server should start on `http://localhost:3000`.
+1. Navigate to the `backend` directory:
+
+   ```bash
+   cd backend
+   ```
+
+2. Install dependencies:
+
+   ```bash
+   bun install
+   ```
+
+3. Copy the example environment file and configure it:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+4. Edit `.env` and configure all required values:
+
+   - `MONGODB_URI`: Your MongoDB connection string
+   - `JWT_SECRET`: A strong secret key (generate with `openssl rand -base64 32`)
+   - `GOOGLE_CLIENT_ID` & `GOOGLE_CLIENT_SECRET`: From Google Cloud Console
+   - `OAUTH_REDIRECT_BASE_URL`: Your backend URL (e.g., `http://localhost:3000`)
+   - `CORS_ORIGINS`: Comma-separated list of allowed frontend origins
+
+   See `.env.example` for detailed descriptions of each variable.
+
+5. Start the backend server:
+
+   ```bash
+   bun run dev
+   ```
+
+   The server should start on `http://localhost:3000`.
+
+6. Start the worker:
+
+   ```bash
+   bun start:worker
+   ```
 
 ### Mobile App Setup
 
-1.  Navigate to the `mobile` directory:
-    ```bash
-    cd mobile
-    ```
-2.  Install dependencies:
-    ```bash
-    npm install
-    ```
-3.  Start the Expo development server:
-    ```bash
-    npm start
-    ```
-    This will open a new tab in your browser with the Expo Dev Tools. You can then scan the QR code with the Expo Go app on your phone, or choose to run it on an Android emulator or iOS simulator.
+1. Navigate to the `mobile` directory:
+
+   ```bash
+   cd mobile
+   ```
+
+2. Install dependencies:
+
+   ```bash
+   npm install
+   ```
+
+3. Start the Expo development server:
+
+   ```bash
+   npm start
+   ```
+
+   This will open a new tab in your browser with the Expo Dev Tools. You can then scan the QR code with the Expo Go app on your phone, or choose to run it on an Android emulator or iOS simulator.
 
 ---
