@@ -11,7 +11,7 @@ export const genericParser = async (url: string, headers?: any) => {
   const description =
     $('meta[property="og:description"]').attr("content") ||
     $('meta[name="description"]').attr("content");
-  const imageUrl = $('meta[property="og:image"]').attr("content");
+  // const imageUrl = $('meta[property="og:image"]').attr("content");
 
   return {
     type: "link",

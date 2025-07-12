@@ -6,12 +6,16 @@ export const register = async ({
   username,
   email,
   password,
+  firstName,
+  lastName,
 }: {
   username: string;
   email: string;
   password: string;
+  firstName: string;
+  lastName: string;
 }) => {
-  const payload = { username, email, password };
+  const payload = { username, email, password, firstName, lastName };
 
   try {
     const response = await axiosInstance.post(

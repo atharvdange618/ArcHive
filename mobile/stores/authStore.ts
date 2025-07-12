@@ -9,6 +9,7 @@ interface AuthState {
   user: IUser | null;
   setTokens: (accessToken: string, refreshToken: string) => void;
   setUser: (user: IUser) => void;
+  updateUser: (user: Partial<IUser>) => void;
   logout: () => Promise<void>;
   initializeAuth: () => Promise<void>;
 }
@@ -23,6 +24,10 @@ const useAuthStore = create<AuthState>((set, get) => ({
     SecureStore.setItemAsync("refreshToken", refreshToken);
   },
   setUser: (user) => set({ user }),
+  updateUser: (user) =>
+    set((state) => ({
+      user: state.user ? { ...state.user, ...user } : null,
+    })),
   logout: async () => {
     const { accessToken, refreshToken } = get();
     if (accessToken && refreshToken) {

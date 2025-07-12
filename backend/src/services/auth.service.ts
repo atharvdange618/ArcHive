@@ -20,6 +20,9 @@ export interface AuthUserData {
   _id: string;
   username: string;
   email: string;
+  firstName: string;
+  lastName: string;
+  profilePictureUrl?: string;
 }
 
 async function hashPassword(password: string): Promise<string> {
@@ -56,6 +59,9 @@ async function generateTokens(user: AuthUserData) {
       _id: user._id,
       username: user.username,
       email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      profilePictureUrl: user.profilePictureUrl,
       exp: now + 60 * 15, // Access token valid for 15 minutes
       iat: now,
     };
@@ -76,7 +82,7 @@ async function generateTokens(user: AuthUserData) {
 }
 
 async function registerUser(userData: RegisterInput) {
-  const { username, email, password } = userData;
+  const { username, email, password, firstName, lastName } = userData;
 
   try {
     const existingUserByEmail = await User.findOne({ email });
@@ -94,6 +100,8 @@ async function registerUser(userData: RegisterInput) {
       username,
       email,
       password: passwordHash,
+      firstName,
+      lastName,
     }) as IUser & { _id: any };
 
     await newUser.save();
@@ -102,6 +110,8 @@ async function registerUser(userData: RegisterInput) {
       _id: (newUser._id as Types.ObjectId).toString(),
       username: newUser.username as string,
       email: newUser.email,
+      firstName: newUser.firstName as string,
+      lastName: newUser.lastName as string,
     });
 
     return {
@@ -109,6 +119,8 @@ async function registerUser(userData: RegisterInput) {
         _id: (newUser._id as Types.ObjectId).toString(),
         username: newUser.username,
         email: newUser.email,
+        firstName: newUser.firstName,
+        lastName: newUser.lastName,
         createdAt: newUser.createdAt,
         updatedAt: newUser.updatedAt,
       },
@@ -138,6 +150,9 @@ async function loginUser(credentials: LoginInput) {
       _id: (user._id as Types.ObjectId).toString(),
       username: user.username as string,
       email: user.email,
+      firstName: user.firstName as string,
+      lastName: user.lastName as string,
+      profilePictureUrl: user.profilePictureUrl as string,
     });
 
     return {
@@ -145,6 +160,9 @@ async function loginUser(credentials: LoginInput) {
         _id: (user._id as Types.ObjectId).toString(),
         username: user.username,
         email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        profilePictureUrl: user.profilePictureUrl,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
       },
@@ -225,6 +243,9 @@ async function OAuthHandler(c: any) {
       googleId: googleUser.id,
       email: googleUser.email,
       username: fallbackUsername,
+      firstName: googleUser.given_name,
+      lastName: googleUser.family_name,
+      profilePictureUrl: googleUser.picture,
     });
 
     try {
@@ -242,6 +263,9 @@ async function OAuthHandler(c: any) {
     _id: (user._id as Types.ObjectId).toString(),
     email: user.email,
     username: user.username as string,
+    firstName: user.firstName as string,
+    lastName: user.lastName as string,
+    profilePictureUrl: user.profilePictureUrl as string,
   });
 
   const finalAppRedirectPrefix = appRedirectPrefix;
@@ -252,6 +276,10 @@ async function OAuthHandler(c: any) {
   appRedirect.searchParams.set("refreshToken", refreshToken);
   appRedirect.searchParams.set("email", user.email);
   appRedirect.searchParams.set("username", user.username as string);
+  appRedirect.searchParams.set("firstName", user.firstName as string);
+  appRedirect.searchParams.set("lastName", user.lastName as string);
+  appRedirect.searchParams.set("profilePictureUrl", user.profilePictureUrl as string);
+
 
   return c.redirect(appRedirect.toString());
 }
@@ -284,6 +312,9 @@ async function refreshAccessToken(oldRefreshToken: string) {
       _id: user._id.toString(),
       username: user.username,
       email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      profilePictureUrl: user.profilePictureUrl,
       exp: now + 60 * 15, // New access token valid for 15 minutes
       iat: now,
     };
@@ -334,3 +365,4 @@ export {
   refreshAccessToken,
   logoutUser,
 };
+

@@ -19,6 +19,8 @@ export default function RegisterScreen() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   const setTokens = useAuthStore((state) => state.setTokens);
@@ -38,7 +40,7 @@ export default function RegisterScreen() {
   });
 
   const handleRegister = () => {
-    registerMutation.mutate({ username, email, password });
+    registerMutation.mutate({ username, email, password, firstName, lastName });
   };
 
   const isLoading = registerMutation.isPending;
@@ -50,6 +52,20 @@ export default function RegisterScreen() {
         Join ArcHive 💙
       </Text>
 
+      <InputField
+        label="First Name"
+        placeholder="Enter your first name"
+        value={firstName}
+        onChangeText={setFirstName}
+        editable={!isLoading}
+      />
+      <InputField
+        label="Last Name"
+        placeholder="Enter your last name"
+        value={lastName}
+        onChangeText={setLastName}
+        editable={!isLoading}
+      />
       <InputField
         label="Username"
         placeholder="Choose a username"

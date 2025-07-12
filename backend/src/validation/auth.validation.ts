@@ -24,6 +24,16 @@ export const registerSchema = z.object({
       /[^a-zA-Z0-9]/,
       "Password must contain at least one special character"
     ),
+  firstName: z
+    .string()
+    .trim()
+    .min(1, { message: "First name is required." })
+    .max(50, { message: "First name cannot exceed 50 characters." }),
+  lastName: z
+    .string()
+    .trim()
+    .min(1, { message: "Last name is required." })
+    .max(50, { message: "Last name cannot exceed 50 characters." }),
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;

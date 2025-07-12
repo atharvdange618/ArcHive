@@ -30,14 +30,7 @@ export default function TabLayout() {
         name="profile"
         options={{
           title: "Profile",
-          tabBarButton: (props) => (
-            <ProfileTabButton
-              {...props}
-              imageUrl={
-                "https://i.pinimg.com/736x/d7/d0/13/d7d013aa4c1ee9bc96fc8ee329467d34.jpg"
-              }
-            />
-          ),
+          tabBarButton: (props) => <ProfileTabButton {...props} />,
         }}
       />
     </Tabs>

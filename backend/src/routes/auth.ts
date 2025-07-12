@@ -1,5 +1,9 @@
 import { Hono } from "hono";
-import { AppError, ServiceUnavailableError, UnauthorizedError } from "../utils/errors";
+import {
+  AppError,
+  ServiceUnavailableError,
+  UnauthorizedError,
+} from "../utils/errors";
 import { validate } from "../middleware/validator";
 import { authRateLimiter, strictRateLimiter } from "../middleware/rateLimiter";
 import {
@@ -54,13 +58,15 @@ authRoutes.post(
   authRateLimiter,
   validate("json", registerSchema),
   async (c) => {
-    const { username, email, password } = c.req.valid("json") as RegisterInput;
+    const { username, email, password, firstName, lastName } = c.req.valid("json") as RegisterInput;
 
     try {
       const { user, accessToken, refreshToken } = await registerUser({
         username,
         email,
         password,
+        firstName,
+        lastName,
       });
 
       return c.json(
@@ -109,36 +115,33 @@ authRoutes.post(
 );
 
 // Google OAuth
-authRoutes.get("/google", (c) => {
-  if (
-    !config.GOOGLE_CLIENT_ID ||
-    !config.OAUTH_REDIRECT_BASE_URL
-  ) {
-    throw new ServiceUnavailableError("Google OAuth is not configured.");
-  }
-  const redirectUri = encodeURIComponent(
-    `${config.OAUTH_REDIRECT_BASE_URL}/api/auth/google/callback`
-  );
-  const clientId = config.GOOGLE_CLIENT_ID;
-  const scope = encodeURIComponent("openid profile email");
+// authRoutes.get("/google", (c) => {
+//   if (!config.GOOGLE_CLIENT_ID || !config.OAUTH_REDIRECT_BASE_URL) {
+//     throw new ServiceUnavailableError("Google OAuth is not configured.");
+//   }
+//   const redirectUri = encodeURIComponent(
+//     `${config.OAUTH_REDIRECT_BASE_URL}/api/auth/google/callback`
+//   );
+//   const clientId = config.GOOGLE_CLIENT_ID;
+//   const scope = encodeURIComponent("openid profile email");
 
-  const appRedirectPrefix = c.req.query("appRedirectPrefix") || "archive://";
-  const statePayload = JSON.stringify({ appRedirectPrefix });
-  const state = encodeURIComponent(statePayload);
+//   const appRedirectPrefix = c.req.query("appRedirectPrefix") || "archive://";
+//   const statePayload = JSON.stringify({ appRedirectPrefix });
+//   const state = encodeURIComponent(statePayload);
 
-  const url =
-    `https://accounts.google.com/o/oauth2/v2/auth` +
-    `?client_id=${clientId}` +
-    `&redirect_uri=${redirectUri}` +
-    `&response_type=code` +
-    `&scope=${scope}` +
-    `&state=${state}`;
+//   const url =
+//     `https://accounts.google.com/o/oauth2/v2/auth` +
+//     `?client_id=${clientId}` +
+//     `&redirect_uri=${redirectUri}` +
+//     `&response_type=code` +
+//     `&scope=${scope}` +
+//     `&state=${state}`;
 
-  return c.redirect(url);
-});
+//   return c.redirect(url);
+// });
 
 // Google OAuth callback
-authRoutes.get("/google/callback", OAuthHandler);
+// authRoutes.get("/google/callback", OAuthHandler);
 
 // Refresh Access Token
 authRoutes.post(

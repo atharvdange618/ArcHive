@@ -12,6 +12,7 @@ import { config } from "./config";
 import { AuthUserData } from "./services/auth.service";
 import authRoutes from "./routes/auth";
 import contentRoutes from "./routes/content";
+import userRoutes from "./routes/user";
 
 declare module "hono" {
   interface ContextVariableMap {
@@ -80,10 +81,17 @@ app.get("/health", (c) => {
 
 app.route("/api/auth", authRoutes);
 app.route("/api/content", contentRoutes);
+app.route("/api/user", userRoutes);
 
 // --- Custom Error Handling ---
 app.onError((err, c) => {
   if (err instanceof AppError) {
+    if (err.isOperational) {
+      console.log(`Handled AppError: ${err.message}`);
+    } else {
+      console.error(`Critical AppError: ${err.message}`, err);
+    }
+
     const errorResponse: {
       success: boolean;
       message: string;
@@ -103,15 +111,14 @@ app.onError((err, c) => {
       errorResponse.errorCode = err.errorCode;
     }
 
-    console.error(`AppError: ${err.message}`, err);
     return c.json(errorResponse, err.statusCode);
   }
 
   if (err instanceof HTTPException) {
-    return c.json({ message: err.message }, err.status);
+    console.log(`HTTPException: ${err.message}`);
+    return c.json({ success: false, message: err.message }, err.status);
   }
 
-  // Handle other unexpected errors
   console.error(`An unexpected server error occurred: ${err.message}`, err);
   return c.json(
     {

@@ -7,6 +7,9 @@ export interface IUser extends Document {
   username?: string;
   email: string;
   password?: string;
+  firstName?: string;
+  lastName?: string;
+  profilePictureUrl?: string;
   createdAt: Date;
   updatedAt: Date;
   comparePassword(userPass: string): Promise<boolean>;
@@ -49,6 +52,32 @@ const UserSchema: Schema = new Schema(
         },
         "Password is required",
       ],
+    },
+    firstName: {
+      type: String,
+      required: [
+        function (this: IUser) {
+          return !this.googleId;
+        },
+        "First name is required",
+      ],
+      trim: true,
+      maxlength: [50, "First name cannot exceed 50 characters"],
+    },
+    lastName: {
+      type: String,
+      required: [
+        function (this: IUser) {
+          return !this.googleId;
+        },
+        "Last name is required",
+      ],
+      trim: true,
+      maxlength: [50, "Last name cannot exceed 50 characters"],
+    },
+    profilePictureUrl: {
+      type: String,
+      trim: true,
     },
   },
   {
