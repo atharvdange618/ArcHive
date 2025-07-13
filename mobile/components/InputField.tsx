@@ -36,7 +36,7 @@ const InputField: React.FC<InputFieldProps> = ({
           },
           style,
         ]}
-        placeholderTextColor={colors.icon}
+        placeholderTextColor={colors.placeholderText}
         {...props}
       />
       {error && <Text style={styles.errorText}>{error}</Text>}

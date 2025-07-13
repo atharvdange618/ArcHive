@@ -95,7 +95,7 @@ export default function RegisterScreen() {
       {error && <Text style={styles.errorText}>{error}</Text>}
 
       <Button
-        title={isLoading ? <ActivityIndicator color="#fff" /> : "Register"}
+        title={isLoading ? <ActivityIndicator color={colors.background} /> : "Register"}
         onPress={handleRegister}
         style={styles.button}
         disabled={isLoading}

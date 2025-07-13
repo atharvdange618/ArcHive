@@ -45,7 +45,7 @@ const Button: React.FC<ButtonProps> = ({
   const getButtonTextStyles = () => {
     switch (variant) {
       case "primary":
-        return { color: "#FFFFFF" };
+        return { color: colors.background };
       case "secondary":
         return { color: colors.text };
       case "outline":

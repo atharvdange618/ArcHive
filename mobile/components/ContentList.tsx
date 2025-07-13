@@ -1,5 +1,5 @@
 import React from "react";
-import { FlatList, StyleSheet, Text, View } from "react-native";
+import { FlatList, RefreshControl, StyleSheet, Text, View } from "react-native";
 import { useThemeColors } from "../constants/useColorScheme";
 import { ContentType, IContentItem } from "../types";
 import CodeCard from "./CodeCard";
@@ -8,9 +8,15 @@ import TextCard from "./TextCard";
 
 interface ContentListProps {
   contentItems: IContentItem[];
+  onRefresh: () => void;
+  refreshing: boolean;
 }
 
-const ContentList: React.FC<ContentListProps> = ({ contentItems }) => {
+const ContentList: React.FC<ContentListProps> = ({
+  contentItems,
+  onRefresh,
+  refreshing,
+}) => {
   const colors = useThemeColors();
 
   const renderItem = ({ item }: { item: IContentItem }) => {
@@ -23,7 +29,14 @@ const ContentList: React.FC<ContentListProps> = ({ contentItems }) => {
         return <CodeCard item={item} />;
       default:
         return (
-          <View style={styles.errorCard}>
+          <View
+            style={{
+              padding: 16,
+              backgroundColor: colors.danger,
+              borderRadius: 8,
+              marginBottom: 12,
+            }}
+          >
             <Text style={{ color: colors.text }}>
               Unknown content type: {item.type}
             </Text>
@@ -38,6 +51,9 @@ const ContentList: React.FC<ContentListProps> = ({ contentItems }) => {
       renderItem={renderItem}
       keyExtractor={(item) => item._id}
       contentContainerStyle={styles.listContentContainer}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
       ListEmptyComponent={
         <View style={styles.emptyContainer}>
           <Text style={{ color: colors.text }}>
@@ -58,12 +74,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginTop: 50,
-  },
-  errorCard: {
-    padding: 16,
-    backgroundColor: "#FFDDDD",
-    borderRadius: 8,
-    marginBottom: 12,
   },
 });
 

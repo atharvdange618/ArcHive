@@ -69,24 +69,51 @@ export default function ProfileScreen() {
         }}
       >
         <View style={styles.centeredView}>
-          <View style={[styles.modalView, { backgroundColor: colors.card }]}>
+          <View
+            style={[
+              {
+                margin: 20,
+                borderRadius: 20,
+                padding: 35,
+                alignItems: "center",
+                shadowColor: colors.text,
+                shadowOffset: {
+                  width: 0,
+                  height: 2,
+                },
+                shadowOpacity: 0.25,
+                shadowRadius: 4,
+                elevation: 5,
+              },
+              { backgroundColor: colors.card },
+            ]}
+          >
             <Text style={[styles.modalText, { color: colors.text }]}>
               Edit Profile
             </Text>
             <TextInput
-              style={[styles.input, { color: colors.text, borderColor: colors.border }]}
+              style={[
+                styles.input,
+                { color: colors.text, borderColor: colors.subtleBorder },
+              ]}
               placeholder="First Name"
               value={firstName}
               onChangeText={setFirstName}
             />
             <TextInput
-              style={[styles.input, { color: colors.text, borderColor: colors.border }]}
+              style={[
+                styles.input,
+                { color: colors.text, borderColor: colors.subtleBorder },
+              ]}
               placeholder="Last Name"
               value={lastName}
               onChangeText={setLastName}
             />
             <TextInput
-              style={[styles.input, { color: colors.text, borderColor: colors.border }]}
+              style={[
+                styles.input,
+                { color: colors.text, borderColor: colors.subtleBorder },
+              ]}
               placeholder="Profile Picture URL"
               value={profilePictureUrl}
               onChangeText={setProfilePictureUrl}
@@ -152,20 +179,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginTop: 22,
-  },
-  modalView: {
-    margin: 20,
-    borderRadius: 20,
-    padding: 35,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
   },
   modalText: {
     marginBottom: 15,

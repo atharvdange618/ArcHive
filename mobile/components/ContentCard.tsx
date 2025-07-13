@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, View } from "react-native";
+import { View } from "react-native";
 import { useThemeColors } from "../constants/useColorScheme";
 
 interface ContentCardProps {
@@ -12,7 +12,17 @@ const ContentCard: React.FC<ContentCardProps> = ({ children }) => {
   return (
     <View
       style={[
-        styles.card,
+        {
+          borderRadius: 12,
+          borderWidth: 1,
+          padding: 16,
+          marginBottom: 12,
+          shadowColor: colors.text,
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.1,
+          shadowRadius: 2,
+          elevation: 2,
+        },
         { backgroundColor: colors.card, borderColor: colors.subtleBorder },
       ]}
     >
@@ -20,19 +30,5 @@ const ContentCard: React.FC<ContentCardProps> = ({ children }) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  card: {
-    borderRadius: 12,
-    borderWidth: 1,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-});
 
 export default ContentCard;

@@ -46,8 +46,6 @@ const useAuthStore = create<AuthState>((set, get) => ({
     const refreshToken = await SecureStore.getItemAsync("refreshToken");
     if (accessToken && refreshToken) {
       set({ accessToken, refreshToken });
-      // Optionally, you might want to fetch user data here if not stored securely
-      // or if it can change.
     }
   },
 }));

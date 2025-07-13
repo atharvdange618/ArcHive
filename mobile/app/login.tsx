@@ -75,7 +75,7 @@ export default function LoginScreen() {
       {error && <Text style={styles.errorText}>{error}</Text>}
 
       <Button
-        title={isLoading ? <ActivityIndicator color="#fff" /> : "Login"}
+        title={isLoading ? <ActivityIndicator color={colors.background} /> : "Login"}
         onPress={handleLogin}
         style={styles.button}
         disabled={isLoading}

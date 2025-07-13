@@ -15,7 +15,7 @@ interface FabProps {
   onPress?: () => void;
 }
 
-const Fab: React.FC<FabProps> = ({ onPress }) => {
+const Fab: React.FC<FabProps> = () => {
   const colors = useThemeColors();
   const [isOpen, setIsOpen] = useState(false);
   const rotation = useSharedValue(0);
@@ -80,45 +80,100 @@ const Fab: React.FC<FabProps> = ({ onPress }) => {
 
       <Animated.View
         style={[
-          styles.subFab,
+          {
+            position: "absolute",
+            width: 50,
+            height: 50,
+            borderRadius: 25,
+            justifyContent: "center",
+            alignItems: "center",
+            shadowColor: colors.text,
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.25,
+            shadowRadius: 3.84,
+            elevation: 5,
+            zIndex: 9,
+          },
           { backgroundColor: colors.tint },
           animatedCodeStyle,
         ]}
       >
         <TouchableOpacity onPress={() => navigateToCreate("code")}>
-          <FontAwesome name="code" size={24} color="#FFF" />
+          <FontAwesome name="code" size={24} color={colors.background} />
         </TouchableOpacity>
       </Animated.View>
 
       <Animated.View
         style={[
-          styles.subFab,
+          {
+            position: "absolute",
+            width: 50,
+            height: 50,
+            borderRadius: 25,
+            justifyContent: "center",
+            alignItems: "center",
+            shadowColor: colors.text,
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.25,
+            shadowRadius: 3.84,
+            elevation: 5,
+            zIndex: 9,
+          },
           { backgroundColor: colors.tint },
           animatedLinkStyle,
         ]}
       >
         <TouchableOpacity onPress={() => navigateToCreate("link")}>
-          <FontAwesome name="link" size={24} color="#FFF" />
+          <FontAwesome name="link" size={24} color={colors.background} />
         </TouchableOpacity>
       </Animated.View>
 
       <Animated.View
         style={[
-          styles.subFab,
+          {
+            position: "absolute",
+            width: 50,
+            height: 50,
+            borderRadius: 25,
+            justifyContent: "center",
+            alignItems: "center",
+            shadowColor: colors.text,
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.25,
+            shadowRadius: 3.84,
+            elevation: 5,
+            zIndex: 9,
+          },
           { backgroundColor: colors.tint },
           animatedTextStyle,
         ]}
       >
         <TouchableOpacity onPress={() => navigateToCreate("text")}>
-          <FontAwesome name="file-text-o" size={24} color="#FFF" />
+          <FontAwesome name="file-text-o" size={24} color={colors.background} />
         </TouchableOpacity>
       </Animated.View>
 
       <Animated.View
-        style={[styles.fab, { backgroundColor: colors.tint }, animatedFabStyle]}
+        style={[
+          {
+            width: 60,
+            height: 60,
+            borderRadius: 30,
+            justifyContent: "center",
+            alignItems: "center",
+            shadowColor: colors.text,
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.25,
+            shadowRadius: 3.84,
+            elevation: 5,
+            zIndex: 10,
+          },
+          { backgroundColor: colors.tint },
+          animatedFabStyle,
+        ]}
       >
         <TouchableOpacity onPress={toggleMenu}>
-          <FontAwesome name="plus" size={24} color="#FFF" />
+          <FontAwesome name="plus" size={24} color={colors.background} />
         </TouchableOpacity>
       </Animated.View>
     </View>
@@ -140,33 +195,6 @@ const styles = StyleSheet.create({
     right: -1000,
     bottom: -1000,
     backgroundColor: "rgba(0,0,0,0.0)",
-  },
-  fab: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    justifyContent: "center",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-    zIndex: 10,
-  },
-  subFab: {
-    position: "absolute",
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    justifyContent: "center",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-    zIndex: 9,
   },
 });
 
