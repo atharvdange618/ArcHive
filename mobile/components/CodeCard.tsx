@@ -3,25 +3,33 @@ import { StyleSheet, Text, View } from "react-native";
 import { useThemeColors } from "../constants/useColorScheme";
 import { IContentItem } from "../types";
 import ContentCard from "./ContentCard";
+import HighlightText from "./HighlightText";
 
 interface CodeCardProps {
   item: IContentItem;
+  searchQuery?: string;
 }
 
-const CodeCard: React.FC<CodeCardProps> = ({ item }) => {
+const CodeCard: React.FC<CodeCardProps> = ({ item, searchQuery }) => {
   const colors = useThemeColors();
 
   return (
     <ContentCard>
       {item.title && (
-        <Text style={[styles.title, { color: colors.text }]}>{item.title}</Text>
+        <HighlightText
+          text={item.title}
+          highlight={searchQuery || ""}
+          style={[styles.title, { color: colors.text }]}
+        />
       )}
       <View
         style={[styles.codeContainer, { backgroundColor: colors.background }]}
       >
-        <Text style={[styles.code, { color: colors.text }]}>
-          {item.content}
-        </Text>
+        <HighlightText
+          text={item.content as string}
+          highlight={searchQuery || ""}
+          style={[styles.code, { color: colors.text }]}
+        />
       </View>
       {item.tags && item.tags.length > 0 && (
         <View style={styles.tagsContainer}>

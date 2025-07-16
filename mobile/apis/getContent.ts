@@ -12,9 +12,10 @@ export interface ApiResponse {
   };
 }
 
-export const getContent = async (): Promise<ApiResponse> => {
+export const getContent = async (query?: string): Promise<ApiResponse> => {
+  const endpoint = query ? `/content?q=${query}` : "/content";
   try {
-    const response = await axiosInstance.get<ApiResponse>("/content");
+    const response = await axiosInstance.get<ApiResponse>(endpoint);
     return response.data;
   } catch (error) {
     console.error("Error fetching content:", error);

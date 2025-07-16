@@ -4,12 +4,14 @@ import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useThemeColors } from "../constants/useColorScheme";
 import { IContentItem } from "../types";
 import ContentCard from "./ContentCard";
+import HighlightText from "./HighlightText";
 
 interface LinkCardProps {
   item: IContentItem;
+  searchQuery?: string;
 }
 
-const LinkCard: React.FC<LinkCardProps> = ({ item }) => {
+const LinkCard: React.FC<LinkCardProps> = ({ item, searchQuery }) => {
   const colors = useThemeColors();
 
   const handlePress = async () => {
@@ -28,17 +30,25 @@ const LinkCard: React.FC<LinkCardProps> = ({ item }) => {
           />
         )}
         {item.title && (
-          <Text style={[styles.title, { color: colors.text }]}>
-            {item.title}
-          </Text>
+          <HighlightText
+            text={item.title}
+            highlight={searchQuery || ""}
+            style={[styles.title, { color: colors.text }]}
+          />
         )}
         {item.url && (
-          <Text style={[styles.url, { color: colors.tint }]}>{item.url}</Text>
+          <HighlightText
+            text={item.url}
+            highlight={searchQuery || ""}
+            style={[styles.url, { color: colors.tint }]}
+          />
         )}
         {item.description && (
-          <Text style={[styles.description, { color: colors.text }]}>
-            {item.description}
-          </Text>
+          <HighlightText
+            text={item.description}
+            highlight={searchQuery || ""}
+            style={[styles.description, { color: colors.text }]}
+          />
         )}
         {item.tags && item.tags.length > 0 && (
           <View style={styles.tagsContainer}>

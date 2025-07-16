@@ -10,23 +10,25 @@ interface ContentListProps {
   contentItems: IContentItem[];
   onRefresh: () => void;
   refreshing: boolean;
+  searchQuery?: string;
 }
 
 const ContentList: React.FC<ContentListProps> = ({
   contentItems,
   onRefresh,
   refreshing,
+  searchQuery,
 }) => {
   const colors = useThemeColors();
 
   const renderItem = ({ item }: { item: IContentItem }) => {
     switch (item.type) {
       case ContentType.Text:
-        return <TextCard item={item} />;
+        return <TextCard item={item} searchQuery={searchQuery} />;
       case ContentType.Link:
-        return <LinkCard item={item} />;
+        return <LinkCard item={item} searchQuery={searchQuery} />;
       case ContentType.Code:
-        return <CodeCard item={item} />;
+        return <CodeCard item={item} searchQuery={searchQuery} />;
       default:
         return (
           <View
@@ -57,7 +59,7 @@ const ContentList: React.FC<ContentListProps> = ({
       ListEmptyComponent={
         <View style={styles.emptyContainer}>
           <Text style={{ color: colors.text }}>
-            No content items yet. Start by adding one!
+            No content items found. Try a different search.
           </Text>
         </View>
       }
