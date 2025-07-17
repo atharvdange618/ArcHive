@@ -11,12 +11,13 @@ export const genericParser = async (url: string, headers?: any) => {
   const description =
     $('meta[property="og:description"]').attr("content") ||
     $('meta[name="description"]').attr("content");
-  // const imageUrl = $('meta[property="og:image"]').attr("content");
+  const previewImageUrl = $('meta[property="og:image"]').attr("content");
 
   return {
     type: "link",
     title: title.trim(),
     description: description ? description.trim() : "No description found.",
     url: url,
+    previewImageUrl: previewImageUrl || "",
   };
 };

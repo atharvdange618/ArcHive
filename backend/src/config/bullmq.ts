@@ -7,8 +7,12 @@ const connection = new Redis({
   maxRetriesPerRequest: null,
 });
 
-const queue = new Queue("screenshot-queue", {
+const screenshotQueue = new Queue("screenshot-queue", {
   connection,
 });
 
-export { queue, connection };
+const tagQueue = new Queue("tag-queue", {
+  connection,
+});
+
+export { screenshotQueue, tagQueue, connection };

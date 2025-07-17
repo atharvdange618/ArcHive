@@ -12,7 +12,7 @@ export async function connectDB(): Promise<void> {
   const mongoURI = config.MONGODB_URI;
 
   try {
-    await mongoose.connect(mongoURI);
+    await mongoose.connect(mongoURI, { bufferTimeoutMS: 60000 });
     console.log("Connected to MongoDB successfully!");
   } catch (error) {
     console.error("Failed to connect to MongoDB:", error);

@@ -1,7 +1,7 @@
 import ContentItem, { IContentItem } from "../db/models/ContentItem";
 import { AppError, ValidationError, NotFoundError } from "../utils/errors";
 import { parseUrl } from "../parsers";
-import { queue } from "../config/bullmq";
+// import { screenshotQueue, tagQueue } from "../config/bullmq";
 import {
   CreateContentInput,
   UpdateContentInput,
@@ -9,6 +9,9 @@ import {
 } from "../validation/content.validation";
 import mongoose from "mongoose";
 import { HTTPException } from "hono/http-exception";
+import natural from "natural";
+import { cleanSearchQuery } from "src/utils/extractRelevantTags";
+import { generateTagsFromUrl } from "src/utils/generateTagsFromUrl";
 
 /**
  * Creates a new content item for a specific user.
@@ -24,10 +27,10 @@ async function createContent(
   try {
     let finalData: any = { ...data };
 
-    // If a URL is provided, parse it to enrich the content
     if (data.url) {
       const parsedData = await parseUrl(data.url);
-      finalData = { ...finalData, ...parsedData };
+      const tags = await generateTagsFromUrl(data.url);
+      finalData = { ...finalData, ...parsedData, tags };
     }
 
     const newContent = new ContentItem({
@@ -37,19 +40,32 @@ async function createContent(
 
     await newContent.save();
 
-    if (newContent.url) {
-      queue
-        .add("screenshot-queue", {
-          contentId: newContent._id,
-          url: newContent.url,
-        })
-        .catch((err) =>
-          console.error("Failed to enqueue screenshot job", {
-            contentId: newContent._id,
-            error: err,
-          })
-        );
-    }
+    // Enqueue screenshot and tag generation jobs
+    // if (newContent.url) {
+    //   screenshotQueue
+    //     .add("screenshot-queue", {
+    //       contentId: newContent._id,
+    //       url: newContent.url,
+    //     })
+    //     .catch((err) =>
+    //       console.error("Failed to enqueue screenshot job", {
+    //         contentId: newContent._id,
+    //         error: err,
+    //       })
+    //     );
+
+    //   tagQueue
+    //     .add("generate-tags", {
+    //       contentId: newContent._id,
+    //       url: newContent.url,
+    //     })
+    //     .catch((err) =>
+    //       console.error("Failed to enqueue tag generation job", {
+    //         contentId: newContent._id,
+    //         error: err,
+    //       })
+    //     );
+    // }
 
     return newContent;
   } catch (error) {
@@ -115,13 +131,17 @@ async function getContents(userId: string, query: SearchContentQuery) {
   };
 
   if (q) {
-    findCriteria.$text = { $search: q };
+    const cleaned = cleanSearchQuery(q);
+    findCriteria.$text = { $search: cleaned };
   }
+
   if (type) {
     findCriteria.type = type;
   }
+
   if (tag) {
-    findCriteria.tags = { $in: [tag] };
+    const stemmedTag = natural.PorterStemmer.stem(tag.toLowerCase());
+    findCriteria.tags = { $in: [stemmedTag] };
   }
 
   try {
@@ -163,7 +183,7 @@ async function getContents(userId: string, query: SearchContentQuery) {
       )}:`,
       error
     );
-    throw new AppError(500, "Failed to retrieve content items.");
+    throw new AppError(500, "Failed to retrieve content item.");
   }
 }
 
