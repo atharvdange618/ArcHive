@@ -28,7 +28,7 @@ export async function updateUserProfile(
     await user.save();
 
     return {
-      _id: user._id.toString(),
+      _id: user._id!.toString(),
       username: user.username,
       email: user.email,
       firstName: user.firstName,
