@@ -1,5 +1,4 @@
-import puppeteer from "puppeteer-core";
-import chromium from "@sparticuz/chromium-min";
+import puppeteer from "puppeteer";
 import * as cheerio from "cheerio";
 import { JSDOM } from "jsdom";
 import { Readability } from "@mozilla/readability";
@@ -24,14 +23,8 @@ export async function generateTagsFromUrl(url: string): Promise<string[]> {
       return extractRelevantTags(genericParsed.description);
     }
     // --- Puppeteer fallback ---
-    const executablePath = await chromium.executablePath(
-      "https://github.com/Sparticuz/chromium/releases/download/v126.0.0/chromium-v126.0.0-pack.tar"
-    );
-    browser = await puppeteer.launch({
-      args: chromium.args,
-      executablePath,
-      headless: true,
-    });
+
+    browser = await puppeteer.launch();
     const page = await browser.newPage();
     await page.setUserAgent(
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"

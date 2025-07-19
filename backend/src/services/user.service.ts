@@ -1,4 +1,4 @@
-import User, { IUser } from "../db/models/User";
+import User from "../db/models/User";
 import { AppError, NotFoundError } from "../utils/errors";
 import { UpdateUserInput } from "../validation/user.validation";
 
