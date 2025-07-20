@@ -12,7 +12,6 @@ export const Colors = {
     card: "#FFFFFF",
     subtleBorder: "#E2E8F0",
     placeholderText: "#A0AEC0",
-    // New colors
     primary: tintColorLight,
     primaryDarker: "#3C73B4",
     primaryLighter: "#7BA9E8",
@@ -33,7 +32,6 @@ export const Colors = {
     subtleBorder: "#4A5568",
     border: "#4A5568",
     placeholderText: "#718096",
-    // New colors
     primary: tintColorDark,
     primaryDarker: "#3C73B4",
     primaryLighter: "#7BA9E8",
