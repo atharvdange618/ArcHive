@@ -1,10 +1,9 @@
 import React from "react";
 import { Text } from "react-native";
-import { useThemeColors } from "../constants/useColorScheme";
 
 interface HighlightTextProps {
   text: string;
-  highlight: string;
+  highlight?: string | null;
   style?: any;
 }
 
@@ -13,25 +12,19 @@ const HighlightText: React.FC<HighlightTextProps> = ({
   highlight,
   style,
 }) => {
-  const colors = useThemeColors();
+  const highlightString = highlight || "";
 
-  if (!highlight.trim()) {
+  if (!highlightString) {
     return <Text style={style}>{text}</Text>;
   }
 
-  const regex = new RegExp(`(${highlight})`, "gi");
+  const regex = new RegExp(`(${highlightString})`, "gi");
   const parts = text.split(regex);
 
   return (
     <Text style={style}>
       {parts.map((part, index) =>
-        regex.test(part) ? (
-          <Text key={index} style={{ backgroundColor: colors.primaryLighter }}>
-            {part}
-          </Text>
-        ) : (
-          part
-        )
+        regex.test(part) ? <Text key={index}>{part}</Text> : part
       )}
     </Text>
   );

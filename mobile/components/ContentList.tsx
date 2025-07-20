@@ -1,16 +1,19 @@
 import React from "react";
-import { FlatList, RefreshControl, StyleSheet, Text, View } from "react-native";
+import { RefreshControl, StyleSheet, Text, View } from "react-native";
 import { useThemeColors } from "../constants/useColorScheme";
 import { ContentType, IContentItem } from "../types";
 import CodeCard from "./CodeCard";
 import LinkCard from "./LinkCard";
 import TextCard from "./TextCard";
+import { FlashList } from "@shopify/flash-list";
 
 interface ContentListProps {
   contentItems: IContentItem[];
   onRefresh: () => void;
   refreshing: boolean;
   searchQuery?: string;
+  onEndReached?: () => void;
+  ListFooterComponent?: React.ReactElement;
 }
 
 const ContentList: React.FC<ContentListProps> = ({
@@ -18,6 +21,8 @@ const ContentList: React.FC<ContentListProps> = ({
   onRefresh,
   refreshing,
   searchQuery,
+  onEndReached,
+  ListFooterComponent,
 }) => {
   const colors = useThemeColors();
 
@@ -48,7 +53,7 @@ const ContentList: React.FC<ContentListProps> = ({
   };
 
   return (
-    <FlatList
+    <FlashList
       data={contentItems}
       renderItem={renderItem}
       keyExtractor={(item) => item._id}
@@ -63,6 +68,10 @@ const ContentList: React.FC<ContentListProps> = ({
           </Text>
         </View>
       }
+      onEndReached={onEndReached}
+      onEndReachedThreshold={0.5}
+      ListFooterComponent={ListFooterComponent}
+      estimatedItemSize={150}
     />
   );
 };

@@ -58,4 +58,9 @@ userRoutes.put(
   }
 );
 
+userRoutes.get("/profile", apiRateLimiter, async (c) => {
+  const user = c.get("user");
+  return c.json({ user });
+});
+
 export default userRoutes;

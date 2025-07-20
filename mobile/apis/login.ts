@@ -19,6 +19,8 @@ export const login = async ({
 
     return response.data;
   } catch (error: any) {
+    console.log(error);
+
     if (isAxiosError(error)) {
       const message =
         error.response?.data?.message || error.message || "Login failed";

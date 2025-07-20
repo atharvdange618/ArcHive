@@ -1,9 +1,10 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import { useThemeColors } from "../constants/useColorScheme";
 import { IContentItem } from "../types";
 import ContentCard from "./ContentCard";
 import HighlightText from "./HighlightText";
+import { router } from "expo-router";
 
 interface CodeCardProps {
   item: IContentItem;
@@ -13,40 +14,46 @@ interface CodeCardProps {
 const CodeCard: React.FC<CodeCardProps> = ({ item, searchQuery }) => {
   const colors = useThemeColors();
 
+  const handlePress = () => {
+    router.push(`/details/code-detail?id=${item._id}`);
+  };
+
   return (
-    <ContentCard>
-      {item.title && (
-        <HighlightText
-          text={item.title}
-          highlight={searchQuery || ""}
-          style={[styles.title, { color: colors.text }]}
-        />
-      )}
-      <View
-        style={[styles.codeContainer, { backgroundColor: colors.background }]}
-      >
-        <HighlightText
-          text={item.content as string}
-          highlight={searchQuery || ""}
-          style={[styles.code, { color: colors.text }]}
-        />
-      </View>
-      {item.tags && item.tags.length > 0 && (
-        <View style={styles.tagsContainer}>
-          {item.tags.map((tag, index) => (
-            <Text
-              key={index}
-              style={[
-                styles.tag,
-                { backgroundColor: colors.tint, color: colors.card },
-              ]}
-            >
-              {tag}
-            </Text>
-          ))}
+    <TouchableOpacity onPress={handlePress}>
+      <ContentCard>
+        {item.title && (
+          <HighlightText
+            text={item.title}
+            highlight={searchQuery || ""}
+            style={[styles.title, { color: colors.text }]}
+          />
+        )}
+        <View
+          style={[styles.codeContainer, { backgroundColor: colors.background }]}
+        >
+          <HighlightText
+            text={item.content as string}
+            highlight={searchQuery || ""}
+            style={[styles.code, { color: colors.text }]}
+          />
         </View>
-      )}
-    </ContentCard>
+        {item.tags && item.tags.length > 0 && (
+          <View style={styles.tagsContainer}>
+            {item.tags.map((tag, index) => (
+              <Text
+                key={index}
+                style={[
+                  styles.tag,
+                  { backgroundColor: colors.tint, color: colors.card },
+                ]}
+              >
+                {tag}
+              </Text>
+            ))}
+          </View>
+        )}
+      </ContentCard>
+    </TouchableOpacity>
   );
 };
 

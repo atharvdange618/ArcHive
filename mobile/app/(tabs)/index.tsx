@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { FontAwesome } from "@expo/vector-icons";
 import {
   ActivityIndicator,
@@ -18,7 +18,6 @@ import { useEffect, useState } from "react";
 import ContentList from "../../components/ContentList";
 import Fab from "../../components/Fab";
 import { useThemeColors } from "../../constants/useColorScheme";
-import { IContentItem } from "../../types";
 import { getContent } from "../../apis/getContent";
 import { addRecentSearch, getRecentSearches } from "../../utils/recentSearches";
 
@@ -48,21 +47,32 @@ export default function TabOneScreen() {
   const headerHeight = useSharedValue(100);
 
   const {
-    data: content = [],
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
     isLoading,
     refetch,
     isRefetching,
-  } = useQuery<IContentItem[], Error>({
+  } = useInfiniteQuery({
     queryKey: ["content", debouncedSearchQuery],
-    queryFn: async () => {
+    queryFn: async ({ pageParam = 1 }) => {
       if (debouncedSearchQuery) {
         await addRecentSearch(debouncedSearchQuery);
       }
-      const response = await getContent(debouncedSearchQuery);
-      return response.data;
+      const response = await getContent(debouncedSearchQuery, pageParam);
+      return response;
     },
-    enabled: isSearchVisible || !debouncedSearchQuery,
+    getNextPageParam: (lastPage) => {
+      if (lastPage.meta.page < lastPage.meta.totalPages) {
+        return lastPage.meta.page + 1;
+      }
+      return undefined;
+    },
+    initialPageParam: 1,
   });
+
+  const content = data?.pages.flatMap((page) => page.data) || [];
 
   useEffect(() => {
     if (isSearchVisible && !debouncedSearchQuery) {
@@ -103,6 +113,16 @@ export default function TabOneScreen() {
           onRefresh={refetch}
           refreshing={isRefetching}
           searchQuery={debouncedSearchQuery}
+          onEndReached={() => {
+            if (hasNextPage && !isFetchingNextPage) {
+              fetchNextPage();
+            }
+          }}
+          ListFooterComponent={
+            isFetchingNextPage ? (
+              <ActivityIndicator size="small" color={colors.primary} />
+            ) : undefined
+          }
         />
       );
     }
@@ -131,6 +151,16 @@ export default function TabOneScreen() {
         contentItems={content || []}
         onRefresh={refetch}
         refreshing={isRefetching}
+        onEndReached={() => {
+          if (hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
+          }
+        }}
+        ListFooterComponent={
+          isFetchingNextPage ? (
+            <ActivityIndicator size="small" color={colors.primary} />
+          ) : undefined
+        }
       />
     );
   };
