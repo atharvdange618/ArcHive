@@ -62,9 +62,8 @@ export default function CreateTextScreen() {
 
   const handleSave = (data: TextFormData) => {
     createTextContent({
-      type: ContentType.Text,
       title: data.title,
-      content: data.text,
+      text: data.text,
       tags: data.tags?.split(",").map((tag) => tag.trim()).filter(tag => tag) || [],
     });
   };

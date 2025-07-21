@@ -18,7 +18,29 @@
         "backgroundColor": "#F8F7F2"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.atharvdange618.archive"
+      "softwareKeyboardLayoutMode": "pan",
+      "package": "com.atharvdange618.archive",
+      "launchMode": "singleTask",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "archive"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        },
+        {
+          "action": "SEND",
+          "data": [
+            {
+              "mimeType": "text/plain"
+            }
+          ],
+          "category": ["DEFAULT"]
+        }
+      ]
     },
     "web": {
       "bundler": "metro",

@@ -68,7 +68,6 @@ export default function CreateLinkScreen() {
 
   const handleSave = (data: LinkFormData) => {
     createLinkContent({
-      type: ContentType.Link,
       url: data.url,
       title: data.title,
       description: data.description,

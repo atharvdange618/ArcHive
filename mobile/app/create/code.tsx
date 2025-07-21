@@ -13,7 +13,6 @@ import { createContent } from "@/apis/createContent";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { ContentType } from "@/types";
 
 const codeSchema = z.object({
   title: z.string().optional(),
@@ -48,10 +47,16 @@ export default function CreateCodeScreen() {
     },
     onError: (error: any) => {
       let errorMessage = "Failed to save code snippet.";
-      if (error.response && error.response.data && error.response.data.details) {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.details
+      ) {
         const { errors } = error.response.data.details;
         if (errors && errors.length > 0) {
-          errorMessage = errors.map((e: { message: string }) => e.message).join("\n");
+          errorMessage = errors
+            .map((e: { message: string }) => e.message)
+            .join("\n");
         }
       } else if (error.message) {
         errorMessage = error.message;
@@ -62,10 +67,13 @@ export default function CreateCodeScreen() {
 
   const handleSave = (data: CodeFormData) => {
     createCodeContent({
-      type: ContentType.Code,
       title: data.title,
-      content: data.code,
-      tags: data.tags?.split(",").map((tag) => tag.trim()).filter(tag => tag) || [],
+      code: data.code,
+      tags:
+        data.tags
+          ?.split(",")
+          .map((tag) => tag.trim())
+          .filter((tag) => tag) || [],
     });
   };
 

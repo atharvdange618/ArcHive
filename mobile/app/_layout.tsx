@@ -3,23 +3,28 @@ import { useFonts } from "expo-font";
 import { Stack, router, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
-import { useColorScheme, View, ActivityIndicator } from "react-native";
+import { useColorScheme } from "react-native";
 import { Colors } from "../constants/Colors";
 import useAuthStore from "../stores/authStore";
 import { setupAxiosInterceptors } from "../utils/axiosInstance";
+import Toast from "react-native-toast-message";
+import { createContent } from "../apis/createContent";
+import { useIncomingLinkHandler } from "../hooks/useIncomingLinkHandler";
 
 SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient();
 
 function InitialLayout() {
-  const { accessToken, initializeAuth, setTokens, logout, isAuthInitialized } = useAuthStore();
+  const { accessToken, initializeAuth, setTokens, logout, isAuthInitialized } =
+    useAuthStore();
   const segments = useSegments();
   const [loaded, error] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
   });
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
+  const { pendingUrl, clearPendingUrl } = useIncomingLinkHandler();
 
   useEffect(() => {
     if (error) throw error;
@@ -27,31 +32,66 @@ function InitialLayout() {
 
   useEffect(() => {
     if (loaded) {
-      SplashScreen.hideAsync();
       initializeAuth();
       setupAxiosInterceptors(setTokens, logout);
     }
   }, [initializeAuth, loaded, logout, setTokens]);
 
   useEffect(() => {
-    if (!loaded || !isAuthInitialized) return; // Wait for fonts and auth to initialize
+    if (loaded && isAuthInitialized) {
+      SplashScreen.hideAsync();
+    }
+  }, [loaded, isAuthInitialized]);
+
+  useEffect(() => {
+    if (!loaded || !isAuthInitialized) return;
 
     const inAuthGroup = segments[0] === "login" || segments[0] === "register";
+
+    if (pendingUrl) {
+      if (accessToken) {
+        console.log("Processing pending URL (logged in):", pendingUrl);
+        handleCreateContent(pendingUrl);
+        clearPendingUrl();
+      } else if (!inAuthGroup) {
+        console.log("Storing pending URL, redirecting to login:", pendingUrl);
+        router.replace("/login");
+      }
+      return;
+    }
 
     if (accessToken && inAuthGroup) {
       router.replace("/(tabs)");
     } else if (!accessToken && !inAuthGroup) {
       router.replace("/login");
     }
-  }, [accessToken, segments, loaded, isAuthInitialized]);
+  }, [
+    accessToken,
+    segments,
+    loaded,
+    isAuthInitialized,
+    pendingUrl,
+    clearPendingUrl,
+  ]);
 
-  if (!loaded || !isAuthInitialized) {
-    return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: colors.background }}>
-        <ActivityIndicator size="large" color={colors.primary} />
-      </View>
-    );
-  }
+  const handleCreateContent = async (url: string) => {
+    console.log("Attempting to create content with URL:", url);
+    try {
+      await createContent({ url });
+      Toast.show({
+        type: "success",
+        text1: "Link Saved!",
+        text2: "The link has been successfully saved to your ArcHive.",
+      });
+    } catch (error) {
+      console.error("Failed to save link:", error);
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Failed to save the link.",
+      });
+    }
+  };
 
   return (
     <Stack
@@ -79,6 +119,7 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <InitialLayout />
+      <Toast />
     </QueryClientProvider>
   );
 }
