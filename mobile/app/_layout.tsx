@@ -1,8 +1,12 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useFonts } from "expo-font";
 import { Stack, router, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { useColorScheme } from "react-native";
 import { Colors } from "../constants/Colors";
 import useAuthStore from "../stores/authStore";
@@ -10,6 +14,8 @@ import { setupAxiosInterceptors } from "../utils/axiosInstance";
 import Toast from "react-native-toast-message";
 import { createContent } from "../apis/createContent";
 import { useIncomingLinkHandler } from "../hooks/useIncomingLinkHandler";
+
+import { ShareIntentProvider } from "expo-share-intent";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -25,6 +31,29 @@ function InitialLayout() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
   const { pendingUrl, clearPendingUrl } = useIncomingLinkHandler();
+  const queryClient = useQueryClient();
+
+  const handleCreateContent = useCallback(
+    async (url: string) => {
+      try {
+        await createContent({ url });
+        queryClient.invalidateQueries({ queryKey: ["contents"] });
+        Toast.show({
+          type: "success",
+          text1: "Link Saved!",
+          text2: "The link has been successfully saved to your ArcHive.",
+        });
+      } catch (error) {
+        console.error("Failed to save link:", error);
+        Toast.show({
+          type: "error",
+          text1: "Error",
+          text2: "Failed to save the link.",
+        });
+      }
+    },
+    [queryClient]
+  );
 
   useEffect(() => {
     if (error) throw error;
@@ -72,26 +101,8 @@ function InitialLayout() {
     isAuthInitialized,
     pendingUrl,
     clearPendingUrl,
+    handleCreateContent,
   ]);
-
-  const handleCreateContent = async (url: string) => {
-    console.log("Attempting to create content with URL:", url);
-    try {
-      await createContent({ url });
-      Toast.show({
-        type: "success",
-        text1: "Link Saved!",
-        text2: "The link has been successfully saved to your ArcHive.",
-      });
-    } catch (error) {
-      console.error("Failed to save link:", error);
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: "Failed to save the link.",
-      });
-    }
-  };
 
   return (
     <Stack
@@ -118,7 +129,9 @@ function InitialLayout() {
 export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
-      <InitialLayout />
+      <ShareIntentProvider>
+        <InitialLayout />
+      </ShareIntentProvider>
       <Toast />
     </QueryClientProvider>
   );

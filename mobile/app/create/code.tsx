@@ -44,7 +44,7 @@ export default function CreateCodeScreen() {
   const { mutate: createCodeContent, isPending } = useMutation({
     mutationFn: createContent,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["content"] });
+      queryClient.invalidateQueries({ queryKey: ["contents"] });
       router.back();
     },
     onError: (error: any) => {

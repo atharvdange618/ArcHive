@@ -1,15 +1,15 @@
 import { useLinkingURL } from "expo-linking";
 import { useEffect, useState } from "react";
-import ReceiveSharingIntent from "react-native-receive-sharing-intent";
+import { useShareIntent } from "expo-share-intent";
 
 export function useIncomingLinkHandler() {
   const [pendingUrl, setPendingUrl] = useState<string | null>(null);
 
   const deepLinkUrl = useLinkingURL();
+  const { hasShareIntent, shareIntent, resetShareIntent } = useShareIntent();
 
   useEffect(() => {
     if (deepLinkUrl) {
-      console.log("Deep link received:", deepLinkUrl);
       const decodedUrl = decodeURIComponent(
         deepLinkUrl.replace("archive://", "")
       );
@@ -18,23 +18,15 @@ export function useIncomingLinkHandler() {
   }, [deepLinkUrl]);
 
   useEffect(() => {
-    ReceiveSharingIntent.getReceivedFiles(
-      (files: { text?: string }[]) => {
-        if (files && files.length > 0 && files[0].text) {
-          console.log("Share intent received:", files[0].text);
-          setPendingUrl(files[0].text);
-        }
-      },
-      (error: any) => {
-        console.error("Share intent error:", error);
-      },
-      "ArcHiveShare"
-    );
-
-    return () => {
-      ReceiveSharingIntent.clearReceivedFiles();
-    };
-  }, []);
+    if (hasShareIntent) {
+      if (shareIntent.webUrl) {
+        setPendingUrl(shareIntent.webUrl);
+      } else if (shareIntent.text) {
+        setPendingUrl(shareIntent.text);
+      }
+      resetShareIntent();
+    }
+  }, [hasShareIntent, shareIntent, resetShareIntent]);
 
   const clearPendingUrl = () => {
     setPendingUrl(null);

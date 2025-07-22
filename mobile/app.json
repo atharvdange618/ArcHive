@@ -29,7 +29,10 @@
               "scheme": "archive"
             }
           ],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         },
         {
           "action": "SEND",
@@ -38,7 +41,9 @@
               "mimeType": "text/plain"
             }
           ],
-          "category": ["DEFAULT"]
+          "category": [
+            "DEFAULT"
+          ]
         }
       ]
     },
@@ -57,7 +62,8 @@
           "resizeMode": "contain",
           "backgroundColor": "#F8F7F2"
         }
-      ]
+      ],
+      "expo-share-intent"
     ],
     "experiments": {
       "typedRoutes": true

@@ -1,4 +1,12 @@
-import { View, Text, StyleSheet, Image, Modal, TextInput } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  TextInput,
+  TouchableOpacity,
+} from "react-native";
+import Modal from "react-native-modal";
 import { useThemeColors } from "@/constants/useColorScheme";
 import useAuthStore from "@/stores/authStore";
 import Button from "@/components/Button";
@@ -10,7 +18,8 @@ import { updateProfile } from "@/apis/updateProfile";
 export default function ProfileScreen() {
   const colors = useThemeColors();
   const { user, logout, updateUser } = useAuthStore();
-  const [modalVisible, setModalVisible] = useState(false);
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [isLogoutModalVisible, setIsLogoutModalVisible] = useState(false);
   const [firstName, setFirstName] = useState(user?.firstName || "");
   const [lastName, setLastName] = useState(user?.lastName || "");
   const [profilePictureUrl, setProfilePictureUrl] = useState(
@@ -20,13 +29,14 @@ export default function ProfileScreen() {
   const handleLogout = async () => {
     await logout();
     router.replace("/login");
+    setIsLogoutModalVisible(false);
   };
 
   const updateProfileMutation = useMutation({
     mutationFn: updateProfile,
     onSuccess: (data) => {
       updateUser(data.user);
-      setModalVisible(false);
+      setIsEditModalVisible(false);
     },
   });
 
@@ -46,7 +56,7 @@ export default function ProfileScreen() {
         <Text style={[styles.name, { color: colors.text }]}>
           {user?.firstName} {user?.lastName}
         </Text>
-        
+
         <Text style={[styles.email, { color: colors.tint }]}>
           {user?.email}
         </Text>
@@ -54,38 +64,18 @@ export default function ProfileScreen() {
 
       <Button
         title="Edit Profile"
-        onPress={() => setModalVisible(true)}
+        onPress={() => setIsEditModalVisible(true)}
         style={styles.editButton}
       />
 
       <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => {
-          setModalVisible(!modalVisible);
-        }}
+        isVisible={isEditModalVisible}
+        onBackdropPress={() => setIsEditModalVisible(false)}
+        animationIn="zoomIn"
+        animationOut="zoomOut"
       >
-        <View style={styles.centeredView}>
-          <View
-            style={[
-              {
-                margin: 20,
-                borderRadius: 20,
-                padding: 35,
-                alignItems: "center",
-                shadowColor: colors.text,
-                shadowOffset: {
-                  width: 0,
-                  height: 2,
-                },
-                shadowOpacity: 0.25,
-                shadowRadius: 4,
-                elevation: 5,
-              },
-              { backgroundColor: colors.card },
-            ]}
-          >
+        <View style={styles.modalContainer}>
+          <View style={[styles.modalContent, { backgroundColor: colors.card }]}>
             <Text style={[styles.modalText, { color: colors.text }]}>
               Edit Profile
             </Text>
@@ -95,6 +85,7 @@ export default function ProfileScreen() {
                 { color: colors.text, borderColor: colors.subtleBorder },
               ]}
               placeholder="First Name"
+              placeholderTextColor={colors.placeholderText}
               value={firstName}
               onChangeText={setFirstName}
             />
@@ -104,6 +95,7 @@ export default function ProfileScreen() {
                 { color: colors.text, borderColor: colors.subtleBorder },
               ]}
               placeholder="Last Name"
+              placeholderTextColor={colors.placeholderText}
               value={lastName}
               onChangeText={setLastName}
             />
@@ -113,13 +105,14 @@ export default function ProfileScreen() {
                 { color: colors.text, borderColor: colors.subtleBorder },
               ]}
               placeholder="Profile Picture URL"
+              placeholderTextColor={colors.placeholderText}
               value={profilePictureUrl}
               onChangeText={setProfilePictureUrl}
             />
             <Button title="Update" onPress={handleUpdateProfile} />
             <Button
               title="Cancel"
-              onPress={() => setModalVisible(false)}
+              onPress={() => setIsEditModalVisible(false)}
               variant="outline"
             />
           </View>
@@ -128,9 +121,39 @@ export default function ProfileScreen() {
 
       <Button
         title="Logout"
-        onPress={handleLogout}
+        onPress={() => setIsLogoutModalVisible(true)}
         style={styles.logoutButton}
       />
+
+      <Modal
+        isVisible={isLogoutModalVisible}
+        onBackdropPress={() => setIsLogoutModalVisible(false)}
+        animationIn="zoomIn"
+        animationOut="zoomOut"
+      >
+        <View style={[styles.modalContent, { backgroundColor: colors.card }]}>
+          <Text style={[styles.modalText, { color: colors.text }]}>
+            Confirm Logout
+          </Text>
+          <Text style={[styles.modalMessage, { color: colors.text }]}>
+            Are you sure you want to log out?
+          </Text>
+          <View style={styles.modalButtons}>
+            <TouchableOpacity
+              style={[styles.modalButton, styles.cancelButton]}
+              onPress={() => setIsLogoutModalVisible(false)}
+            >
+              <Text style={styles.buttonText}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.modalButton, styles.logoutConfirmButton]}
+              onPress={handleLogout}
+            >
+              <Text style={styles.buttonText}>Logout</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -167,18 +190,6 @@ const styles = StyleSheet.create({
     marginTop: "auto",
     width: "100%",
   },
-  centeredView: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 22,
-  },
-  modalText: {
-    marginBottom: 15,
-    textAlign: "center",
-    fontSize: 20,
-    fontWeight: "bold",
-  },
   input: {
     height: 40,
     width: 200,
@@ -186,5 +197,57 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 10,
     borderRadius: 5,
+  },
+  modalContent: {
+    margin: 20,
+    borderRadius: 20,
+    padding: 35,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: "center",
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+  modalMessage: {
+    fontSize: 16,
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    width: "100%",
+  },
+  modalButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    minWidth: 100,
+    alignItems: "center",
+  },
+  cancelButton: {
+    backgroundColor: "#666",
+  },
+  logoutConfirmButton: {
+    backgroundColor: "#222",
+  },
+  buttonText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

@@ -44,7 +44,7 @@ export default function CreateLinkScreen() {
   const { mutate: createLinkContent, isPending } = useMutation({
     mutationFn: createContent,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["content"] });
+      queryClient.invalidateQueries({ queryKey: ["contents"] });
       router.back();
     },
     onError: (error: any) => {
