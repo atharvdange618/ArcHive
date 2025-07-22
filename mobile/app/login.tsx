@@ -1,8 +1,14 @@
 /* eslint-disable react/no-unescaped-entities */
 import { login } from "@/apis/login";
+import Button from "@/components/Button";
+import InputField from "@/components/InputField";
+import { useThemeColors } from "@/constants/useColorScheme";
+import useAuthStore from "@/stores/authStore";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { Link, Stack, router } from "expo-router";
-import React, { useState } from "react";
+import React from "react";
+import { useForm, Controller } from "react-hook-form";
 import {
   ActivityIndicator,
   StyleSheet,
@@ -10,25 +16,34 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import Button from "../components/Button";
-import InputField from "../components/InputField";
-import { useThemeColors } from "../constants/useColorScheme";
-import useAuthStore from "../stores/authStore";
-// import { useOAuth } from "@/hooks/useOAuth";
+import * as z from "zod";
+
+const loginSchema = z.object({
+  email: z.string().email("Invalid email address."),
+  password: z.string().min(1, "Password is required."),
+});
+
+type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginScreen() {
   const colors = useThemeColors();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  // const {
-  //   loginWithGoogle,
-  //   isLoading: oauthLoading,
-  //   error: oauthError,
-  // } = useOAuth();
-
   const setTokens = useAuthStore((state) => state.setTokens);
   const setUser = useAuthStore((state) => state.setUser);
+
+  const {
+    control,
+    handleSubmit,
+    setError,
+    formState: { errors },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    mode: "onChange",
+    reValidateMode: "onChange",
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
   const loginMutation = useMutation({
     mutationFn: login,
@@ -39,12 +54,15 @@ export default function LoginScreen() {
     },
     onError: (err: any) => {
       console.log(err);
-      setError(err.message);
+      setError("root", {
+        type: "manual",
+        message: err.message || "An error occurred.",
+      });
     },
   });
 
-  const handleLogin = () => {
-    loginMutation.mutate({ email, password });
+  const handleLogin = (data: LoginFormData) => {
+    loginMutation.mutate(data);
   };
 
   const isLoading = loginMutation.isPending;
@@ -54,58 +72,53 @@ export default function LoginScreen() {
       <Stack.Screen options={{ headerShown: false }} />
       <Text style={[styles.title, { color: colors.text }]}>Welcome Back!</Text>
 
-      <InputField
-        label="Email"
-        placeholder="Enter your email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-        editable={!isLoading}
-      />
-      <InputField
-        label="Password"
-        placeholder="Enter your password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-        editable={!isLoading}
+      <Controller
+        control={control}
+        name="email"
+        render={({ field: { onChange, onBlur, value } }) => (
+          <InputField
+            label="Email"
+            placeholder="Enter your email"
+            value={value}
+            onChangeText={onChange}
+            onBlur={onBlur}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            editable={!isLoading}
+            error={errors.email?.message}
+          />
+        )}
       />
 
-      {error && <Text style={styles.errorText}>{error}</Text>}
+      <Controller
+        control={control}
+        name="password"
+        render={({ field: { onChange, onBlur, value } }) => (
+          <InputField
+            label="Password"
+            placeholder="Enter your password"
+            value={value}
+            onChangeText={onChange}
+            onBlur={onBlur}
+            isPassword
+            editable={!isLoading}
+            error={errors.password?.message}
+          />
+        )}
+      />
+
+      {errors.root && (
+        <Text style={styles.errorText}>{errors.root.message}</Text>
+      )}
 
       <Button
-        title={isLoading ? <ActivityIndicator color={colors.background} /> : "Login"}
-        onPress={handleLogin}
+        title={
+          isLoading ? <ActivityIndicator color={colors.background} /> : "Login"
+        }
+        onPress={handleSubmit(handleLogin)}
         style={styles.button}
         disabled={isLoading}
       />
-
-      {/* <View style={styles.dividerContainer}>
-        <View
-          style={[styles.divider, { backgroundColor: colors.subtleBorder }]}
-        ></View>
-        <Text style={[styles.dividerText, { color: colors.text }]}>OR</Text>
-        <View
-          style={[styles.divider, { backgroundColor: colors.subtleBorder }]}
-        ></View>
-      </View> */}
-
-      {/* <Button
-        title={
-          oauthLoading ? (
-            <ActivityIndicator color={colors.tint} />
-          ) : (
-            "Sign in with Google"
-          )
-        }
-        onPress={loginWithGoogle}
-        variant="outline"
-        style={styles.googleButton}
-        disabled={oauthLoading}
-      /> */}
-
-      {/* {oauthError && <Text style={styles.errorText}>{oauthError}</Text>} */}
 
       <View style={styles.footerTextContainer}>
         <Text style={{ color: colors.text }}>Don't have an account? </Text>

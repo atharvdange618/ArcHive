@@ -16,7 +16,7 @@ export const genericParser = async (url: string, headers?: any) => {
   return {
     type: "link",
     title: title.trim(),
-    description: description ? description.trim() : "No description found.",
+    description: description ? description.trim() : "",
     url: url,
     previewImageUrl: previewImageUrl || "",
   };

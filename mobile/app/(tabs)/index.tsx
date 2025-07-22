@@ -41,7 +41,7 @@ export default function TabOneScreen() {
   const colors = useThemeColors();
   const [isSearchVisible, setIsSearchVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
 
   const headerHeight = useSharedValue(100);
@@ -55,7 +55,7 @@ export default function TabOneScreen() {
     refetch,
     isRefetching,
   } = useInfiniteQuery({
-    queryKey: ["content", debouncedSearchQuery],
+    queryKey: ["contents", debouncedSearchQuery],
     queryFn: async ({ pageParam = 1 }) => {
       if (debouncedSearchQuery) {
         await addRecentSearch(debouncedSearchQuery);

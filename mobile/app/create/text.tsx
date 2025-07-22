@@ -13,7 +13,6 @@ import { createContent } from "@/apis/createContent";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { ContentType } from "@/types";
 
 const textSchema = z.object({
   title: z.string().optional(),
@@ -33,6 +32,8 @@ export default function CreateTextScreen() {
     formState: { errors },
   } = useForm<TextFormData>({
     resolver: zodResolver(textSchema),
+    mode: "onChange",
+    reValidateMode: "onChange",
     defaultValues: {
       title: "",
       text: "",
@@ -48,10 +49,16 @@ export default function CreateTextScreen() {
     },
     onError: (error: any) => {
       let errorMessage = "Failed to save text note.";
-      if (error.response && error.response.data && error.response.data.details) {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.details
+      ) {
         const { errors } = error.response.data.details;
         if (errors && errors.length > 0) {
-          errorMessage = errors.map((e: { message: string }) => e.message).join("\n");
+          errorMessage = errors
+            .map((e: { message: string }) => e.message)
+            .join("\n");
         }
       } else if (error.message) {
         errorMessage = error.message;
@@ -64,7 +71,11 @@ export default function CreateTextScreen() {
     createTextContent({
       title: data.title,
       text: data.text,
-      tags: data.tags?.split(",").map((tag) => tag.trim()).filter(tag => tag) || [],
+      tags:
+        data.tags
+          ?.split(",")
+          .map((tag) => tag.trim())
+          .filter((tag) => tag) || [],
     });
   };
 

@@ -9,9 +9,10 @@ import { router } from "expo-router";
 interface CodeCardProps {
   item: IContentItem;
   searchQuery?: string;
+  onDelete: () => void;
 }
 
-const CodeCard: React.FC<CodeCardProps> = ({ item, searchQuery }) => {
+const CodeCard: React.FC<CodeCardProps> = ({ item, searchQuery, onDelete }) => {
   const colors = useThemeColors();
 
   const handlePress = () => {
@@ -20,7 +21,7 @@ const CodeCard: React.FC<CodeCardProps> = ({ item, searchQuery }) => {
 
   return (
     <TouchableOpacity onPress={handlePress}>
-      <ContentCard>
+      <ContentCard onDelete={onDelete}>
         {item.title && (
           <HighlightText
             text={item.title}

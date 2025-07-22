@@ -35,7 +35,7 @@ const useAuthStore = create<AuthState>((set, get) => ({
     const { accessToken, refreshToken } = get();
     if (accessToken && refreshToken) {
       try {
-        await logoutApi(accessToken, refreshToken);
+        await logoutApi(refreshToken);
       } catch (error) {
         console.error("Failed to logout:", error);
       }

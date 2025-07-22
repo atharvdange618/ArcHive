@@ -13,7 +13,6 @@ import { createContent } from "@/apis/createContent";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { ContentType } from "@/types";
 
 const linkSchema = z.object({
   url: z.string().url("Please enter a valid URL."),
@@ -33,6 +32,8 @@ export default function CreateLinkScreen() {
     formState: { errors },
   } = useForm<LinkFormData>({
     resolver: zodResolver(linkSchema),
+    mode: "onChange",
+    reValidateMode: "onChange",
     defaultValues: {
       url: "",
       title: "",

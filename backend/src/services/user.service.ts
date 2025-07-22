@@ -29,7 +29,6 @@ export async function updateUserProfile(
 
     return {
       _id: user._id!.toString(),
-      username: user.username,
       email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,

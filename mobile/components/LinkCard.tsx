@@ -9,9 +9,10 @@ import HighlightText from "./HighlightText";
 interface LinkCardProps {
   item: IContentItem;
   searchQuery?: string;
+  onDelete: () => void;
 }
 
-const LinkCard: React.FC<LinkCardProps> = ({ item, searchQuery }) => {
+const LinkCard: React.FC<LinkCardProps> = ({ item, searchQuery, onDelete }) => {
   const colors = useThemeColors();
 
   const handlePress = async () => {
@@ -21,7 +22,7 @@ const LinkCard: React.FC<LinkCardProps> = ({ item, searchQuery }) => {
   };
 
   return (
-    <ContentCard>
+    <ContentCard onDelete={onDelete}>
       <TouchableOpacity onPress={handlePress}>
         {item.previewImageUrl && (
           <Image
@@ -57,7 +58,7 @@ const LinkCard: React.FC<LinkCardProps> = ({ item, searchQuery }) => {
                 key={index}
                 style={[
                   styles.tag,
-                  { backgroundColor: colors.tint, color: colors.card },
+                  { backgroundColor: colors.tint, color: colors.text },
                 ]}
               >
                 {tag}

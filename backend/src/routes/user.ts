@@ -21,7 +21,6 @@ userRoutes.use(
     }
     c.set("user", {
       _id: payload._id,
-      username: payload.username,
       email: payload.email,
       firstName: payload.firstName,
       lastName: payload.lastName,

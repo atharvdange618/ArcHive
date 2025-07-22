@@ -4,7 +4,6 @@ import { ConflictError } from "src/utils/errors";
 
 export interface IUser extends Document {
   googleId?: string;
-  username?: string;
   email: string;
   password?: string;
   firstName?: string;
@@ -22,20 +21,7 @@ const UserSchema: Schema = new Schema(
       unique: true,
       sparse: true,
     },
-    username: {
-      type: String,
-      required: [
-        function (this: IUser) {
-          return !this.googleId;
-        },
-        "Username is required",
-      ],
-      unique: true,
-      trim: true,
-      minlength: [3, "Username must be at least 3 characters long"],
-      maxlength: [30, "Username cannot exceed 30 characters"],
-      sparse: true,
-    },
+    
     email: {
       type: String,
       required: [true, "Email is required"],

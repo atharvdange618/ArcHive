@@ -13,11 +13,11 @@ export const createContent = async (content: {
   try {
     let type: ContentType;
     if (content.url) {
-      type = ContentType.LINK;
+      type = ContentType.Link;
     } else if (content.text) {
-      type = ContentType.TEXT;
+      type = ContentType.Text;
     } else if (content.code) {
-      type = ContentType.CODE;
+      type = ContentType.Code;
     } else {
       throw new Error("Invalid content type");
     }

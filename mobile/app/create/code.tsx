@@ -32,6 +32,8 @@ export default function CreateCodeScreen() {
     formState: { errors },
   } = useForm<CodeFormData>({
     resolver: zodResolver(codeSchema),
+    mode: "onChange",
+    reValidateMode: "onChange",
     defaultValues: {
       title: "",
       code: "",

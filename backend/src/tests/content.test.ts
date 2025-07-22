@@ -8,12 +8,12 @@ import { Types } from "mongoose";
 const handler = handle(app);
 
 const getAuthToken = async (
-  usernamePrefix = "testuser",
   emailPrefix = "test",
-  password = "Password123!"
+  password = "Password123!",
+  firstName = "Test",
+  lastName = "User"
 ): Promise<{ accessToken: string; email: string; userId: string }> => {
   const uniqueId = Date.now();
-  const username = `${usernamePrefix}_${uniqueId}`;
   const email = `${emailPrefix}_${uniqueId}@example.com`;
 
   await User.deleteOne({ email });
@@ -21,7 +21,7 @@ const getAuthToken = async (
   const registerReq = new Request("http://localhost/api/auth/register", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, email, password }),
+    body: JSON.stringify({ email, password, firstName, lastName }),
   });
   const registerRes = await handler(registerReq);
   expect(registerRes.status).toBe(201);
@@ -44,7 +44,7 @@ let userId: string;
 let testEmail: string;
 
 beforeAll(async () => {
-  const result = await getAuthToken("contentuser", "contentuser");
+  const result = await getAuthToken("contentuser", "Password123!", "Test", "User");
   authToken = result.accessToken;
   testEmail = result.email;
   userId = result.userId;

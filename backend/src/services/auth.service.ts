@@ -18,7 +18,6 @@ import { randomBytes } from "crypto";
 
 export interface AuthUserData {
   _id: string;
-  username: string;
   email: string;
   firstName: string;
   lastName: string;
@@ -57,7 +56,6 @@ async function generateTokens(user: AuthUserData) {
     const now = Math.floor(Date.now() / 1000);
     const payload = {
       _id: user._id,
-      username: user.username,
       email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,
@@ -82,22 +80,17 @@ async function generateTokens(user: AuthUserData) {
 }
 
 async function registerUser(userData: RegisterInput) {
-  const { username, email, password, firstName, lastName } = userData;
+  const { email, password, firstName, lastName } = userData;
 
   try {
     const existingUserByEmail = await User.findOne({ email });
     if (existingUserByEmail) {
       throw new ConflictError("Email already registered.");
     }
-    const existingUserByUsername = await User.findOne({ username });
-    if (existingUserByUsername) {
-      throw new ConflictError("Username already taken.");
-    }
 
     const passwordHash = await hashPassword(password);
 
     const newUser = new User({
-      username,
       email,
       password: passwordHash,
       firstName,
@@ -108,7 +101,6 @@ async function registerUser(userData: RegisterInput) {
 
     const { accessToken, refreshToken } = await generateTokens({
       _id: (newUser._id as Types.ObjectId).toString(),
-      username: newUser.username as string,
       email: newUser.email,
       firstName: newUser.firstName as string,
       lastName: newUser.lastName as string,
@@ -117,7 +109,6 @@ async function registerUser(userData: RegisterInput) {
     return {
       user: {
         _id: (newUser._id as Types.ObjectId).toString(),
-        username: newUser.username,
         email: newUser.email,
         firstName: newUser.firstName,
         lastName: newUser.lastName,
@@ -148,7 +139,6 @@ async function loginUser(credentials: LoginInput) {
 
     const { accessToken, refreshToken } = await generateTokens({
       _id: (user._id as Types.ObjectId).toString(),
-      username: user.username as string,
       email: user.email,
       firstName: user.firstName as string,
       lastName: user.lastName as string,
@@ -158,7 +148,6 @@ async function loginUser(credentials: LoginInput) {
     return {
       user: {
         _id: (user._id as Types.ObjectId).toString(),
-        username: user.username,
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
@@ -236,13 +225,9 @@ async function OAuthHandler(c: any) {
 
   let user = await User.findOne({ googleId: googleUser.id });
   if (!user) {
-    const fallbackUsername =
-      googleUser.name?.replace(/\s+/g, "") || googleUser.email.split("@")[0];
-
     user = new User({
       googleId: googleUser.id,
       email: googleUser.email,
-      username: fallbackUsername,
       firstName: googleUser.given_name,
       lastName: googleUser.family_name,
       profilePictureUrl: googleUser.picture,
@@ -262,7 +247,6 @@ async function OAuthHandler(c: any) {
   const { accessToken, refreshToken } = await generateTokens({
     _id: (user._id as Types.ObjectId).toString(),
     email: user.email,
-    username: user.username as string,
     firstName: user.firstName as string,
     lastName: user.lastName as string,
     profilePictureUrl: user.profilePictureUrl as string,
@@ -275,7 +259,7 @@ async function OAuthHandler(c: any) {
   appRedirect.searchParams.set("accessToken", accessToken);
   appRedirect.searchParams.set("refreshToken", refreshToken);
   appRedirect.searchParams.set("email", user.email);
-  appRedirect.searchParams.set("username", user.username as string);
+  
   appRedirect.searchParams.set("firstName", user.firstName as string);
   appRedirect.searchParams.set("lastName", user.lastName as string);
   appRedirect.searchParams.set("profilePictureUrl", user.profilePictureUrl as string);
@@ -310,7 +294,6 @@ async function refreshAccessToken(oldRefreshToken: string) {
     const now = Math.floor(Date.now() / 1000);
     const payload = {
       _id: user._id.toString(),
-      username: user.username,
       email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,

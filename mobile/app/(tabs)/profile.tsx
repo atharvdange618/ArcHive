@@ -46,9 +46,7 @@ export default function ProfileScreen() {
         <Text style={[styles.name, { color: colors.text }]}>
           {user?.firstName} {user?.lastName}
         </Text>
-        <Text style={[styles.username, { color: colors.tint }]}>
-          @{user?.username}
-        </Text>
+        
         <Text style={[styles.email, { color: colors.tint }]}>
           {user?.email}
         </Text>
@@ -157,11 +155,6 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 28,
     fontWeight: "bold",
-  },
-  username: {
-    fontSize: 18,
-    color: "gray",
-    marginBottom: 5,
   },
   email: {
     fontSize: 16,

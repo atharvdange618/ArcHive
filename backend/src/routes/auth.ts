@@ -58,11 +58,10 @@ authRoutes.post(
   authRateLimiter,
   validate("json", registerSchema),
   async (c) => {
-    const { username, email, password, firstName, lastName } = c.req.valid("json") as RegisterInput;
+    const { email, password, firstName, lastName } = c.req.valid("json") as RegisterInput;
 
     try {
       const { user, accessToken, refreshToken } = await registerUser({
-        username,
         email,
         password,
         firstName,

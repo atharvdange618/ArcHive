@@ -6,6 +6,7 @@ import CodeCard from "./CodeCard";
 import LinkCard from "./LinkCard";
 import TextCard from "./TextCard";
 import { FlashList } from "@shopify/flash-list";
+import { useDeleteContent } from "../hooks/useDeleteContent";
 
 interface ContentListProps {
   contentItems: IContentItem[];
@@ -25,15 +26,18 @@ const ContentList: React.FC<ContentListProps> = ({
   ListFooterComponent,
 }) => {
   const colors = useThemeColors();
+  const { mutate: deleteContent } = useDeleteContent(onRefresh);
 
   const renderItem = ({ item }: { item: IContentItem }) => {
+    const onDelete = () => deleteContent(item._id);
+
     switch (item.type) {
       case ContentType.Text:
-        return <TextCard item={item} searchQuery={searchQuery} />;
+        return <TextCard item={item} searchQuery={searchQuery} onDelete={onDelete} />;
       case ContentType.Link:
-        return <LinkCard item={item} searchQuery={searchQuery} />;
+        return <LinkCard item={item} searchQuery={searchQuery} onDelete={onDelete} />;
       case ContentType.Code:
-        return <CodeCard item={item} searchQuery={searchQuery} />;
+        return <CodeCard item={item} searchQuery={searchQuery} onDelete={onDelete} />;
       default:
         return (
           <View

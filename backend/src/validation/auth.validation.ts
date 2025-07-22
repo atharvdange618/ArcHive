@@ -3,15 +3,6 @@ import { z } from "zod";
 // Schema for user registration input
 
 export const registerSchema = z.object({
-  username: z
-    .string()
-    .trim()
-    .min(3, { message: "Username must be at least 3 characters long." })
-    .max(30, { message: "Username cannot exceed 30 characters." })
-    .regex(
-      /^[a-zA-Z0-9_]+$/,
-      "Username can only contain letters, numbers, and underscores"
-    ),
   email: z.string().trim().toLowerCase().email("Invalid email address"),
   password: z
     .string()

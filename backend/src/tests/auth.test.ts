@@ -15,9 +15,10 @@ test("Auth: POST /api/auth/register - Successfully registers a new user", async 
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      username: "testuser",
       email: "register@example.com",
       password: "StrongPassword@123",
+      firstName: "Test",
+      lastName: "User",
     }),
   });
 
@@ -28,7 +29,7 @@ test("Auth: POST /api/auth/register - Successfully registers a new user", async 
 
   expect(data).toHaveProperty("message", "Registration successful!");
   expect(data).toHaveProperty("user");
-  expect(data.user).toHaveProperty("username", "testuser");
+  expect(data.user).not.toHaveProperty("username");
   expect(data.user).toHaveProperty("email", "register@example.com");
   expect(data.user).toHaveProperty("_id");
   expect(data).toHaveProperty("accessToken");
@@ -37,13 +38,12 @@ test("Auth: POST /api/auth/register - Successfully registers a new user", async 
   // Verify if the user exists in the db
   const userInDb = await User.findOne({ email: "register@example.com" });
   expect(userInDb).not.toBeNull();
-  expect(userInDb?.username).toBe("testuser");
+  expect(userInDb).not.toHaveProperty("username");
 });
 
 test("Auth: POST /api/auth/register - Fails with existing email", async () => {
   // register a user
   await new User({
-    username: "existing",
     email: "existing@example.com",
     password: "Password123!",
   }).save();
@@ -54,9 +54,10 @@ test("Auth: POST /api/auth/register - Fails with existing email", async () => {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      username: "anotheruser",
       email: "existing@example.com", // Duplicate email
       password: "AnotherStrongPassword@123",
+      firstName: "Another",
+      lastName: "User",
     }),
   });
 
@@ -67,60 +68,9 @@ test("Auth: POST /api/auth/register - Fails with existing email", async () => {
   expect(data).toHaveProperty("message", "Email already registered.");
 });
 
-test("Auth: POST /api/auth/register - Fails with existing username", async () => {
-  // First, register a user
-  await new User({
-    username: "existingusername",
-    email: "unique@example.com",
-    password: "Password123!",
-  }).save();
 
-  const req = new Request("http://localhost/api/auth/register", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      username: "existingusername", // Duplicate username
-      email: "anotherunique@example.com",
-      password: "YetAnotherStrongPassword@123",
-    }),
-  });
 
-  const res = await handler(req);
 
-  expect(res.status).toBe(409); // Conflict
-  const data = await res.json();
-  expect(data).toHaveProperty("message", "Username already taken.");
-});
-
-test("Auth: POST /api/auth/register - Fails with invalid username (too short)", async () => {
-  const req = new Request("http://localhost/api/auth/register", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      username: "ab", // Too short
-      email: "invaliduser@example.com",
-      password: "StrongPassword@123",
-    }),
-  });
-
-  const res = await handler(req);
-
-  expect(res.status).toBe(400); // Bad Request (validation)
-  const data = await res.json();
-
-  expect(data.message).toContain("Validation failed");
-  expect(data).toHaveProperty("details");
-  expect(Array.isArray(data.details.errors)).toBe(true);
-  expect(
-    data.details.errors.some((e: any) =>
-      e.message.includes("Username must be at least 3 characters long.")
-    )
-  ).toBe(true);
-});
 
 test("Auth: POST /api/auth/register - Fails with invalid email format", async () => {
   const req = new Request("http://localhost/api/auth/register", {
@@ -129,9 +79,10 @@ test("Auth: POST /api/auth/register - Fails with invalid email format", async ()
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      username: "validuser",
       email: "invalid-email", // Invalid format
       password: "StrongPassword@123",
+      firstName: "Test",
+      lastName: "User",
     }),
   });
 
@@ -157,9 +108,10 @@ test("Auth: POST /api/auth/register - Fails with weak password (missing uppercas
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      username: "weakpassuser",
       email: "weakpass@example.com",
       password: "password123!", // Missing uppercase
+      firstName: "Test",
+      lastName: "User",
     }),
   });
 

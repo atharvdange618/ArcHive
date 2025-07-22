@@ -3,19 +3,17 @@ import axiosInstance from "@/utils/axiosInstance";
 import { isAxiosError } from "axios";
 
 export const register = async ({
-  username,
   email,
   password,
   firstName,
   lastName,
 }: {
-  username: string;
   email: string;
   password: string;
   firstName: string;
   lastName: string;
 }) => {
-  const payload = { username, email, password, firstName, lastName };
+  const payload = { email, password, firstName, lastName };
 
   try {
     const response = await axiosInstance.post(

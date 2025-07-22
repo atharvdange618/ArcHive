@@ -18,7 +18,7 @@ export async function generateTagsFromUrl(url: string): Promise<string[]> {
     if (
       genericParsed &&
       genericParsed.description &&
-      genericParsed.description !== "No description found."
+      genericParsed.description !== ""
     ) {
       return extractRelevantTags(genericParsed.description);
     }

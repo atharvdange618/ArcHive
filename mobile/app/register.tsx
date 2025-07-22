@@ -1,7 +1,7 @@
 import { register } from "@/apis/register";
 import { useMutation } from "@tanstack/react-query";
 import { Link, Stack, router } from "expo-router";
-import React, { useState } from "react";
+import React from "react";
 import {
   ActivityIndicator,
   StyleSheet,
@@ -13,18 +13,44 @@ import Button from "../components/Button";
 import InputField from "../components/InputField";
 import { useThemeColors } from "../constants/useColorScheme";
 import useAuthStore from "../stores/authStore";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+
+const registerSchema = z.object({
+  firstName: z.string().min(1, "First name is required."),
+  lastName: z.string().min(1, "Last name is required."),
+  email: z.string().email("Invalid email address."),
+  password: z.string().min(6, "Password must be at least 6 characters."),
+  confirmPassword: z.string().min(1, "Confirm password is required."),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match.",
+  path: ["confirmPassword"],
+});
+
+type RegisterFormData = z.infer<typeof registerSchema>;
 
 export default function RegisterScreen() {
   const colors = useThemeColors();
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [error, setError] = useState<string | null>(null);
-
   const setTokens = useAuthStore((state) => state.setTokens);
   const setUser = useAuthStore((state) => state.setUser);
+
+  const {
+    control,
+    handleSubmit,
+    setError,
+    formState: { errors },
+  } = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
+    mode: "onChange",
+    reValidateMode: "onChange",
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+    },
+  });
 
   const registerMutation = useMutation({
     mutationFn: register,
@@ -35,12 +61,15 @@ export default function RegisterScreen() {
     },
     onError: (err: any) => {
       console.log(err);
-      setError(err.message);
+      setError("root", {
+        type: "manual",
+        message: err.message || "An error occurred.",
+      });
     },
   });
 
-  const handleRegister = () => {
-    registerMutation.mutate({ username, email, password, firstName, lastName });
+  const handleRegister = (data: RegisterFormData) => {
+    registerMutation.mutate(data);
   };
 
   const isLoading = registerMutation.isPending;
@@ -52,51 +81,101 @@ export default function RegisterScreen() {
         Join ArcHive 💙
       </Text>
 
-      <InputField
-        label="First Name"
-        placeholder="Enter your first name"
-        value={firstName}
-        onChangeText={setFirstName}
-        editable={!isLoading}
-      />
-      <InputField
-        label="Last Name"
-        placeholder="Enter your last name"
-        value={lastName}
-        onChangeText={setLastName}
-        editable={!isLoading}
-      />
-      <InputField
-        label="Username"
-        placeholder="Choose a username"
-        value={username}
-        onChangeText={setUsername}
-        autoCapitalize="none"
-        editable={!isLoading}
-      />
-      <InputField
-        label="Email"
-        placeholder="Enter your email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-        editable={!isLoading}
-      />
-      <InputField
-        label="Password"
-        placeholder="Create a strong password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-        editable={!isLoading}
+      <Controller
+        control={control}
+        name="firstName"
+        render={({ field: { onChange, onBlur, value } }) => (
+          <InputField
+            label="First Name"
+            placeholder="Enter your first name"
+            value={value}
+            onChangeText={onChange}
+            onBlur={onBlur}
+            editable={!isLoading}
+            error={errors.firstName?.message}
+          />
+        )}
       />
 
-      {error && <Text style={styles.errorText}>{error}</Text>}
+      <Controller
+        control={control}
+        name="lastName"
+        render={({ field: { onChange, onBlur, value } }) => (
+          <InputField
+            label="Last Name"
+            placeholder="Enter your last name"
+            value={value}
+            onChangeText={onChange}
+            onBlur={onBlur}
+            editable={!isLoading}
+            error={errors.lastName?.message}
+          />
+        )}
+      />
+
+      
+
+      <Controller
+        control={control}
+        name="email"
+        render={({ field: { onChange, onBlur, value } }) => (
+          <InputField
+            label="Email"
+            placeholder="Enter your email"
+            value={value}
+            onChangeText={onChange}
+            onBlur={onBlur}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            editable={!isLoading}
+            error={errors.email?.message}
+          />
+        )}
+      />
+
+      <Controller
+        control={control}
+        name="password"
+        render={({ field: { onChange, onBlur, value } }) => (
+          <InputField
+            label="Password"
+            placeholder="Create a strong password"
+            value={value}
+            onChangeText={onChange}
+            onBlur={onBlur}
+            isPassword
+            editable={!isLoading}
+            error={errors.password?.message}
+          />
+        )}
+      />
+
+      <Controller
+        control={control}
+        name="confirmPassword"
+        render={({ field: { onChange, onBlur, value } }) => (
+          <InputField
+            label="Confirm Password"
+            placeholder="Confirm your password"
+            value={value}
+            onChangeText={onChange}
+            onBlur={onBlur}
+            isPassword
+            editable={!isLoading}
+            error={errors.confirmPassword?.message}
+          />
+        )}
+      />
+
+      {errors.root && (
+        <Text style={styles.errorText}>{errors.root.message}</Text>
+      )}
 
       <Button
-        title={isLoading ? <ActivityIndicator color={colors.background} /> : "Register"}
-        onPress={handleRegister}
+        title={
+          isLoading ? <ActivityIndicator color={colors.background} /> : "Register"
+        }
+        onPress={handleSubmit(handleRegister)}
         style={styles.button}
         disabled={isLoading}
       />
