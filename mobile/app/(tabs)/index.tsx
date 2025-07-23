@@ -37,12 +37,15 @@ const useDebounce = (value: string, delay: number) => {
   return debouncedValue;
 };
 
+const contentTypes = ["All", "Link", "Text", "Code"];
+
 export default function TabOneScreen() {
   const colors = useThemeColors();
   const [isSearchVisible, setIsSearchVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const debouncedSearchQuery = useDebounce(searchQuery, 500);
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [selectedContentType, setSelectedContentType] = useState("All");
 
   const headerHeight = useSharedValue(100);
 
@@ -51,16 +54,22 @@ export default function TabOneScreen() {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-    isLoading,
     refetch,
     isRefetching,
   } = useInfiniteQuery({
-    queryKey: ["contents", debouncedSearchQuery],
+    queryKey: ["contents", debouncedSearchQuery, selectedContentType],
     queryFn: async ({ pageParam = 1 }) => {
       if (debouncedSearchQuery) {
         await addRecentSearch(debouncedSearchQuery);
       }
-      const response = await getContent(debouncedSearchQuery, pageParam);
+      const response = await getContent(
+        debouncedSearchQuery,
+        pageParam,
+        10,
+        selectedContentType === "All"
+          ? undefined
+          : selectedContentType.toLowerCase()
+      );
       return response;
     },
     getNextPageParam: (lastPage) => {
@@ -94,76 +103,6 @@ export default function TabOneScreen() {
       height: headerHeight.value,
     };
   });
-
-  const renderContent = () => {
-    if (isLoading) {
-      return (
-        <ActivityIndicator
-          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-          size="large"
-          color={colors.primary}
-        />
-      );
-    }
-
-    if (debouncedSearchQuery) {
-      return (
-        <ContentList
-          contentItems={content || []}
-          onRefresh={refetch}
-          refreshing={isRefetching}
-          searchQuery={debouncedSearchQuery}
-          onEndReached={() => {
-            if (hasNextPage && !isFetchingNextPage) {
-              fetchNextPage();
-            }
-          }}
-          ListFooterComponent={
-            isFetchingNextPage ? (
-              <ActivityIndicator size="small" color={colors.primary} />
-            ) : undefined
-          }
-        />
-      );
-    }
-
-    if (isSearchVisible && recentSearches.length > 0) {
-      return (
-        <View style={styles.recentSearchesContainer}>
-          <Text style={[styles.recentSearchesTitle, { color: colors.text }]}>
-            Recent Searches
-          </Text>
-          {recentSearches.map((term) => (
-            <TouchableOpacity
-              key={term}
-              onPress={() => setSearchQuery(term)}
-              style={styles.recentSearchItem}
-            >
-              <Text style={{ color: colors.primary }}>{term}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      );
-    }
-
-    return (
-      <ContentList
-        contentItems={content || []}
-        onRefresh={refetch}
-        refreshing={isRefetching}
-        onEndReached={() => {
-          if (hasNextPage && !isFetchingNextPage) {
-            fetchNextPage();
-          }
-        }}
-        ListFooterComponent={
-          isFetchingNextPage ? (
-            <ActivityIndicator size="small" color={colors.primary} />
-          ) : undefined
-        }
-      />
-    );
-  };
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -200,7 +139,92 @@ export default function TabOneScreen() {
         )}
       </Animated.View>
 
-      {renderContent()}
+      {isSearchVisible ? (
+        <View style={{ flex: 1 }}>
+          <View style={styles.filterContainer}>
+            {contentTypes.map((type) => (
+              <TouchableOpacity
+                key={type}
+                style={[
+                  styles.filterButton,
+                  selectedContentType === type && {
+                    backgroundColor: colors.primary,
+                  },
+                ]}
+                onPress={() => setSelectedContentType(type)}
+              >
+                <Text
+                  style={{
+                    color:
+                      selectedContentType === type
+                        ? colors.background
+                        : colors.text,
+                  }}
+                >
+                  {type}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+          {debouncedSearchQuery || selectedContentType !== "All" ? (
+            <ContentList
+              contentItems={content || []}
+              onRefresh={refetch}
+              refreshing={isRefetching}
+              searchQuery={debouncedSearchQuery}
+              onEndReached={() => {
+                if (hasNextPage && !isFetchingNextPage) {
+                  fetchNextPage();
+                }
+              }}
+              ListFooterComponent={
+                isFetchingNextPage ? (
+                  <ActivityIndicator size="small" color={colors.primary} />
+                ) : undefined
+              }
+            />
+          ) : isSearchVisible && recentSearches.length > 0 ? (
+            <View style={styles.recentSearchesContainer}>
+              <Text
+                style={[styles.recentSearchesTitle, { color: colors.text }]}
+              >
+                Recent Searches
+              </Text>
+              {recentSearches.map((term) => (
+                <TouchableOpacity
+                  key={term}
+                  onPress={() => setSearchQuery(term)}
+                  style={styles.recentSearchItem}
+                >
+                  <Text style={{ color: colors.primary }}>{term}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          ) : (
+            <View>
+              <Text style={{ color: colors.text }}>
+                No recent searches. Start typing to search.
+              </Text>
+            </View>
+          )}
+        </View>
+      ) : (
+        <ContentList
+          contentItems={content || []}
+          onRefresh={refetch}
+          refreshing={isRefetching}
+          onEndReached={() => {
+            if (hasNextPage && !isFetchingNextPage) {
+              fetchNextPage();
+            }
+          }}
+          ListFooterComponent={
+            isFetchingNextPage ? (
+              <ActivityIndicator size="small" color={colors.primary} />
+            ) : undefined
+          }
+        />
+      )}
 
       <Fab />
     </View>
@@ -245,5 +269,19 @@ const styles = StyleSheet.create({
   },
   recentSearchItem: {
     paddingVertical: 8,
+  },
+  filterContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#e0e0e0",
+  },
+  filterButton: {
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#ccc",
   },
 });

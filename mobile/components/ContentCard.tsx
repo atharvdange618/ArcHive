@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   cancelButton: {
-    backgroundColor: "#ccc",
+    backgroundColor: "#555",
   },
   deleteConfirmButton: {
     backgroundColor: "#ff4d4d",

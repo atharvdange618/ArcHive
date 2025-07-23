@@ -5,6 +5,7 @@ import {
   Image,
   TextInput,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import Modal from "react-native-modal";
 import { useThemeColors } from "@/constants/useColorScheme";
@@ -13,7 +14,9 @@ import Button from "@/components/Button";
 import { router } from "expo-router";
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { updateProfile } from "@/apis/updateProfile";
+import { updateProfile, uploadProfilePicture } from "@/apis/updateProfile";
+import * as ImagePicker from "expo-image-picker";
+import Toast from "react-native-toast-message";
 
 export default function ProfileScreen() {
   const colors = useThemeColors();
@@ -25,6 +28,7 @@ export default function ProfileScreen() {
   const [profilePictureUrl, setProfilePictureUrl] = useState(
     user?.profilePictureUrl || ""
   );
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   const handleLogout = async () => {
     await logout();
@@ -37,6 +41,41 @@ export default function ProfileScreen() {
     onSuccess: (data) => {
       updateUser(data.user);
       setIsEditModalVisible(false);
+      Toast.show({
+        type: "success",
+        text1: "Profile updated successfully!",
+      });
+    },
+    onError: (error: any) => {
+      Toast.show({
+        type: "error",
+        text1: "Failed to update profile",
+        text2: error.message || "Please try again.",
+      });
+    },
+  });
+
+  const uploadProfilePictureMutation = useMutation({
+    mutationFn: uploadProfilePicture,
+    onMutate: () => {
+      setIsUploadingImage(true);
+    },
+    onSuccess: (data) => {
+      updateUser(data.user);
+      Toast.show({
+        type: "success",
+        text1: "Profile picture updated!",
+      });
+    },
+    onError: (error: any) => {
+      Toast.show({
+        type: "error",
+        text1: "Failed to upload image",
+        text2: error.message || "Please try again.",
+      });
+    },
+    onSettled: () => {
+      setIsUploadingImage(false);
     },
   });
 
@@ -44,15 +83,44 @@ export default function ProfileScreen() {
     updateProfileMutation.mutate({ firstName, lastName, profilePictureUrl });
   };
 
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert(
+        "Permission Denied",
+        "Sorry, we need camera roll permissions to make this work!"
+      );
+      return;
+    }
+
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      uploadProfilePictureMutation.mutate(result.assets[0].uri);
+    }
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.profileHeader}>
-        <Image
-          source={{
-            uri: user?.profilePictureUrl || "https://via.placeholder.com/150",
-          }}
-          style={styles.profilePicture}
-        />
+        <TouchableOpacity onPress={pickImage} disabled={isUploadingImage}>
+          <Image
+            source={{
+              uri: user?.profilePictureUrl || "https://via.placeholder.com/150",
+            }}
+            style={styles.profilePicture}
+          />
+          {isUploadingImage && (
+            <View style={styles.uploadingOverlay}>
+              <Text style={styles.uploadingText}>Uploading...</Text>
+            </View>
+          )}
+        </TouchableOpacity>
         <Text style={[styles.name, { color: colors.text }]}>
           {user?.firstName} {user?.lastName}
         </Text>
@@ -236,7 +304,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   cancelButton: {
-    backgroundColor: "#666",
+    backgroundColor: "#555",
   },
   logoutConfirmButton: {
     backgroundColor: "#222",
@@ -249,5 +317,21 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  uploadingOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    borderRadius: 75,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  uploadingText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });

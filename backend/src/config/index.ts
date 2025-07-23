@@ -11,6 +11,7 @@ const envSchema = z.object({
   PORT: z.coerce.number().int().positive().default(3000),
   MONGODB_URI: z.string().min(1, "MONGODB_URI is required"),
   JWT_SECRET: z.string().min(1, "JWT_SECRET is required"),
+  API_BASE_URL: z.string().url().min(1, "API_BASE_URL is required"),
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),
   OAUTH_REDIRECT_BASE_URL: z.string().url().optional(),

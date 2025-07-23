@@ -7,6 +7,7 @@ import { secureHeaders } from "hono/secure-headers";
 import { HTTPException } from "hono/http-exception";
 import { AppError } from "./utils/errors";
 import { bodyLimit } from "hono/body-limit";
+import { serveStatic } from "hono/bun";
 
 import { config } from "./config";
 import { AuthUserData } from "./services/auth.service";
@@ -63,6 +64,15 @@ app.use(
         message: "Request body too large. Maximum size is 1MB.",
       });
     },
+  })
+);
+
+// --- Static files ---
+app.use(
+  "/public/*",
+  serveStatic({
+    root: "./public",
+    rewriteRequestPath: (path) => path.replace(/^\/public/, ""),
   })
 );
 

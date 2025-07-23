@@ -15,11 +15,19 @@ export interface ApiResponse {
 export const getContent = async (
   query?: string,
   page: number = 1,
-  limit: number = 20
+  limit: number = 20,
+  type?: string
 ): Promise<ApiResponse> => {
-  const endpoint = query
-    ? `/content?q=${query}&page=${page}&limit=${limit}`
-    : `/content?page=${page}&limit=${limit}`;
+  let endpoint = `/content?page=${page}&limit=${limit}`;
+
+  if (query) {
+    endpoint += `&q=${query}`;
+  }
+
+  if (type) {
+    endpoint += `&type=${type}`;
+  }
+
   try {
     const response = await axiosInstance.get<ApiResponse>(endpoint);
     return response.data;

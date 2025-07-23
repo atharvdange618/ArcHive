@@ -10,7 +10,6 @@ import {
 import mongoose from "mongoose";
 import { HTTPException } from "hono/http-exception";
 import natural from "natural";
-import { cleanSearchQuery } from "src/utils/extractRelevantTags";
 import { generateTagsFromUrl } from "src/utils/generateTagsFromUrl";
 
 /**
@@ -131,8 +130,14 @@ async function getContents(userId: string, query: SearchContentQuery) {
   };
 
   if (q) {
-    const cleaned = cleanSearchQuery(q);
-    findCriteria.$text = { $search: cleaned };
+    const searchRegex = new RegExp(q, "i"); // Case-insensitive regex search
+    findCriteria.$or = [
+      { title: searchRegex },
+      { description: searchRegex },
+      { content: searchRegex },
+      { url: searchRegex },
+      { tags: searchRegex },
+    ];
   }
 
   if (type) {
@@ -155,17 +160,6 @@ async function getContents(userId: string, query: SearchContentQuery) {
       .sort({ createdAt: -1 }) // Sort by newest first
       .skip(skip)
       .limit(limit);
-
-    // If a text search query is present, sort by text score for relevance
-    if (q) {
-      contentsQuery = contentsQuery.sort({
-        score: { $meta: "textScore" },
-        createdAt: -1,
-      });
-    } else {
-      // Default sort by creation date if no text search
-      contentsQuery = contentsQuery.sort({ createdAt: -1 });
-    }
 
     const contents = await contentsQuery.exec();
 

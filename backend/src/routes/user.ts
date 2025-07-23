@@ -1,11 +1,17 @@
 import { Hono } from "hono";
 import { jwt } from "hono/jwt";
-import { AppError, UnauthorizedError } from "../utils/errors";
+import { AppError, BadRequestError, UnauthorizedError } from "../utils/errors";
 import { validate } from "../middleware/validator";
 import { checkBlacklist } from "../middleware/auth.middleware";
 import { apiRateLimiter } from "../middleware/rateLimiter";
-import { updateUserProfile } from "../services/user.service";
-import { updateUserSchema, UpdateUserInput } from "../validation/user.validation";
+import {
+  updateUserProfile,
+  updateUserProfilePicture,
+} from "../services/user.service";
+import {
+  updateUserSchema,
+  UpdateUserInput,
+} from "../validation/user.validation";
 import { config } from "../config";
 
 const userRoutes = new Hono();
@@ -56,6 +62,32 @@ userRoutes.put(
     }
   }
 );
+
+userRoutes.put("/profile-picture", apiRateLimiter, async (c) => {
+  const userId = c.get("user")?._id;
+  const body = await c.req.parseBody();
+  const file = body["profilePicture"] as File;
+
+  if (!file) {
+    throw new BadRequestError("No file uploaded.");
+  }
+
+  try {
+    const updatedUser = await updateUserProfilePicture(userId, file);
+    return c.json(
+      {
+        message: "Profile picture updated successfully",
+        user: updatedUser,
+      },
+      200
+    );
+  } catch (error) {
+    if (error instanceof AppError) {
+      throw error;
+    }
+    throw new AppError(500, "Internal Server Error");
+  }
+});
 
 userRoutes.get("/profile", apiRateLimiter, async (c) => {
   const user = c.get("user");
