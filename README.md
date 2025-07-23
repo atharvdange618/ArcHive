@@ -20,15 +20,24 @@ My goal with ArcHive is to empower creators, thinkers, and anyone passionate abo
 
 ## ✨ Features
 
-- **Secure User Authentication:** Your personal knowledge is private. ArcHive ensures secure registration and login, with improved authentication flows.
-- **User Profiles:** Manage and update your account, and view your archived content from a dedicated user profile screen.
-- **Multi-Content Type Support:** Seamlessly save text notes, web links, and code snippets, all within one unified system.
-- **Intelligent Content Parsing:** ArcHive automatically parses web links to extract rich metadata. It includes specialized parsers for platforms like GitHub, Instagram, and YouTube, with enhanced parsing capabilities.
-- **Automatic Screenshot Generation:** For every link you save, ArcHive generates a robust screenshot to provide a visual reference.
-- **Rich Metadata & Tagging:** Organize your content with titles, descriptions, and flexible tagging, now enhanced with a powerful tag engine for easy categorization and retrieval.
-- **Powerful Full-Text Search:** Find exactly what you need, when you need it, with an intelligent search engine, now also implemented in the mobile app.
-- **Intuitive Content Capture:** A dynamic Floating Action Button (FAB) allows for quick and delightful capture of new content.
-- **Cross-Platform Accessibility:** Access your ArcHive from anywhere with dedicated mobile applications (iOS & Android) featuring enhanced content fetching and UI improvements, and a planned web interface.
+- **Secure & Private:** Your personal knowledge is protected. ArcHive ensures secure registration and login with robust password hashing (Argon2) and JWT-based authentication. Features include a password visibility toggle and secure logout via token blacklisting.
+- **Multi-Content Support:** Effortlessly save text notes, web links, and code snippets in one unified system.
+- **Seamless Content Capture:**
+    - **Share From Anywhere:** Share links and text directly from other apps into ArcHive for quick saving.
+    - **Deep Linking:** Open content directly in the app via shared links.
+    - **In-App Capture:** A dynamic Floating Action Button (FAB) allows for quick and delightful creation of new content.
+- **Intelligent Content Processing:**
+    - **Automatic Parsing:** ArcHive automatically parses web links to extract titles, descriptions, and other metadata. It includes specialized parsers for platforms like GitHub, Instagram, and YouTube.
+    - **Screenshot Generation:** For every link you save, ArcHive generates a screenshot for a quick visual reference.
+    - **Automated Tagging:** An intelligent tag engine analyzes content to suggest relevant tags, making organization effortless.
+- **Powerful Organization & Retrieval:**
+    - **Full-Text Search:** Find exactly what you need with a powerful search that scans the entire content of your saved items, not just titles. Matching keywords are highlighted for context.
+    - **Rich Metadata:** Organize your content with custom titles, descriptions, and flexible tagging.
+    - **Content Management:** Easily view, edit, and delete your archived content.
+- **Polished User Experience:**
+    - **Cross-Platform:** Access your ArcHive from anywhere with dedicated mobile applications for iOS & Android.
+    - **Modern UI:** A clean, intuitive interface with smooth animations, gesture support, and high-quality components like interactive modals.
+    - **User Profiles:** Manage your account and view your archived content from a dedicated profile screen.
 
 ## 🔒 Security Features
 
@@ -61,9 +70,12 @@ ArcHive is built with a modern, robust, and scalable technology stack:
 ### Mobile (Expo / React Native)
 
 - **Expo Router:** For intuitive, file-based navigation across mobile platforms.
+- **TanStack Query:** For robust data fetching, caching, and state management, including infinite scroll.
+- **React Hook Form & Zod:** For building performant, validated forms.
+- **Expo Share Intent:** To handle incoming data from other applications.
+- **React Native Modal:** For creating highly customizable and professional modals.
 - **React Native Reanimated:** Powering smooth and engaging UI animations.
 - **React Native Gesture Handler:** For native-driven touch and gesture interactions.
-- **Expo Ecosystem:** Leveraging various Expo modules for fonts, web browsing, and more, ensuring a seamless development and user experience, with enhanced content fetching and UI improvements, and integrated full-text search.
 
 ### Web (Planned)
 
