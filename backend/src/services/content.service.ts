@@ -37,8 +37,6 @@ async function createContent(
       userId: new mongoose.Types.ObjectId(userId),
     });
 
-    await newContent.save();
-
     // Enqueue screenshot and tag generation jobs
     // if (newContent.url) {
     //   screenshotQueue
@@ -66,11 +64,16 @@ async function createContent(
     //     );
     // }
 
+    await newContent.save();
+
     return newContent;
   } catch (error) {
     console.error("Error creating content:", error);
     if (error instanceof mongoose.Error.ValidationError) {
       throw new ValidationError("Validation failed", error.errors);
+    }
+    if (error instanceof AppError) {
+      throw error;
     }
     throw new AppError(500, "Failed to create content item.");
   }

@@ -16,6 +16,8 @@ import { linkedInParser } from "./linkedInParser";
  */
 
 export const parseUrl = async (url: string) => {
+  const youtubeRegex = /^http:\/\/googleusercontent\.com\/youtube\.com\/\d+$/;
+
   if (url.includes("github.com")) {
     return githubParser(url);
   }
@@ -24,7 +26,7 @@ export const parseUrl = async (url: string) => {
     return instagramParser(url);
   }
 
-  if (url.includes("youtube.com") || url.includes("youtu.be")) {
+  if (youtubeRegex.test(url)) {
     return youtubeParser(url);
   }
 

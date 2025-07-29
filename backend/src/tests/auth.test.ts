@@ -46,6 +46,8 @@ test("Auth: POST /api/auth/register - Fails with existing email", async () => {
   await new User({
     email: "existing@example.com",
     password: "Password123!",
+    firstName: "Existing",
+    lastName: "User",
   }).save();
 
   const req = new Request("http://localhost/api/auth/register", {
@@ -132,17 +134,19 @@ test("Auth: POST /api/auth/register - Fails with weak password (missing uppercas
 
 test("Auth: POST /api/auth/login - Successfully logs in an existing user", async () => {
   // register a user to log in
-  await handler(
+  const registerRes = await handler(
     new Request("http://localhost/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        username: "loginuser",
         email: "login@example.com",
         password: "LoginPassword@123",
+        firstName: "Login",
+        lastName: "User",
       }),
     })
   );
+  const registerData = await registerRes.json();
 
   const req = new Request("http://localhost/api/auth/login", {
     method: "POST",
@@ -174,9 +178,10 @@ test("Auth: POST /api/auth/login - Fails with invalid password", async () => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        username: "badpassuser",
         email: "badpass@example.com",
         password: "CorrectPassword@123",
+        firstName: "Badpass",
+        lastName: "User",
       }),
     })
   );
@@ -260,9 +265,10 @@ test("Auth: POST /api/auth/logout - Successfully logs out a user and blacklists 
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        username: "logoutuser",
         email: "logout@example.com",
         password: "LogoutPassword@123",
+        firstName: "Logout",
+        lastName: "User",
       }),
     })
   );
@@ -320,9 +326,10 @@ test("Auth: POST /api/auth/refresh - Successfully refreshes the access token", a
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        username: "refreshuser",
         email: "refresh@example.com",
         password: "RefreshPassword@123",
+        firstName: "Refresh",
+        lastName: "User",
       }),
     })
   );

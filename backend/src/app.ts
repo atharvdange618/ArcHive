@@ -7,13 +7,15 @@ import { secureHeaders } from "hono/secure-headers";
 import { HTTPException } from "hono/http-exception";
 import { AppError } from "./utils/errors";
 import { bodyLimit } from "hono/body-limit";
-import { serveStatic } from "hono/bun";
-
 import { config } from "./config";
 import { AuthUserData } from "./services/auth.service";
 import authRoutes from "./routes/auth";
 import contentRoutes from "./routes/content";
 import userRoutes from "./routes/user";
+
+const { serveStatic } = process.env.VITEST
+  ? await import("@hono/node-server/serve-static")
+  : await import("hono/bun");
 
 declare module "hono" {
   interface ContextVariableMap {
