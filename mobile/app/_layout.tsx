@@ -7,8 +7,7 @@ import { useFonts } from "expo-font";
 import { Stack, router, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useCallback, useEffect } from "react";
-import { useColorScheme } from "react-native";
-import { Colors } from "../constants/Colors";
+import { useThemeColors } from "../constants/useColorScheme";
 import useAuthStore from "../stores/authStore";
 import { setupAxiosInterceptors } from "../utils/axiosInstance";
 import Toast from "react-native-toast-message";
@@ -28,8 +27,7 @@ function InitialLayout() {
   const [loaded, error] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
   });
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? "light"];
+  const colors = useThemeColors();
   const { pendingUrl, clearPendingUrl } = useIncomingLinkHandler();
   const queryClient = useQueryClient();
 
