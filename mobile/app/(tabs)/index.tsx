@@ -1,5 +1,5 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { FontAwesome } from "@expo/vector-icons";
+import { FontAwesome, FontAwesome5 } from "@expo/vector-icons";
 import {
   ActivityIndicator,
   StyleSheet,
@@ -142,29 +142,58 @@ export default function TabOneScreen() {
       {isSearchVisible ? (
         <View style={{ flex: 1 }}>
           <View style={styles.filterContainer}>
-            {contentTypes.map((type) => (
-              <TouchableOpacity
-                key={type}
-                style={[
-                  styles.filterButton,
-                  selectedContentType === type && {
-                    backgroundColor: colors.primary,
-                  },
-                ]}
-                onPress={() => setSelectedContentType(type)}
-              >
-                <Text
-                  style={{
-                    color:
-                      selectedContentType === type
-                        ? colors.background
-                        : colors.text,
-                  }}
+            {contentTypes.map((type) => {
+              const isSelected = selectedContentType === type;
+              const getIcon = () => {
+                switch (type) {
+                  case "Link":
+                    return "link";
+                  case "Text":
+                    return "file-text";
+                  case "Code":
+                    return "code";
+                  default:
+                    return "th-large";
+                }
+              };
+
+              return (
+                <TouchableOpacity
+                  key={type}
+                  style={[
+                    styles.filterButton,
+                    isSelected && {
+                      backgroundColor: colors.primary,
+                      borderColor: colors.primary,
+                      shadowColor: colors.primary,
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.3,
+                      shadowRadius: 4,
+                      elevation: 3,
+                    },
+                  ]}
+                  onPress={() => setSelectedContentType(type)}
                 >
-                  {type}
-                </Text>
-              </TouchableOpacity>
-            ))}
+                  <FontAwesome5
+                    name={getIcon()}
+                    size={14}
+                    color={isSelected ? "#FFFFFF" : colors.secondary}
+                    style={{ marginRight: 6 }}
+                  />
+                  <Text
+                    style={[
+                      styles.filterButtonText,
+                      {
+                        color: isSelected ? "#FFFFFF" : colors.text,
+                        fontWeight: isSelected ? "600" : "500",
+                      },
+                    ]}
+                  >
+                    {type}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
           {debouncedSearchQuery || selectedContentType !== "All" ? (
             <ContentList
@@ -172,6 +201,14 @@ export default function TabOneScreen() {
               onRefresh={refetch}
               refreshing={isRefetching}
               searchQuery={debouncedSearchQuery}
+              emptyStateType={
+                debouncedSearchQuery
+                  ? "search"
+                  : selectedContentType !== "All"
+                  ? "filter"
+                  : "default"
+              }
+              filterType={selectedContentType}
               onEndReached={() => {
                 if (hasNextPage && !isFetchingNextPage) {
                   fetchNextPage();
@@ -185,26 +222,107 @@ export default function TabOneScreen() {
             />
           ) : isSearchVisible && recentSearches.length > 0 ? (
             <View style={styles.recentSearchesContainer}>
-              <Text
-                style={[styles.recentSearchesTitle, { color: colors.text }]}
-              >
-                Recent Searches
-              </Text>
-              {recentSearches.map((term) => (
-                <TouchableOpacity
-                  key={term}
-                  onPress={() => setSearchQuery(term)}
-                  style={styles.recentSearchItem}
+              <View style={styles.recentSearchesHeader}>
+                <FontAwesome5 name="history" size={20} color={colors.primary} />
+                <Text
+                  style={[styles.recentSearchesTitle, { color: colors.text }]}
                 >
-                  <Text style={{ color: colors.primary }}>{term}</Text>
-                </TouchableOpacity>
-              ))}
+                  Recent Searches
+                </Text>
+              </View>
+              <View style={styles.recentSearchesList}>
+                {recentSearches.map((term, index) => (
+                  <TouchableOpacity
+                    key={term}
+                    onPress={() => setSearchQuery(term)}
+                    style={[
+                      styles.recentSearchItem,
+                      { backgroundColor: colors.card },
+                    ]}
+                  >
+                    <FontAwesome5
+                      name="search"
+                      size={14}
+                      color={colors.secondary}
+                      style={styles.searchItemIcon}
+                    />
+                    <Text
+                      style={[styles.recentSearchText, { color: colors.text }]}
+                      numberOfLines={1}
+                    >
+                      {term}
+                    </Text>
+                    <FontAwesome5
+                      name="arrow-right"
+                      size={14}
+                      color={colors.secondary}
+                    />
+                  </TouchableOpacity>
+                ))}
+              </View>
             </View>
           ) : (
-            <View>
-              <Text style={{ color: colors.text }}>
-                No recent searches. Start typing to search.
+            <View style={styles.emptySearchContainer}>
+              <View
+                style={[
+                  styles.emptySearchIconContainer,
+                  { backgroundColor: `${colors.primary}15` },
+                ]}
+              >
+                <FontAwesome5 name="search" size={56} color={colors.primary} />
+              </View>
+              <Text style={[styles.emptySearchTitle, { color: colors.text }]}>
+                Start Your Search
               </Text>
+              <Text
+                style={[
+                  styles.emptySearchDescription,
+                  { color: colors.secondary },
+                ]}
+              >
+                Type in the search box above to find your saved links, notes,
+                and code snippets
+              </Text>
+              <View style={styles.searchTipsContainer}>
+                <View style={styles.searchTipItem}>
+                  <View
+                    style={[
+                      styles.tipBadge,
+                      { backgroundColor: `${colors.primary}20` },
+                    ]}
+                  >
+                    <FontAwesome5
+                      name="lightbulb"
+                      size={14}
+                      color={colors.primary}
+                    />
+                  </View>
+                  <Text
+                    style={[styles.searchTipText, { color: colors.secondary }]}
+                  >
+                    Search by title, description, or content
+                  </Text>
+                </View>
+                <View style={styles.searchTipItem}>
+                  <View
+                    style={[
+                      styles.tipBadge,
+                      { backgroundColor: `${colors.primary}20` },
+                    ]}
+                  >
+                    <FontAwesome5
+                      name="filter"
+                      size={14}
+                      color={colors.primary}
+                    />
+                  </View>
+                  <Text
+                    style={[styles.searchTipText, { color: colors.secondary }]}
+                  >
+                    Use filters to narrow down by type
+                  </Text>
+                </View>
+              </View>
             </View>
           )}
         </View>
@@ -213,6 +331,7 @@ export default function TabOneScreen() {
           contentItems={content || []}
           onRefresh={refetch}
           refreshing={isRefetching}
+          emptyStateType="default"
           onEndReached={() => {
             if (hasNextPage && !isFetchingNextPage) {
               fetchNextPage();
@@ -262,26 +381,104 @@ const styles = StyleSheet.create({
   recentSearchesContainer: {
     padding: 16,
   },
+  recentSearchesHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
+    gap: 8,
+  },
   recentSearchesTitle: {
     fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 10,
+    fontWeight: "700",
+  },
+  recentSearchesList: {
+    gap: 8,
   },
   recentSearchItem: {
-    paddingVertical: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    marginBottom: 8,
+    gap: 12,
+  },
+  searchItemIcon: {
+    opacity: 0.6,
+  },
+  recentSearchText: {
+    flex: 1,
+    fontSize: 15,
+  },
+  emptySearchContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 32,
+    paddingVertical: 60,
+  },
+  emptySearchIconContainer: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  emptySearchTitle: {
+    fontSize: 22,
+    fontWeight: "700",
+    marginBottom: 12,
+    textAlign: "center",
+  },
+  emptySearchDescription: {
+    fontSize: 15,
+    textAlign: "center",
+    lineHeight: 22,
+    marginBottom: 32,
+    paddingHorizontal: 16,
+  },
+  searchTipsContainer: {
+    width: "100%",
+    maxWidth: 320,
+    gap: 16,
+  },
+  searchTipItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  tipBadge: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  searchTipText: {
+    flex: 1,
+    fontSize: 14,
+    lineHeight: 20,
   },
   filterContainer: {
     flexDirection: "row",
-    justifyContent: "space-around",
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
+    justifyContent: "center",
+    paddingVertical: 16,
+    paddingHorizontal: 12,
+    gap: 8,
+    backgroundColor: "transparent",
   },
   filterButton: {
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "#ccc",
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 24,
+    borderWidth: 1.5,
+    borderColor: "#CBD5E0",
+    backgroundColor: "transparent",
+  },
+  filterButtonText: {
+    fontSize: 14,
   },
 });

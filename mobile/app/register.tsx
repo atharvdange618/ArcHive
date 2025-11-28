@@ -17,16 +17,18 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 
-const registerSchema = z.object({
-  firstName: z.string().min(1, "First name is required."),
-  lastName: z.string().min(1, "Last name is required."),
-  email: z.string().email("Invalid email address."),
-  password: z.string().min(6, "Password must be at least 6 characters."),
-  confirmPassword: z.string().min(1, "Confirm password is required."),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match.",
-  path: ["confirmPassword"],
-});
+const registerSchema = z
+  .object({
+    firstName: z.string().min(1, "First name is required."),
+    lastName: z.string().min(1, "Last name is required."),
+    email: z.string().email("Invalid email address."),
+    password: z.string().min(6, "Password must be at least 6 characters."),
+    confirmPassword: z.string().min(1, "Confirm password is required."),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match.",
+    path: ["confirmPassword"],
+  });
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
@@ -42,8 +44,8 @@ export default function RegisterScreen() {
     formState: { errors },
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
-    mode: "onChange",
-    reValidateMode: "onChange",
+    mode: "onBlur",
+    reValidateMode: "onBlur",
     defaultValues: {
       firstName: "",
       lastName: "",
@@ -89,6 +91,7 @@ export default function RegisterScreen() {
             label="First Name"
             placeholder="Enter your first name"
             value={value}
+            spellCheck={false}
             onChangeText={onChange}
             onBlur={onBlur}
             editable={!isLoading}
@@ -105,6 +108,7 @@ export default function RegisterScreen() {
             label="Last Name"
             placeholder="Enter your last name"
             value={value}
+            spellCheck={false}
             onChangeText={onChange}
             onBlur={onBlur}
             editable={!isLoading}
@@ -112,8 +116,6 @@ export default function RegisterScreen() {
           />
         )}
       />
-
-      
 
       <Controller
         control={control}
@@ -173,7 +175,11 @@ export default function RegisterScreen() {
 
       <Button
         title={
-          isLoading ? <ActivityIndicator color={colors.background} /> : "Register"
+          isLoading ? (
+            <ActivityIndicator color={colors.background} />
+          ) : (
+            "Register"
+          )
         }
         onPress={handleSubmit(handleRegister)}
         style={styles.button}

@@ -8,6 +8,7 @@ import {
   updateUserProfile,
   updateUserProfilePicture,
 } from "../services/user.service";
+import { getUserStats } from "../services/stats.service";
 import {
   updateUserSchema,
   UpdateUserInput,
@@ -92,6 +93,20 @@ userRoutes.put("/profile-picture", apiRateLimiter, async (c) => {
 userRoutes.get("/profile", apiRateLimiter, async (c) => {
   const user = c.get("user");
   return c.json({ user });
+});
+
+userRoutes.get("/stats", apiRateLimiter, async (c) => {
+  const userId = c.get("user")?._id;
+
+  try {
+    const stats = await getUserStats(userId);
+    return c.json({ stats }, 200);
+  } catch (error) {
+    if (error instanceof AppError) {
+      throw error;
+    }
+    throw new AppError(500, "Internal Server Error");
+  }
 });
 
 export default userRoutes;

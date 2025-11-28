@@ -1,4 +1,3 @@
-import { API_BASE_URL } from "@/constants";
 import axiosInstance from "@/utils/axiosInstance";
 import { isAxiosError } from "axios";
 
@@ -16,10 +15,7 @@ export const register = async ({
   const payload = { email, password, firstName, lastName };
 
   try {
-    const response = await axiosInstance.post(
-      `${API_BASE_URL}/auth/register`,
-      payload
-    );
+    const response = await axiosInstance.post(`/auth/register`, payload);
 
     return response.data;
   } catch (error: any) {

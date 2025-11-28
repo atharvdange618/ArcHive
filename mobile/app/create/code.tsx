@@ -5,8 +5,8 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  Alert,
 } from "react-native";
+import Toast from "react-native-toast-message";
 import { useThemeColors } from "../../constants/useColorScheme";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createContent } from "@/apis/createContent";
@@ -45,6 +45,11 @@ export default function CreateCodeScreen() {
     mutationFn: createContent,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["contents"] });
+      Toast.show({
+        type: "success",
+        text1: "Code Saved!",
+        text2: "Your code snippet has been saved successfully.",
+      });
       router.back();
     },
     onError: (error: any) => {
@@ -63,7 +68,11 @@ export default function CreateCodeScreen() {
       } else if (error.message) {
         errorMessage = error.message;
       }
-      Alert.alert("Validation Error", errorMessage);
+      Toast.show({
+        type: "error",
+        text1: "Validation Error",
+        text2: errorMessage,
+      });
     },
   });
 
@@ -81,7 +90,18 @@ export default function CreateCodeScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Stack.Screen options={{ title: "New Code Snippet" }} />
+      <Stack.Screen
+        options={{
+          title: "New Code Snippet",
+          headerStyle: {
+            backgroundColor: colors.background,
+          },
+          headerTintColor: colors.text,
+          headerTitleStyle: {
+            color: colors.text,
+          },
+        }}
+      />
       <Controller
         control={control}
         name="title"

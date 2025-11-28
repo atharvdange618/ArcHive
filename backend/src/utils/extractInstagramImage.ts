@@ -1,12 +1,8 @@
 import { Page } from "puppeteer";
 import { NotFoundError } from "../utils/errors";
-import fs from "fs";
 import axios from "axios";
 
-export async function extractInstagramImage(
-  page: Page,
-  outputPath: string
-): Promise<void> {
+export async function extractInstagramImage(page: Page): Promise<Buffer> {
   const ogImageUrl = await page.evaluate(() => {
     const ogImage = document.querySelector('meta[property="og:image"]');
     return ogImage?.getAttribute("content") || null;
@@ -18,5 +14,5 @@ export async function extractInstagramImage(
 
   const response = await axios.get(ogImageUrl, { responseType: "arraybuffer" });
 
-  fs.writeFileSync(outputPath, response.data);
+  return Buffer.from(response.data);
 }

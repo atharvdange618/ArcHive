@@ -39,7 +39,9 @@ export const getContent = async (
 
 export const getContentById = async (id: string): Promise<IContentItem> => {
   try {
-    const response = await axiosInstance.get<{ content: IContentItem }>(`/content/${id}`);
+    const response = await axiosInstance.get<{ content: IContentItem }>(
+      `/content/${id}`
+    );
     return response.data.content;
   } catch (error) {
     console.error(`Error fetching content with ID ${id}:`, error);

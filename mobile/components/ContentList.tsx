@@ -5,6 +5,7 @@ import { ContentType, IContentItem } from "../types";
 import CodeCard from "./CodeCard";
 import LinkCard from "./LinkCard";
 import TextCard from "./TextCard";
+import EmptyState from "./EmptyState";
 import { FlashList } from "@shopify/flash-list";
 import { useDeleteContent } from "../hooks/useDeleteContent";
 
@@ -15,6 +16,8 @@ interface ContentListProps {
   searchQuery?: string;
   onEndReached?: () => void;
   ListFooterComponent?: React.ReactElement;
+  emptyStateType?: "default" | "search" | "filter";
+  filterType?: string;
 }
 
 const ContentList: React.FC<ContentListProps> = ({
@@ -24,6 +27,8 @@ const ContentList: React.FC<ContentListProps> = ({
   searchQuery,
   onEndReached,
   ListFooterComponent,
+  emptyStateType = "default",
+  filterType,
 }) => {
   const colors = useThemeColors();
   const { mutate: deleteContent } = useDeleteContent(onRefresh);
@@ -33,11 +38,17 @@ const ContentList: React.FC<ContentListProps> = ({
 
     switch (item.type) {
       case ContentType.Text:
-        return <TextCard item={item} searchQuery={searchQuery} onDelete={onDelete} />;
+        return (
+          <TextCard item={item} searchQuery={searchQuery} onDelete={onDelete} />
+        );
       case ContentType.Link:
-        return <LinkCard item={item} searchQuery={searchQuery} onDelete={onDelete} />;
+        return (
+          <LinkCard item={item} searchQuery={searchQuery} onDelete={onDelete} />
+        );
       case ContentType.Code:
-        return <CodeCard item={item} searchQuery={searchQuery} onDelete={onDelete} />;
+        return (
+          <CodeCard item={item} searchQuery={searchQuery} onDelete={onDelete} />
+        );
       default:
         return (
           <View
@@ -66,11 +77,11 @@ const ContentList: React.FC<ContentListProps> = ({
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
       ListEmptyComponent={
-        <View style={styles.emptyContainer}>
-          <Text style={{ color: colors.text }}>
-            No content items found. Try a different search.
-          </Text>
-        </View>
+        <EmptyState
+          type={emptyStateType}
+          searchQuery={searchQuery}
+          filterType={filterType}
+        />
       }
       onEndReached={onEndReached}
       onEndReachedThreshold={0.5}
@@ -83,12 +94,6 @@ const ContentList: React.FC<ContentListProps> = ({
 const styles = StyleSheet.create({
   listContentContainer: {
     padding: 16,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 50,
   },
 });
 

@@ -1,7 +1,8 @@
 import User from "../db/models/User";
 import { AppError, NotFoundError } from "../utils/errors";
 import { UpdateUserInput } from "../validation/user.validation";
-import { config } from "../config";
+import cloudinary from "../config/cloudinary";
+import { Readable } from "stream";
 
 export async function updateUserProfile(
   userId: string,
@@ -56,13 +57,37 @@ export async function updateUserProfilePicture(userId: string, file: File) {
       throw new NotFoundError("User not found.");
     }
 
-    const fileName = `${userId}-${Date.now()}-${file.name}`;
-    const filePath = `public/uploads/${fileName}`;
+    // Convert File to Buffer
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
 
-    await Bun.write(filePath, file);
+    // Upload to Cloudinary
+    const uploadResult = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: `archive/users/${userId}/profile`,
+          public_id: `profile-picture`,
+          resource_type: "image",
+          format: "jpg",
+          overwrite: true,
+          transformation: [
+            { width: 500, height: 500, crop: "fill", gravity: "face" },
+            { quality: "auto:good" },
+          ],
+        },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      );
 
-    const fileUrl = `${config.API_BASE_URL}/public/uploads/${fileName}`;
-    user.profilePictureUrl = fileUrl;
+      const bufferStream = Readable.from(buffer);
+      bufferStream.pipe(uploadStream);
+    });
+
+    const cloudinaryUrl = (uploadResult as any).secure_url;
+
+    user.profilePictureUrl = cloudinaryUrl;
     await user.save();
 
     return {

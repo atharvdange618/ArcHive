@@ -15,6 +15,7 @@
     "axios": "^1.10.0",
     "bullmq": "^5.56.2",
     "cheerio": "^1.1.0",
+    "cloudinary": "^2.8.0",
     "franc": "^6.2.0",
     "hono": "^4.8.4",
     "hono-rate-limiter": "^0.4.2",

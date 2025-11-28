@@ -29,10 +29,7 @@
               "scheme": "archive"
             }
           ],
-          "category": [
-            "BROWSABLE",
-            "DEFAULT"
-          ]
+          "category": ["BROWSABLE", "DEFAULT"]
         },
         {
           "action": "SEND",
@@ -41,9 +38,7 @@
               "mimeType": "text/plain"
             }
           ],
-          "category": [
-            "DEFAULT"
-          ]
+          "category": ["DEFAULT"]
         }
       ]
     },
@@ -73,7 +68,7 @@
       "eas": {
         "projectId": "8e0c6da8-f210-4548-8737-c417cd7fb3d7"
       },
-      "EXPO_PUBLIC_API_BASE_URL": "https://archive-ctld.onrender.com/api"
+      "EXPO_PUBLIC_API_BASE_URL": "http://localhost:3000/api"
     },
     "owner": "atharvdange618"
   }

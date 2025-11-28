@@ -1,4 +1,3 @@
-import { API_BASE_URL } from "@/constants";
 import { IUser } from "@/types";
 import axiosInstance from "@/utils/axiosInstance";
 import { isAxiosError } from "axios";
@@ -6,7 +5,7 @@ import { isAxiosError } from "axios";
 export const updateProfile = async (userData: Partial<IUser>) => {
   try {
     const response = await axiosInstance.put(
-      `${API_BASE_URL}/user/profile`,
+      `/user/profile`,
       userData
     );
     return response.data;
@@ -40,7 +39,7 @@ export const uploadProfilePicture = async (imageUri: string) => {
     } as any);
 
     const response = await axiosInstance.put(
-      `${API_BASE_URL}/user/profile-picture`,
+      `/user/profile-picture`,
       formData,
       {
         headers: {

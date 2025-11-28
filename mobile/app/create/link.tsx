@@ -5,8 +5,8 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  Alert,
 } from "react-native";
+import Toast from "react-native-toast-message";
 import { useThemeColors } from "../../constants/useColorScheme";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createContent } from "@/apis/createContent";
@@ -45,6 +45,11 @@ export default function CreateLinkScreen() {
     mutationFn: createContent,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["contents"] });
+      Toast.show({
+        type: "success",
+        text1: "Link Saved!",
+        text2: "Your link has been saved successfully.",
+      });
       router.back();
     },
     onError: (error: any) => {
@@ -63,7 +68,11 @@ export default function CreateLinkScreen() {
       } else if (error.message) {
         errorMessage = error.message;
       }
-      Alert.alert("Validation Error", errorMessage);
+      Toast.show({
+        type: "error",
+        text1: "Validation Error",
+        text2: errorMessage,
+      });
     },
   });
 
@@ -77,7 +86,18 @@ export default function CreateLinkScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Stack.Screen options={{ title: "New Link" }} />
+      <Stack.Screen
+        options={{
+          title: "New Link",
+          headerStyle: {
+            backgroundColor: colors.background,
+          },
+          headerTintColor: colors.text,
+          headerTitleStyle: {
+            color: colors.text,
+          },
+        }}
+      />
       <Controller
         control={control}
         name="url"
@@ -96,6 +116,8 @@ export default function CreateLinkScreen() {
             onBlur={onBlur}
             onChangeText={onChange}
             value={value}
+            spellCheck={false}
+            autoCorrect={false}
             autoCapitalize="none"
           />
         )}
@@ -119,6 +141,9 @@ export default function CreateLinkScreen() {
             onBlur={onBlur}
             onChangeText={onChange}
             value={value}
+            spellCheck={false}
+            autoCorrect={false}
+            autoCapitalize="words"
           />
         )}
       />
@@ -142,6 +167,9 @@ export default function CreateLinkScreen() {
             onBlur={onBlur}
             onChangeText={onChange}
             value={value}
+            spellCheck={false}
+            autoCorrect={false}
+            autoCapitalize="none"
           />
         )}
       />

@@ -11,6 +11,7 @@ import mongoose from "mongoose";
 import { HTTPException } from "hono/http-exception";
 import natural from "natural";
 import { generateTagsFromUrl } from "src/utils/generateTagsFromUrl";
+import { screenshotQueue, tagQueue } from "src/config/bullmq";
 
 /**
  * Creates a new content item for a specific user.
@@ -38,31 +39,32 @@ async function createContent(
     });
 
     // Enqueue screenshot and tag generation jobs
-    // if (newContent.url) {
-    //   screenshotQueue
-    //     .add("screenshot-queue", {
-    //       contentId: newContent._id,
-    //       url: newContent.url,
-    //     })
-    //     .catch((err) =>
-    //       console.error("Failed to enqueue screenshot job", {
-    //         contentId: newContent._id,
-    //         error: err,
-    //       })
-    //     );
+    if (newContent.url) {
+      screenshotQueue
+        .add("screenshot-queue", {
+          contentId: newContent._id,
+          url: newContent.url,
+          userId: userId,
+        })
+        .catch((err) =>
+          console.error("Failed to enqueue screenshot job", {
+            contentId: newContent._id,
+            error: err,
+          })
+        );
 
-    //   tagQueue
-    //     .add("generate-tags", {
-    //       contentId: newContent._id,
-    //       url: newContent.url,
-    //     })
-    //     .catch((err) =>
-    //       console.error("Failed to enqueue tag generation job", {
-    //         contentId: newContent._id,
-    //         error: err,
-    //       })
-    //     );
-    // }
+      tagQueue
+        .add("generate-tags", {
+          contentId: newContent._id,
+          url: newContent.url,
+        })
+        .catch((err) =>
+          console.error("Failed to enqueue tag generation job", {
+            contentId: newContent._id,
+            error: err,
+          })
+        );
+    }
 
     await newContent.save();
 

@@ -1,11 +1,10 @@
-import { API_BASE_URL } from "@/constants";
 import { IUser } from "@/types";
 import axiosInstance from "@/utils/axiosInstance";
 import { isAxiosError } from "axios";
 
 export const getUserProfile = async (): Promise<IUser> => {
   try {
-    const response = await axiosInstance.get<{ user: IUser }>(`${API_BASE_URL}/user/profile`);
+    const response = await axiosInstance.get<{ user: IUser }>(`/user/profile`);
     return response.data.user;
   } catch (error) {
     if (isAxiosError(error)) {
