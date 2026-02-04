@@ -12,7 +12,7 @@ import ContentItem from "src/db/models/ContentItem";
     async (job) => {
       const { contentId, url } = job.data;
       console.log(
-        `Processing tag generation for contentId: ${contentId}, URL: ${url}`
+        `Processing tag generation for contentId: ${contentId}, URL: ${url}`,
       );
 
       try {
@@ -22,11 +22,11 @@ import ContentItem from "src/db/models/ContentItem";
       } catch (error) {
         console.error(
           `Failed to generate or update tags for contentId: ${contentId}`,
-          error
+          error,
         );
       }
     },
-    { connection }
+    { connection },
   );
 
   console.log("Tag worker started.");

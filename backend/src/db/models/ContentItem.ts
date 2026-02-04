@@ -68,7 +68,7 @@ const ContentItemSchema: Schema = new Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // --- MongoDB Text Index for Search ---
@@ -89,12 +89,12 @@ ContentItemSchema.index(
       content: 1, // Lowest weight for full content
       url: 1, // URL matches
     },
-  }
+  },
 );
 
 const ContentItem = mongoose.model<IContentItem>(
   "ContentItem",
-  ContentItemSchema
+  ContentItemSchema,
 );
 
 export default ContentItem;

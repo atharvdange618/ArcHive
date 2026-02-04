@@ -60,7 +60,7 @@ const contentRoutes = new Hono();
 
 contentRoutes.use(
   "*",
-  jwt({ secret: config.JWT_SECRET }),
+  jwt({ secret: config.JWT_SECRET, alg: "HS256" }),
   checkBlacklist,
   async (c, next) => {
     const payload = c.get("jwtPayload");
@@ -74,7 +74,7 @@ contentRoutes.use(
       lastName: payload.lastName,
     });
     await next();
-  }
+  },
 );
 
 // CREATE Content Item (POST /api/content)
@@ -94,7 +94,7 @@ contentRoutes.post(
           message: "Content created successfully",
           content: newContent.toObject(),
         },
-        201
+        201,
       );
     } catch (error) {
       if (error instanceof AppError) {
@@ -102,7 +102,7 @@ contentRoutes.post(
       }
       throw new AppError(500, "Internal Server Error");
     }
-  }
+  },
 );
 
 // GET All Content Items with Search & Pagination (GET /api/content)
@@ -127,7 +127,7 @@ contentRoutes.get(
             totalPages: result.totalPages,
           },
         },
-        200
+        200,
       );
     } catch (error) {
       if (error instanceof AppError) {
@@ -135,7 +135,7 @@ contentRoutes.get(
       }
       throw new AppError(500, "Internal Server Error");
     }
-  }
+  },
 );
 
 // GET Single Content Item by ID (GET /api/content/:id)
@@ -150,7 +150,7 @@ contentRoutes.get("/:id", async (c) => {
         message: "Content item retrieved successfully!",
         content: content.toObject(),
       },
-      200
+      200,
     );
   } catch (error) {
     if (error instanceof AppError) {
@@ -177,7 +177,7 @@ contentRoutes.put(
           message: "Content item updated successfully!",
           content: updatedContent.toObject(),
         },
-        200
+        200,
       );
     } catch (error) {
       if (error instanceof AppError) {
@@ -185,7 +185,7 @@ contentRoutes.put(
       }
       throw new AppError(500, "Internal Server Error");
     }
-  }
+  },
 );
 
 // DELETE Content Item (DELETE /api/content/:id)
@@ -199,7 +199,7 @@ contentRoutes.delete("/:id", apiRateLimiter, async (c) => {
       {
         message: "Content item deleted successfully!",
       },
-      200
+      200,
     );
   } catch (error) {
     if (error instanceof AppError) {

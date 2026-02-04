@@ -6,7 +6,7 @@ import { Readable } from "stream";
 
 export async function updateUserProfile(
   userId: string,
-  userData: UpdateUserInput
+  userData: UpdateUserInput,
 ) {
   try {
     const user = await User.findById(userId);
@@ -45,7 +45,7 @@ export async function updateUserProfile(
     console.error("Error in updateUserProfile service:", error);
     throw new AppError(
       500,
-      "Failed to update user profile due to server error."
+      "Failed to update user profile due to server error.",
     );
   }
 }
@@ -78,7 +78,7 @@ export async function updateUserProfilePicture(userId: string, file: File) {
         (error, result) => {
           if (error) reject(error);
           else resolve(result);
-        }
+        },
       );
 
       const bufferStream = Readable.from(buffer);
@@ -106,7 +106,7 @@ export async function updateUserProfilePicture(userId: string, file: File) {
     console.error("Error in updateUserProfilePicture service:", error);
     throw new AppError(
       500,
-      "Failed to update user profile picture due to server error."
+      "Failed to update user profile picture due to server error.",
     );
   }
 }

@@ -12,7 +12,7 @@ import { ValidationError } from "../utils/errors";
  */
 export const validate = <T extends z.ZodType<any, any, any>>(
   target: "json" | "query" | "param" | "form" | "header",
-  schema: T
+  schema: T,
 ) => {
   return validator(target, (value, c) => {
     const parsed = schema.safeParse(value);

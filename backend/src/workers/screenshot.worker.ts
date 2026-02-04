@@ -1,7 +1,6 @@
 import { Worker } from "bullmq";
 import { connection } from "../config/bullmq";
 import puppeteer from "puppeteer";
-import { AppError } from "../utils/errors";
 import { extractInstagramImage } from "src/utils/extractInstagramImage";
 import cloudinary from "../config/cloudinary";
 import ContentItem from "../db/models/ContentItem";
@@ -17,7 +16,7 @@ import { Readable } from "stream";
       const { contentId, url, userId } = job.data;
 
       console.log(
-        `Processing screenshot for contentId: ${contentId}, URL: ${url}`
+        `Processing screenshot for contentId: ${contentId}, URL: ${url}`,
       );
 
       const browser = await puppeteer.launch({
@@ -56,7 +55,7 @@ import { Readable } from "stream";
             (error, result) => {
               if (error) reject(error);
               else resolve(result);
-            }
+            },
           );
 
           const bufferStream = Readable.from(screenshotBuffer);
@@ -71,19 +70,19 @@ import { Readable } from "stream";
         });
 
         console.log(
-          `Screenshot uploaded and saved for contentId: ${contentId}`
+          `Screenshot uploaded and saved for contentId: ${contentId}`,
         );
       } catch (err: any) {
         console.error(
           `Screenshot job failed for contentId: ${contentId}:`,
-          err
+          err,
         );
         // Don't throw error - content item should still exist without screenshot
       } finally {
         await browser.close();
       }
     },
-    { connection }
+    { connection },
   );
 
   console.log("Screenshot worker started.");

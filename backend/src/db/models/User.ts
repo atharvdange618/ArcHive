@@ -21,7 +21,7 @@ const UserSchema: Schema = new Schema(
       unique: true,
       sparse: true,
     },
-    
+
     email: {
       type: String,
       required: [true, "Email is required"],
@@ -68,7 +68,7 @@ const UserSchema: Schema = new Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // --- Custom Schema Methods ---
@@ -76,7 +76,7 @@ const UserSchema: Schema = new Schema(
 // Method to compare user password with the stored hashed password
 UserSchema.methods.comparePassword = async function (
   this: IUser,
-  userPass: string
+  userPass: string,
 ): Promise<boolean> {
   if (!this.password) {
     throw new ConflictError("Password is not set for this user.");

@@ -30,7 +30,7 @@ async function fetchWithRetry(page: Page, url: string): Promise<string> {
       if (i === MAX_RETRIES - 1) {
         throw new ServiceUnavailableError(
           `Failed to fetch ${url} after ${MAX_RETRIES} attempts.`,
-          { error }
+          { error },
         );
       }
       const backoff = INITIAL_BACKOFF * Math.pow(2, i);
@@ -62,7 +62,7 @@ export async function generateTagsFromUrl(url: string): Promise<string[]> {
     const browser = await browserManager.getBrowser();
     const page = await browser.newPage();
     await page.setUserAgent(
-      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
     );
 
     try {
@@ -76,7 +76,7 @@ export async function generateTagsFromUrl(url: string): Promise<string[]> {
       }
 
       const ogDescription = $('meta[property="og:description"]').attr(
-        "content"
+        "content",
       );
       if (ogDescription) {
         return extractRelevantTags(ogDescription);
@@ -115,7 +115,7 @@ export async function generateTagsFromUrl(url: string): Promise<string[]> {
     }
     throw new AppError(
       500,
-      `An unexpected error occurred while generating tags for ${url}.`
+      `An unexpected error occurred while generating tags for ${url}.`,
     );
   }
 }

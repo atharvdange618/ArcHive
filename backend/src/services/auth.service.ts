@@ -66,7 +66,7 @@ async function generateTokens(user: AuthUserData) {
 
     const accessToken = await sign(payload, config.JWT_SECRET);
     const refreshToken = await generateRefreshToken(
-      new Types.ObjectId(user._id)
+      new Types.ObjectId(user._id),
     );
 
     return { accessToken, refreshToken };
@@ -214,7 +214,7 @@ async function OAuthHandler(c: any) {
     "https://www.googleapis.com/oauth2/v2/userinfo",
     {
       headers: { Authorization: `Bearer ${tokenData.access_token}` },
-    }
+    },
   );
 
   const googleUser = await userInfoRes.json();
@@ -259,11 +259,13 @@ async function OAuthHandler(c: any) {
   appRedirect.searchParams.set("accessToken", accessToken);
   appRedirect.searchParams.set("refreshToken", refreshToken);
   appRedirect.searchParams.set("email", user.email);
-  
+
   appRedirect.searchParams.set("firstName", user.firstName as string);
   appRedirect.searchParams.set("lastName", user.lastName as string);
-  appRedirect.searchParams.set("profilePictureUrl", user.profilePictureUrl as string);
-
+  appRedirect.searchParams.set(
+    "profilePictureUrl",
+    user.profilePictureUrl as string,
+  );
 
   return c.redirect(appRedirect.toString());
 }
@@ -304,7 +306,7 @@ async function refreshAccessToken(oldRefreshToken: string) {
 
     const accessToken = await sign(payload, config.JWT_SECRET);
     const newRefreshToken = await generateRefreshToken(
-      new Types.ObjectId(user._id)
+      new Types.ObjectId(user._id),
     );
 
     return { accessToken, refreshToken: newRefreshToken };
@@ -348,4 +350,3 @@ export {
   refreshAccessToken,
   logoutUser,
 };
-

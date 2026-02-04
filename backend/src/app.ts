@@ -51,7 +51,7 @@ app.use(
     exposeHeaders: ["Content-Length"],
     maxAge: 600,
     credentials: true,
-  })
+  }),
 );
 
 app.use(logger());
@@ -66,7 +66,7 @@ app.use(
         message: "Request body too large. Maximum size is 1MB.",
       });
     },
-  })
+  }),
 );
 
 // --- Static files ---
@@ -75,7 +75,7 @@ app.use(
   serveStatic({
     root: "./public",
     rewriteRequestPath: (path) => path.replace(/^\/public/, ""),
-  })
+  }),
 );
 
 // --- Routes ---
@@ -139,7 +139,7 @@ app.onError((err, c) => {
       statusCode: 500,
       errorCode: "INTERNAL_SERVER_ERROR",
     },
-    500
+    500,
   );
 });
 

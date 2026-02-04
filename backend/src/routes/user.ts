@@ -19,7 +19,7 @@ const userRoutes = new Hono();
 
 userRoutes.use(
   "*",
-  jwt({ secret: config.JWT_SECRET }),
+  jwt({ secret: config.JWT_SECRET, alg: "HS256" }),
   checkBlacklist,
   async (c, next) => {
     const payload = c.get("jwtPayload");
@@ -34,7 +34,7 @@ userRoutes.use(
       profilePictureUrl: payload.profilePictureUrl,
     });
     await next();
-  }
+  },
 );
 
 userRoutes.put(
@@ -53,7 +53,7 @@ userRoutes.put(
           message: "Profile updated successfully",
           user: updatedUser,
         },
-        200
+        200,
       );
     } catch (error) {
       if (error instanceof AppError) {
@@ -61,7 +61,7 @@ userRoutes.put(
       }
       throw new AppError(500, "Internal Server Error");
     }
-  }
+  },
 );
 
 userRoutes.put("/profile-picture", apiRateLimiter, async (c) => {
@@ -80,7 +80,7 @@ userRoutes.put("/profile-picture", apiRateLimiter, async (c) => {
         message: "Profile picture updated successfully",
         user: updatedUser,
       },
-      200
+      200,
     );
   } catch (error) {
     if (error instanceof AppError) {

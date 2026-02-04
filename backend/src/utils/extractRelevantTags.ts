@@ -58,7 +58,7 @@ export function extractRelevantTags(text: string, maxTags = 10): string[] {
   }
 
   const sortedKeywords = [...keywordCounts.entries()].sort(
-    (a, b) => b[1] - a[1]
+    (a, b) => b[1] - a[1],
   );
 
   const keywords = sortedKeywords

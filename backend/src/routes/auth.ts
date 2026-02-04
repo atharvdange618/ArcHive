@@ -58,7 +58,9 @@ authRoutes.post(
   authRateLimiter,
   validate("json", registerSchema),
   async (c) => {
-    const { email, password, firstName, lastName } = c.req.valid("json") as RegisterInput;
+    const { email, password, firstName, lastName } = c.req.valid(
+      "json",
+    ) as RegisterInput;
 
     try {
       const { user, accessToken, refreshToken } = await registerUser({
@@ -75,7 +77,7 @@ authRoutes.post(
           accessToken,
           refreshToken,
         },
-        201
+        201,
       );
     } catch (error) {
       if (error instanceof AppError) {
@@ -83,7 +85,7 @@ authRoutes.post(
       }
       throw new AppError(500, "Internal Server Error");
     }
-  }
+  },
 );
 
 // User Login
@@ -102,7 +104,7 @@ authRoutes.post(
 
       return c.json(
         { message: "Login successful!", user, accessToken, refreshToken },
-        200
+        200,
       );
     } catch (error) {
       if (error instanceof AppError) {
@@ -110,7 +112,7 @@ authRoutes.post(
       }
       throw new AppError(500, "Internal Server Error");
     }
-  }
+  },
 );
 
 // Google OAuth
@@ -159,13 +161,13 @@ authRoutes.post(
       }
       throw new AppError(500, "Internal Server Error");
     }
-  }
+  },
 );
 
 // User Logout
 authRoutes.post(
   "/logout",
-  jwt({ secret: config.JWT_SECRET }),
+  jwt({ secret: config.JWT_SECRET, alg: "HS256" }),
   validate("json", logoutSchema),
   async (c) => {
     const authHeader = c.req.header("Authorization");
@@ -185,7 +187,7 @@ authRoutes.post(
       }
       throw new AppError(500, "Internal Server Error");
     }
-  }
+  },
 );
 
 export default authRoutes;

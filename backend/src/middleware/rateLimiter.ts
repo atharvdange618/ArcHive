@@ -28,7 +28,7 @@ export const authRateLimiter = createRateLimiter({
   },
   handler: (c: any) => {
     throw new TooManyRequestsError(
-      "Too many authentication attempts. Please try again later."
+      "Too many authentication attempts. Please try again later.",
     );
   },
 });
@@ -62,7 +62,7 @@ export const searchRateLimiter = createRateLimiter({
   },
   handler: (c: any) => {
     throw new TooManyRequestsError(
-      "Too many search requests. Please slow down."
+      "Too many search requests. Please slow down.",
     );
   },
 });
@@ -79,7 +79,7 @@ export const strictRateLimiter = createRateLimiter({
   },
   handler: (c: any) => {
     throw new TooManyRequestsError(
-      "Too many attempts. Please try again after an hour."
+      "Too many attempts. Please try again after an hour.",
     );
   },
 });

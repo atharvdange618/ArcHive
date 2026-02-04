@@ -26,5 +26,5 @@ const RefreshTokenSchema: Schema = new Schema({
 
 export default mongoose.model<IRefreshToken>(
   "RefreshToken",
-  RefreshTokenSchema
+  RefreshTokenSchema,
 );

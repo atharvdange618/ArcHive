@@ -22,7 +22,7 @@ import { screenshotQueue, tagQueue } from "src/config/bullmq";
  */
 async function createContent(
   userId: string,
-  data: CreateContentInput
+  data: CreateContentInput,
 ): Promise<IContentItem> {
   try {
     let finalData: any = { ...data };
@@ -50,7 +50,7 @@ async function createContent(
           console.error("Failed to enqueue screenshot job", {
             contentId: newContent._id,
             error: err,
-          })
+          }),
         );
 
       tagQueue
@@ -62,7 +62,7 @@ async function createContent(
           console.error("Failed to enqueue tag generation job", {
             contentId: newContent._id,
             error: err,
-          })
+          }),
         );
     }
 
@@ -91,7 +91,7 @@ async function createContent(
  */
 async function getContentById(
   userId: string,
-  contentId: string
+  contentId: string,
 ): Promise<IContentItem> {
   if (!mongoose.Types.ObjectId.isValid(contentId)) {
     throw new ValidationError("Invalid content ID format.");
@@ -104,7 +104,7 @@ async function getContentById(
 
     if (!content) {
       throw new NotFoundError(
-        "Content item not found or you do not have access."
+        "Content item not found or you do not have access.",
       );
     }
     return content;
@@ -114,7 +114,7 @@ async function getContentById(
     }
     console.error(
       `Error getting content item ${contentId} for user ${userId}:`,
-      error
+      error,
     );
     throw new AppError(500, "Failed to retrieve content item.");
   }
@@ -178,9 +178,9 @@ async function getContents(userId: string, query: SearchContentQuery) {
   } catch (error) {
     console.error(
       `Error getting content items for user ${userId} with query ${JSON.stringify(
-        query
+        query,
       )}:`,
-      error
+      error,
     );
     throw new AppError(500, "Failed to retrieve content item.");
   }
@@ -198,7 +198,7 @@ async function getContents(userId: string, query: SearchContentQuery) {
 async function updateContent(
   userId: string,
   contentId: string,
-  updates: UpdateContentInput
+  updates: UpdateContentInput,
 ): Promise<IContentItem> {
   if (!mongoose.Types.ObjectId.isValid(contentId)) {
     throw new ValidationError("Invalid content ID format.");
@@ -213,7 +213,7 @@ async function updateContent(
 
     if (existing && existing.type !== updates.type) {
       throw new ValidationError(
-        `Content type cannot be changed. Expected ${existing.type}, got ${updates.type}.`
+        `Content type cannot be changed. Expected ${existing.type}, got ${updates.type}.`,
       );
     }
   }
@@ -225,12 +225,12 @@ async function updateContent(
         userId: new mongoose.Types.ObjectId(userId),
       },
       { $set: updates },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
 
     if (!updatedContent) {
       throw new NotFoundError(
-        "Content item not found or you do not have access to update it."
+        "Content item not found or you do not have access to update it.",
       );
     }
 
@@ -244,7 +244,7 @@ async function updateContent(
     }
     console.error(
       `Error updating content item ${contentId} for user ${userId}:`,
-      error
+      error,
     );
     throw new AppError(500, "Failed to update content item.");
   }
@@ -270,7 +270,7 @@ async function deleteContent(userId: string, contentId: string): Promise<void> {
 
     if (result.deletedCount === 0) {
       throw new NotFoundError(
-        "Content item not found or you do not have access to delete it."
+        "Content item not found or you do not have access to delete it.",
       );
     }
   } catch (error) {
@@ -279,7 +279,7 @@ async function deleteContent(userId: string, contentId: string): Promise<void> {
     }
     console.error(
       `Error deleting content item ${contentId} for user ${userId}:`,
-      error
+      error,
     );
     throw new AppError(500, "Failed to delete content item.");
   }

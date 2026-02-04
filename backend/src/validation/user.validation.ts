@@ -13,7 +13,11 @@ export const updateUserSchema = z.object({
     .min(1, { message: "Last name is required." })
     .max(50, { message: "Last name cannot exceed 50 characters." })
     .optional(),
-  profilePictureUrl: z.string().trim().url({ message: "Invalid URL." }).optional(),
+  profilePictureUrl: z
+    .string()
+    .trim()
+    .url({ message: "Invalid URL." })
+    .optional(),
 });
 
 export type UpdateUserInput = z.infer<typeof updateUserSchema>;

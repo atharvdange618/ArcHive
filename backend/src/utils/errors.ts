@@ -16,7 +16,7 @@ export class AppError extends HTTPException {
     message: string,
     details?: ErrorDetails,
     errorCode?: string,
-    cause?: Error
+    cause?: Error,
   ) {
     super(statusCode, { message, cause });
     this.statusCode = statusCode;
