@@ -1,6 +1,5 @@
 import mongoose, { Schema, Document, Types } from "mongoose";
 
-// Enum for content types
 export enum ContentType {
   Text = "text",
   Link = "link",
@@ -8,14 +7,14 @@ export enum ContentType {
 }
 
 export interface IContentItem extends Document {
-  userId: Types.ObjectId; // Reference to the user who created the content
-  type: ContentType; // Type of content (text, link, code)
-  title?: string; // Optional title for the content
-  description?: string; // Optional description for the content
-  content: string; // The actual content (text, link URL, or code)
-  url?: string; // URL for link items
-  tags: string[]; // Array of string tags for organization and search
-  previewImageUrl?: string; // Optional URL for a generated link preview image
+  userId: Types.ObjectId;
+  type: ContentType;
+  title?: string;
+  description?: string;
+  content: string;
+  url?: string;
+  tags: string[];
+  previewImageUrl?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -44,12 +43,12 @@ const ContentItemSchema: Schema = new Schema(
       maxlength: [1000, "Description cannot exceed 1000 characters"],
     },
     content: {
-      type: String, // For text notes and code snippets
+      type: String,
       trim: true,
       maxlength: [100000, "Content cannot exceed 100,000 characters"],
     },
     url: {
-      type: String, // For link items
+      type: String,
       trim: true,
       match: [/^(https?:\/\/[^\s$.?#].[^\s]*)$/i, "Please enter a valid URL"],
     },
@@ -71,7 +70,6 @@ const ContentItemSchema: Schema = new Schema(
   },
 );
 
-// --- MongoDB Text Index for Search ---
 ContentItemSchema.index(
   {
     title: "text",
@@ -83,11 +81,11 @@ ContentItemSchema.index(
   {
     name: "ContentItemTextIndex",
     weights: {
-      title: 10, // Higher weight for title matches
-      tags: 5, // Medium weight for tag matches
-      description: 3, // Lower weight for description
-      content: 1, // Lowest weight for full content
-      url: 1, // URL matches
+      title: 10,
+      tags: 5,
+      description: 3,
+      content: 1,
+      url: 1,
     },
   },
 );

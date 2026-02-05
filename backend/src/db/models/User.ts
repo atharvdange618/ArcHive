@@ -71,9 +71,6 @@ const UserSchema: Schema = new Schema(
   },
 );
 
-// --- Custom Schema Methods ---
-
-// Method to compare user password with the stored hashed password
 UserSchema.methods.comparePassword = async function (
   this: IUser,
   userPass: string,

@@ -39,7 +39,7 @@ async function hashPassword(password: string): Promise<string> {
 async function generateRefreshToken(userId: Types.ObjectId): Promise<string> {
   const token = randomBytes(40).toString("hex");
   const expiresAt = new Date();
-  expiresAt.setDate(expiresAt.getDate() + 30); // Refresh token valid for 30 days
+  expiresAt.setDate(expiresAt.getDate() + 30);
 
   const refreshToken = new RefreshToken({
     user: userId,
@@ -60,7 +60,7 @@ async function generateTokens(user: AuthUserData) {
       firstName: user.firstName,
       lastName: user.lastName,
       profilePictureUrl: user.profilePictureUrl,
-      exp: now + 60 * 15, // Access token valid for 15 minutes
+      exp: now + 60 * 15,
       iat: now,
     };
 
@@ -167,108 +167,108 @@ async function loginUser(credentials: LoginInput) {
   }
 }
 
-async function OAuthHandler(c: any) {
-  if (
-    !config.GOOGLE_CLIENT_ID ||
-    !config.GOOGLE_CLIENT_SECRET ||
-    !config.OAUTH_REDIRECT_BASE_URL
-  ) {
-    throw new ServiceUnavailableError("Google OAuth is not configured.");
-  }
-  const code = c.req.query("code");
-  const stateParam = c.req.query("state");
+// async function OAuthHandler(c: any) {
+//   if (
+//     !config.GOOGLE_CLIENT_ID ||
+//     !config.GOOGLE_CLIENT_SECRET ||
+//     !config.OAUTH_REDIRECT_BASE_URL
+//   ) {
+//     throw new ServiceUnavailableError("Google OAuth is not configured.");
+//   }
+//   const code = c.req.query("code");
+//   const stateParam = c.req.query("state");
 
-  if (!code) throw new ValidationError("No code provided");
-  if (!stateParam) throw new ValidationError("No state parameter provided");
+//   if (!code) throw new ValidationError("No code provided");
+//   if (!stateParam) throw new ValidationError("No state parameter provided");
 
-  let appRedirectPrefix: string | undefined;
-  try {
-    const statePayload = JSON.parse(decodeURIComponent(stateParam));
-    appRedirectPrefix = statePayload.appRedirectPrefix;
-  } catch (error) {
-    console.error("Failed to parse state parameter:", error);
-    throw new ValidationError("Invalid state parameter");
-  }
+//   let appRedirectPrefix: string | undefined;
+//   try {
+//     const statePayload = JSON.parse(decodeURIComponent(stateParam));
+//     appRedirectPrefix = statePayload.appRedirectPrefix;
+//   } catch (error) {
+//     console.error("Failed to parse state parameter:", error);
+//     throw new ValidationError("Invalid state parameter");
+//   }
 
-  const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
-      code,
-      client_id: config.GOOGLE_CLIENT_ID,
-      client_secret: config.GOOGLE_CLIENT_SECRET,
-      redirect_uri: `${config.OAUTH_REDIRECT_BASE_URL}/api/auth/google/callback`,
-      grant_type: "authorization_code",
-    }),
-  });
+//   const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
+//     method: "POST",
+//     headers: { "Content-Type": "application/x-www-form-urlencoded" },
+//     body: new URLSearchParams({
+//       code,
+//       client_id: config.GOOGLE_CLIENT_ID,
+//       client_secret: config.GOOGLE_CLIENT_SECRET,
+//       redirect_uri: `${config.OAUTH_REDIRECT_BASE_URL}/api/auth/google/callback`,
+//       grant_type: "authorization_code",
+//     }),
+//   });
 
-  if (!tokenRes.ok) {
-    const errorBody = await tokenRes.text();
-    console.error("Token error response:", errorBody);
-    throw new UnauthorizedError("Failed to get access token");
-  }
+//   if (!tokenRes.ok) {
+//     const errorBody = await tokenRes.text();
+//     console.error("Token error response:", errorBody);
+//     throw new UnauthorizedError("Failed to get access token");
+//   }
 
-  const tokenData = await tokenRes.json();
+//   const tokenData = await tokenRes.json();
 
-  const userInfoRes = await fetch(
-    "https://www.googleapis.com/oauth2/v2/userinfo",
-    {
-      headers: { Authorization: `Bearer ${tokenData.access_token}` },
-    },
-  );
+//   const userInfoRes = await fetch(
+//     "https://www.googleapis.com/oauth2/v2/userinfo",
+//     {
+//       headers: { Authorization: `Bearer ${tokenData.access_token}` },
+//     },
+//   );
 
-  const googleUser = await userInfoRes.json();
-  if (!userInfoRes.ok) {
-    console.error("User info error", googleUser);
-    throw new UnauthorizedError("Failed to get user info");
-  }
+//   const googleUser = await userInfoRes.json();
+//   if (!userInfoRes.ok) {
+//     console.error("User info error", googleUser);
+//     throw new UnauthorizedError("Failed to get user info");
+//   }
 
-  let user = await User.findOne({ googleId: googleUser.id });
-  if (!user) {
-    user = new User({
-      googleId: googleUser.id,
-      email: googleUser.email,
-      firstName: googleUser.given_name,
-      lastName: googleUser.family_name,
-      profilePictureUrl: googleUser.picture,
-    });
+//   let user = await User.findOne({ googleId: googleUser.id });
+//   if (!user) {
+//     user = new User({
+//       googleId: googleUser.id,
+//       email: googleUser.email,
+//       firstName: googleUser.given_name,
+//       lastName: googleUser.family_name,
+//       profilePictureUrl: googleUser.picture,
+//     });
 
-    try {
-      await user.save();
-    } catch (err: any) {
-      console.error("User creation failed", err);
-      if (err instanceof AppError || err instanceof HTTPException) {
-        throw err;
-      }
-      throw new AppError(500, "User creation failed");
-    }
-  }
+//     try {
+//       await user.save();
+//     } catch (err: any) {
+//       console.error("User creation failed", err);
+//       if (err instanceof AppError || err instanceof HTTPException) {
+//         throw err;
+//       }
+//       throw new AppError(500, "User creation failed");
+//     }
+//   }
 
-  const { accessToken, refreshToken } = await generateTokens({
-    _id: (user._id as Types.ObjectId).toString(),
-    email: user.email,
-    firstName: user.firstName as string,
-    lastName: user.lastName as string,
-    profilePictureUrl: user.profilePictureUrl as string,
-  });
+//   const { accessToken, refreshToken } = await generateTokens({
+//     _id: (user._id as Types.ObjectId).toString(),
+//     email: user.email,
+//     firstName: user.firstName as string,
+//     lastName: user.lastName as string,
+//     profilePictureUrl: user.profilePictureUrl as string,
+//   });
 
-  const finalAppRedirectPrefix = appRedirectPrefix;
+//   const finalAppRedirectPrefix = appRedirectPrefix;
 
-  const appRedirect = new URL(`${finalAppRedirectPrefix}auth-callback`);
+//   const appRedirect = new URL(`${finalAppRedirectPrefix}auth-callback`);
 
-  appRedirect.searchParams.set("accessToken", accessToken);
-  appRedirect.searchParams.set("refreshToken", refreshToken);
-  appRedirect.searchParams.set("email", user.email);
+//   appRedirect.searchParams.set("accessToken", accessToken);
+//   appRedirect.searchParams.set("refreshToken", refreshToken);
+//   appRedirect.searchParams.set("email", user.email);
 
-  appRedirect.searchParams.set("firstName", user.firstName as string);
-  appRedirect.searchParams.set("lastName", user.lastName as string);
-  appRedirect.searchParams.set(
-    "profilePictureUrl",
-    user.profilePictureUrl as string,
-  );
+//   appRedirect.searchParams.set("firstName", user.firstName as string);
+//   appRedirect.searchParams.set("lastName", user.lastName as string);
+//   appRedirect.searchParams.set(
+//     "profilePictureUrl",
+//     user.profilePictureUrl as string,
+//   );
 
-  return c.redirect(appRedirect.toString());
-}
+//   return c.redirect(appRedirect.toString());
+// }
 
 async function refreshAccessToken(oldRefreshToken: string) {
   try {
@@ -285,7 +285,6 @@ async function refreshAccessToken(oldRefreshToken: string) {
       throw new UnauthorizedError("Refresh token expired.");
     }
 
-    // Invalidate the old refresh token
     await RefreshToken.findByIdAndDelete(storedToken._id);
 
     const user = storedToken.user as IUser & { _id: any };
@@ -300,7 +299,7 @@ async function refreshAccessToken(oldRefreshToken: string) {
       firstName: user.firstName,
       lastName: user.lastName,
       profilePictureUrl: user.profilePictureUrl,
-      exp: now + 60 * 15, // New access token valid for 15 minutes
+      exp: now + 60 * 15,
       iat: now,
     };
 
@@ -343,10 +342,4 @@ async function logoutUser(accessToken: string, refreshToken: string) {
   }
 }
 
-export {
-  registerUser,
-  loginUser,
-  OAuthHandler,
-  refreshAccessToken,
-  logoutUser,
-};
+export { registerUser, loginUser, refreshAccessToken, logoutUser };

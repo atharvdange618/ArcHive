@@ -40,7 +40,6 @@ async function createContent(
       userId: new mongoose.Types.ObjectId(userId),
     });
 
-    // Enqueue screenshot and tag generation jobs
     if (newContent.url) {
       screenshotQueue
         .add("screenshot-queue", {
@@ -137,7 +136,7 @@ async function getContents(userId: string, query: SearchContentQuery) {
   };
 
   if (q) {
-    const searchRegex = new RegExp(q, "i"); // Case-insensitive regex search
+    const searchRegex = new RegExp(q, "i");
     findCriteria.$or = [
       { title: searchRegex },
       { description: searchRegex },
@@ -157,14 +156,12 @@ async function getContents(userId: string, query: SearchContentQuery) {
   }
 
   try {
-    // count total documents matching the criteria (for pagination metadata)
     const totalCount = await ContentItem.countDocuments(findCriteria);
 
-    // calculatie skip for pagination
     const skip = (page - 1) * limit;
 
     let contentsQuery = ContentItem.find(findCriteria)
-      .sort({ createdAt: -1 }) // Sort by newest first
+      .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
@@ -206,7 +203,6 @@ async function updateContent(
     throw new ValidationError("Invalid content ID format.");
   }
 
-  // Prevent changing content type after creation
   if (updates.type) {
     const existing = await ContentItem.findOne({
       _id: contentId,

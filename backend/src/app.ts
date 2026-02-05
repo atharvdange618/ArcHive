@@ -60,7 +60,7 @@ app.use(secureHeaders());
 
 app.use(
   bodyLimit({
-    maxSize: 1 * 1024 * 1024, // 1MB
+    maxSize: 1 * 1024 * 1024,
     onError: (c) => {
       throw new HTTPException(413, {
         message: "Request body too large. Maximum size is 1MB.",

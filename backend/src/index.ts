@@ -3,7 +3,6 @@ import app from "./app";
 import { connectDB, disconnectDB } from "./db";
 
 (async () => {
-  // Connect to DB once when the server starts
   await connectDB();
 
   const port = config.PORT;
@@ -15,7 +14,6 @@ import { connectDB, disconnectDB } from "./db";
 
   console.log(`Server starting on http://localhost:${port}`);
 
-  // Handle graceful shutdown
   process.on("SIGINT", async () => {
     console.log("Shutting down server...");
     await disconnectDB();

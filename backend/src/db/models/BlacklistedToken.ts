@@ -14,7 +14,7 @@ const BlacklistedTokenSchema: Schema = new Schema({
   expiresAt: {
     type: Date,
     required: true,
-    index: { expires: "1s" }, // Automatically remove documents after expiresAt
+    index: { expires: "1s" },
   },
 });
 

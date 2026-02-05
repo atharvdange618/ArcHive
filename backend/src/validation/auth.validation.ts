@@ -1,7 +1,5 @@
 import { z } from "zod";
 
-// Schema for user registration input
-
 export const registerSchema = z.object({
   email: z.string().trim().toLowerCase().email("Invalid email address"),
   password: z

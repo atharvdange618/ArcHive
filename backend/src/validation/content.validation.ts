@@ -23,7 +23,6 @@ const baseContentSchema = z.object({
     .default([]),
 });
 
-// Schema for Text content type
 const textContentSchema = baseContentSchema.extend({
   type: z.literal(ContentType.Text),
   content: z
@@ -34,7 +33,6 @@ const textContentSchema = baseContentSchema.extend({
   url: z.never().optional(),
 });
 
-// Schema for Link content type
 const linkContentSchema = baseContentSchema.extend({
   type: z.literal(ContentType.Link).optional(),
   url: z
@@ -45,7 +43,6 @@ const linkContentSchema = baseContentSchema.extend({
   content: z.never().optional(),
 });
 
-// Schema for Code content type
 const codeContentSchema = baseContentSchema.extend({
   type: z.literal(ContentType.Code),
   content: z
@@ -56,14 +53,12 @@ const codeContentSchema = baseContentSchema.extend({
   url: z.never().optional(),
 });
 
-// Union type for creating new content items
 export const createContentSchema = z.discriminatedUnion("type", [
   textContentSchema,
   linkContentSchema,
   codeContentSchema,
 ]);
 
-// Infer the TypeScript type for creation
 export type CreateContentInput = z.infer<typeof createContentSchema>;
 
 export const updateContentSchema = z
@@ -100,10 +95,8 @@ export const updateContentSchema = z
   })
   .partial();
 
-// Infer the TypeScript type for update
 export type UpdateContentInput = z.infer<typeof updateContentSchema>;
 
-// Schema for search query parameters
 export const searchContentQuerySchema = z
   .object({
     q: z.string().trim().min(1, "Search query cannot be empty").optional(),

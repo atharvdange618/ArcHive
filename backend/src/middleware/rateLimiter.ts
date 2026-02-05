@@ -10,16 +10,14 @@ import { config } from "../config";
 // Helper to bypass rate limiting in test environment
 const createRateLimiter = (options: any): MiddlewareHandler => {
   if (config.NODE_ENV === "test") {
-    // Return a no-op middleware in test environment
     return async (c, next) => await next();
   }
   return rateLimiter(options);
 };
 
-// Strict rate limit for authentication endpoints
 export const authRateLimiter = createRateLimiter({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  limit: 5, // Limit each IP to 5 requests per windowMs
+  windowMs: 15 * 60 * 1000,
+  limit: 5,
   standardHeaders: "draft-6",
   keyGenerator: (c: any) => {
     return (
@@ -33,10 +31,9 @@ export const authRateLimiter = createRateLimiter({
   },
 });
 
-// Moderate rate limit for general API endpoints
 export const apiRateLimiter = createRateLimiter({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  limit: 100, // Limit each IP to 100 requests per windowMs
+  windowMs: 15 * 60 * 1000,
+  limit: 100,
   standardHeaders: "draft-6",
   keyGenerator: (c: any) => {
     const user = c.get("user");
@@ -49,10 +46,9 @@ export const apiRateLimiter = createRateLimiter({
   },
 });
 
-// Higher rate limit for search/read operations
 export const searchRateLimiter = createRateLimiter({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  limit: 200, // Limit each IP to 200 requests per windowMs
+  windowMs: 15 * 60 * 1000,
+  limit: 200,
   standardHeaders: "draft-6",
   keyGenerator: (c: any) => {
     const user = c.get("user");
@@ -67,10 +63,9 @@ export const searchRateLimiter = createRateLimiter({
   },
 });
 
-// Very strict rate limit for password reset or sensitive operations
 export const strictRateLimiter = createRateLimiter({
-  windowMs: 60 * 60 * 1000, // 1 hour
-  limit: 3, // Limit each IP to 3 requests per hour
+  windowMs: 60 * 60 * 1000,
+  limit: 3,
   standardHeaders: "draft-6",
   keyGenerator: (c: any) => {
     return (

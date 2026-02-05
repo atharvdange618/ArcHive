@@ -57,11 +57,9 @@ export async function updateUserProfilePicture(userId: string, file: File) {
       throw new NotFoundError("User not found.");
     }
 
-    // Convert File to Buffer
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // Upload to Cloudinary
     const uploadResult = await new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {

@@ -6,18 +6,15 @@ export async function getUserStats(userId: string) {
   try {
     const userObjectId = new mongoose.Types.ObjectId(userId);
 
-    // Get total count
     const totalCount = await ContentItem.countDocuments({
       userId: userObjectId,
     });
 
-    // Get counts by type
     const countsByType = await ContentItem.aggregate([
       { $match: { userId: userObjectId } },
       { $group: { _id: "$type", count: { $sum: 1 } } },
     ]);
 
-    // Get recent activity (last 7 days)
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
@@ -26,7 +23,6 @@ export async function getUserStats(userId: string) {
       createdAt: { $gte: sevenDaysAgo },
     });
 
-    // Get most used tags (top 5)
     const topTags = await ContentItem.aggregate([
       { $match: { userId: userObjectId } },
       { $unwind: "$tags" },
@@ -35,7 +31,6 @@ export async function getUserStats(userId: string) {
       { $limit: 5 },
     ]);
 
-    // Get oldest and newest content dates
     const oldestContent = await ContentItem.findOne({ userId: userObjectId })
       .sort({ createdAt: 1 })
       .select("createdAt");
@@ -44,7 +39,6 @@ export async function getUserStats(userId: string) {
       .sort({ createdAt: -1 })
       .select("createdAt");
 
-    // Format counts by type
     const typeStats = {
       link: 0,
       text: 0,

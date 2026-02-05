@@ -33,17 +33,14 @@ import { Readable } from "stream";
         let screenshotBuffer: Buffer;
 
         if (/instagram\.com\//.test(url)) {
-          // For Instagram, use the custom extractor
           screenshotBuffer = await extractInstagramImage(page);
         } else {
-          // For other sites, take a regular screenshot
           screenshotBuffer = (await page.screenshot({
             fullPage: false,
             type: "png",
           })) as Buffer;
         }
 
-        // Upload to Cloudinary
         const uploadResult = await new Promise((resolve, reject) => {
           const uploadStream = cloudinary.uploader.upload_stream(
             {
@@ -64,7 +61,6 @@ import { Readable } from "stream";
 
         const cloudinaryUrl = (uploadResult as any).secure_url;
 
-        // Update the ContentItem with the screenshot URL
         await ContentItem.findByIdAndUpdate(contentId, {
           previewImageUrl: cloudinaryUrl,
         });
@@ -77,7 +73,6 @@ import { Readable } from "stream";
           `Screenshot job failed for contentId: ${contentId}:`,
           err,
         );
-        // Don't throw error - content item should still exist without screenshot
       } finally {
         await browser.close();
       }
