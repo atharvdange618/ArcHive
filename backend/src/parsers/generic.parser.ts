@@ -6,8 +6,9 @@ export const genericParser = async (url: string, headers?: any) => {
   const html = response.data;
   const $ = cheerio.load(html);
 
-  const title =
+  const rawTitle =
     $('meta[property="og:title"]').attr("content") || $("title").text();
+  const title = rawTitle ? rawTitle.trim() : "";
   const description =
     $('meta[property="og:description"]').attr("content") ||
     $('meta[name="description"]').attr("content");

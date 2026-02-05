@@ -29,8 +29,10 @@ async function createContent(
 
     if (data.url) {
       const parsedData = await parseUrl(data.url);
-      const tags = await generateTagsFromUrl(data.url);
-      finalData = { ...finalData, ...parsedData, tags };
+      if (parsedData.title?.length > 200) {
+        parsedData.title = parsedData.title.substring(0, 200);
+      }
+      finalData = { ...finalData, ...parsedData };
     }
 
     const newContent = new ContentItem({

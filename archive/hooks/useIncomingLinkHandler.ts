@@ -1,9 +1,10 @@
 import { useLinkingURL } from "expo-linking";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useShareIntent } from "expo-share-intent";
+import useAuthStore from "../stores/authStore";
 
 export function useIncomingLinkHandler() {
-  const [pendingUrl, setPendingUrl] = useState<string | null>(null);
+  const { pendingUrl, setPendingUrl } = useAuthStore();
 
   const deepLinkUrl = useLinkingURL();
   const { hasShareIntent, shareIntent, resetShareIntent } = useShareIntent();
@@ -11,11 +12,11 @@ export function useIncomingLinkHandler() {
   useEffect(() => {
     if (deepLinkUrl) {
       const decodedUrl = decodeURIComponent(
-        deepLinkUrl.replace("archive://", "")
+        deepLinkUrl.replace("archive://", ""),
       );
       setPendingUrl(decodedUrl);
     }
-  }, [deepLinkUrl]);
+  }, [deepLinkUrl, setPendingUrl]);
 
   useEffect(() => {
     if (hasShareIntent) {
@@ -24,12 +25,14 @@ export function useIncomingLinkHandler() {
       } else if (shareIntent.text) {
         setPendingUrl(shareIntent.text);
       }
-      resetShareIntent();
     }
-  }, [hasShareIntent, shareIntent, resetShareIntent]);
+  }, [hasShareIntent, shareIntent, setPendingUrl]);
 
   const clearPendingUrl = () => {
     setPendingUrl(null);
+    if (hasShareIntent) {
+      resetShareIntent();
+    }
   };
 
   return { pendingUrl, clearPendingUrl };

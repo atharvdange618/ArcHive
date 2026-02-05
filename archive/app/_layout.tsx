@@ -50,7 +50,7 @@ function InitialLayout() {
         });
       }
     },
-    [queryClient]
+    [queryClient],
   );
 
   useEffect(() => {
@@ -78,13 +78,20 @@ function InitialLayout() {
     if (pendingUrl) {
       if (accessToken) {
         console.log("Processing pending URL (logged in):", pendingUrl);
-        handleCreateContent(pendingUrl);
-        clearPendingUrl();
-      } else if (!inAuthGroup) {
+        handleCreateContent(pendingUrl).finally(() => {
+          clearPendingUrl();
+          if (inAuthGroup) {
+            router.replace("/(tabs)");
+          }
+        });
+        return;
+      } else {
         console.log("Storing pending URL, redirecting to login:", pendingUrl);
-        router.replace("/login");
+        if (!inAuthGroup) {
+          router.replace("/login");
+        }
+        return;
       }
-      return;
     }
 
     if (accessToken && inAuthGroup) {

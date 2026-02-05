@@ -8,19 +8,21 @@ interface AuthState {
   accessToken: string | null;
   refreshToken: string | null;
   user: IUser | null;
-  isAuthInitialized: boolean; // New state to track initialization
+  isAuthInitialized: boolean;
   setTokens: (accessToken: string, refreshToken: string) => void;
   setUser: (user: IUser) => void;
   updateUser: (user: Partial<IUser>) => void;
   logout: () => Promise<void>;
   initializeAuth: () => Promise<void>;
+  pendingUrl: string | null;
+  setPendingUrl: (url: string | null) => void;
 }
 
 const useAuthStore = create<AuthState>((set, get) => ({
   accessToken: null,
   refreshToken: null,
   user: null,
-  isAuthInitialized: false, // Initialize to false
+  isAuthInitialized: false,
   setTokens: (accessToken, refreshToken) => {
     set({ accessToken, refreshToken });
     SecureStore.setItemAsync("accessToken", accessToken);
@@ -40,7 +42,12 @@ const useAuthStore = create<AuthState>((set, get) => ({
         console.error("Failed to logout:", error);
       }
     }
-    set({ accessToken: null, refreshToken: null, user: null, isAuthInitialized: true }); // Set to true on logout
+    set({
+      accessToken: null,
+      refreshToken: null,
+      user: null,
+      isAuthInitialized: true,
+    });
     SecureStore.deleteItemAsync("accessToken");
     SecureStore.deleteItemAsync("refreshToken");
   },
@@ -57,8 +64,10 @@ const useAuthStore = create<AuthState>((set, get) => ({
         get().logout();
       }
     }
-    set({ isAuthInitialized: true }); // Set to true after initialization attempt
+    set({ isAuthInitialized: true });
   },
+  pendingUrl: null,
+  setPendingUrl: (url) => set({ pendingUrl: url }),
 }));
 
 export default useAuthStore;

@@ -34,17 +34,24 @@ class BrowserManager {
   private async initializeBrowser(): Promise<void> {
     try {
       this.browser = await puppeteer.launch({
-        args: ["--no-sandbox", "--disable-setuid-sandbox"],
+        executablePath: "/usr/bin/google-chrome",
+        args: [
+          "--no-sandbox",
+          "--disable-setuid-sandbox",
+          "--disable-dev-shm-usage",
+          "--disable-gpu",
+        ],
         headless: true,
       });
 
-      // Restart browser if it crashes
-      this.browser.on("disconnected", async () => {
+      this.browser.on("disconnected", () => {
         this.browser = null;
         this.isInitializing = false;
+        this.initPromise = null;
       });
     } catch (error) {
       this.isInitializing = false;
+      this.initPromise = null;
       throw error;
     }
   }

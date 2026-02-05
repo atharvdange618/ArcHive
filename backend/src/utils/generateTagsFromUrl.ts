@@ -46,7 +46,7 @@ async function fetchWithRetry(page: Page, url: string): Promise<string> {
  * @returns {Promise<string[]>} A promise that resolves to an array of tags.
  */
 export async function generateTagsFromUrl(url: string): Promise<string[]> {
-  let browser;
+  let page: Page | null = null;
   try {
     // --- Generic parse block ---
     const genericParsed = await parseUrl(url);
@@ -59,55 +59,49 @@ export async function generateTagsFromUrl(url: string): Promise<string[]> {
     }
 
     // --- Puppeteer fallback ---
-    const browser = await browserManager.getBrowser();
-    const page = await browser.newPage();
+    const browserInstance = await browserManager.getBrowser();
+    page = await browserInstance.newPage();
     await page.setUserAgent(
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
     );
 
-    try {
-      const html = await fetchWithRetry(page, url);
-      const $ = cheerio.load(html);
+    const html = await fetchWithRetry(page, url);
+    const $ = cheerio.load(html);
 
-      // Priority to OpenGraph and meta tags
-      const metaKeywords = $('meta[name="keywords"]').attr("content");
-      if (metaKeywords) {
-        return extractRelevantTags(metaKeywords);
-      }
-
-      const ogDescription = $('meta[property="og:description"]').attr(
-        "content",
-      );
-      if (ogDescription) {
-        return extractRelevantTags(ogDescription);
-      }
-
-      const articleText =
-        $("article.content div.text").text() ||
-        $("article").text() ||
-        $(".article-content").text() ||
-        $(".entry-content").text() ||
-        $(".post-content").text();
-      if (articleText) {
-        return extractRelevantTags(articleText);
-      }
-
-      const dom = new JSDOM(html, { url });
-      const reader = new Readability(dom.window.document);
-      const article = reader.parse();
-      if (article && article.textContent) {
-        return extractRelevantTags(article.textContent);
-      }
-
-      const bodyText = $("body").text();
-      if (bodyText) {
-        return extractRelevantTags(bodyText);
-      }
-
-      return [];
-    } finally {
-      await page.close();
+    // Priority to OpenGraph and meta tags
+    const metaKeywords = $('meta[name="keywords"]').attr("content");
+    if (metaKeywords) {
+      return extractRelevantTags(metaKeywords);
     }
+
+    const ogDescription = $('meta[property="og:description"]').attr("content");
+    if (ogDescription) {
+      return extractRelevantTags(ogDescription);
+    }
+
+    const articleText =
+      $("article.content div.text").text() ||
+      $("article").text() ||
+      $(".article-content").text() ||
+      $(".entry-content").text() ||
+      $(".post-content").text();
+    if (articleText) {
+      return extractRelevantTags(articleText);
+    }
+
+    const dom = new JSDOM(html, { url });
+    const reader = new Readability(dom.window.document);
+    const article = reader.parse();
+    if (article && article.textContent) {
+      return extractRelevantTags(article.textContent);
+    }
+
+    const bodyText = $("body").text();
+    if (bodyText) {
+      return extractRelevantTags(bodyText);
+    }
+
+    return [];
   } catch (error) {
     console.error(`Failed to generate tags from ${url}:`, error);
     if (error instanceof AppError) {
@@ -117,5 +111,20 @@ export async function generateTagsFromUrl(url: string): Promise<string[]> {
       500,
       `An unexpected error occurred while generating tags for ${url}.`,
     );
+  } finally {
+    if (page) {
+      const browser = page.browser();
+      if (browser && browser.isConnected() && !page.isClosed()) {
+        try {
+          await page.close();
+        } catch (closeError) {
+          console.warn(`Error closing page for ${url}:`, closeError);
+        }
+      } else if (page.isClosed()) {
+        console.warn(`Attempted to close an already closed page for ${url}.`);
+      } else if (browser && !browser.isConnected()) {
+        console.warn(`Browser disconnected, cannot close page for ${url}.`);
+      }
+    }
   }
 }
