@@ -54,15 +54,14 @@ const LinkCard: React.FC<LinkCardProps> = ({ item, searchQuery, onDelete }) => {
         {item.tags && item.tags.length > 0 && (
           <View style={styles.tagsContainer}>
             {item.tags.map((tag, index) => (
-              <Text
+              <View
                 key={index}
-                style={[
-                  styles.tag,
-                  { backgroundColor: colors.tint, color: colors.text },
-                ]}
+                style={[styles.tagContainer, { backgroundColor: colors.tint }]}
               >
-                {tag}
-              </Text>
+                <Text style={[styles.tagText, { color: colors.text }]}>
+                  {tag}
+                </Text>
+              </View>
             ))}
           </View>
         )}
@@ -97,14 +96,17 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     marginTop: 8,
+    alignItems: "flex-start",
   },
-  tag: {
-    fontSize: 12,
+  tagContainer: {
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
     marginRight: 6,
     marginBottom: 6,
+  },
+  tagText: {
+    fontSize: 12,
   },
 });
 

@@ -5,7 +5,7 @@ import { isAxiosError } from "axios";
 export const updateProfile = async (userData: Partial<IUser>) => {
   try {
     const response = await axiosInstance.put(
-      `/user/profile`,
+      `/api/user/profile`,
       userData
     );
     return response.data;
@@ -27,7 +27,6 @@ export const updateProfile = async (userData: Partial<IUser>) => {
 export const uploadProfilePicture = async (imageUri: string) => {
   try {
     const formData = new FormData();
-    // The 'uri' is the local file path, 'name' is the filename, 'type' is the MIME type
     const filename = imageUri.split("/").pop();
     const match = /\.(\w+)$/.exec(filename || "");
     const type = match ? `image/${match[1]}` : `image`;
@@ -39,7 +38,7 @@ export const uploadProfilePicture = async (imageUri: string) => {
     } as any);
 
     const response = await axiosInstance.put(
-      `/user/profile-picture`,
+      `/api/user/profile-picture`,
       formData,
       {
         headers: {

@@ -17,6 +17,6 @@ export interface UserStats {
 }
 
 export const getUserStats = async (): Promise<UserStats> => {
-  const response = await axiosInstance.get("/user/stats");
+  const response = await axiosInstance.get("/api/user/stats");
   return response.data.stats;
 };

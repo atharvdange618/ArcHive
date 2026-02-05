@@ -18,7 +18,7 @@ export const getContent = async (
   limit: number = 20,
   type?: string
 ): Promise<ApiResponse> => {
-  let endpoint = `/content?page=${page}&limit=${limit}`;
+  let endpoint = `/api/content?page=${page}&limit=${limit}`;
 
   if (query) {
     endpoint += `&q=${query}`;
@@ -40,7 +40,7 @@ export const getContent = async (
 export const getContentById = async (id: string): Promise<IContentItem> => {
   try {
     const response = await axiosInstance.get<{ content: IContentItem }>(
-      `/content/${id}`
+      `/api/content/${id}`
     );
     return response.data.content;
   } catch (error) {

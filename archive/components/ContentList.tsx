@@ -86,7 +86,6 @@ const ContentList: React.FC<ContentListProps> = ({
       onEndReached={onEndReached}
       onEndReachedThreshold={0.5}
       ListFooterComponent={ListFooterComponent}
-      estimatedItemSize={150}
     />
   );
 };

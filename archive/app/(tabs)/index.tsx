@@ -231,7 +231,7 @@ export default function TabOneScreen() {
                 </Text>
               </View>
               <View style={styles.recentSearchesList}>
-                {recentSearches.map((term, index) => (
+                {recentSearches.map((term) => (
                   <TouchableOpacity
                     key={term}
                     onPress={() => setSearchQuery(term)}

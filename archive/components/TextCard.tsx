@@ -6,17 +6,17 @@ import ContentCard from "./ContentCard";
 import HighlightText from "./HighlightText";
 import { router } from "expo-router";
 
-interface CodeCardProps {
+interface TextCardProps {
   item: IContentItem;
   searchQuery?: string;
   onDelete: () => void;
 }
 
-const CodeCard: React.FC<CodeCardProps> = ({ item, searchQuery, onDelete }) => {
+const TextCard: React.FC<TextCardProps> = ({ item, searchQuery, onDelete }) => {
   const colors = useThemeColors();
 
   const handlePress = () => {
-    router.push(`/details/code-detail?id=${item._id}`);
+    router.push(`/details/text-detail?id=${item._id}`);
   };
 
   return (
@@ -29,27 +29,22 @@ const CodeCard: React.FC<CodeCardProps> = ({ item, searchQuery, onDelete }) => {
             style={[styles.title, { color: colors.text }]}
           />
         )}
-        <View
-          style={[styles.codeContainer, { backgroundColor: colors.background }]}
-        >
-          <HighlightText
-            text={item.content as string}
-            highlight={searchQuery || ""}
-            style={[styles.code, { color: colors.text }]}
-          />
-        </View>
+        <HighlightText
+          text={item.content as string}
+          highlight={searchQuery || ""}
+          style={[styles.content, { color: colors.text }]}
+        />
         {item.tags && item.tags.length > 0 && (
           <View style={styles.tagsContainer}>
             {item.tags.map((tag, index) => (
-              <Text
+              <View
                 key={index}
-                style={[
-                  styles.tag,
-                  { backgroundColor: colors.tint, color: colors.card },
-                ]}
+                style={[styles.tagContainer, { backgroundColor: colors.tint }]}
               >
-                {tag}
-              </Text>
+                <Text style={[styles.tagText, { color: colors.text }]}>
+                  {tag}
+                </Text>
+              </View>
             ))}
           </View>
         )}
@@ -64,29 +59,26 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 8,
   },
-  codeContainer: {
-    padding: 10,
-    borderRadius: 8,
-    marginBottom: 8,
-  },
-  code: {
-    fontFamily: "SpaceMono",
-    fontSize: 14,
-    lineHeight: 20,
+  content: {
+    fontSize: 16,
+    lineHeight: 24,
   },
   tagsContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
     marginTop: 8,
+    alignItems: "flex-start",
   },
-  tag: {
-    fontSize: 12,
+  tagContainer: {
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
     marginRight: 6,
     marginBottom: 6,
   },
+  tagText: {
+    fontSize: 12,
+  },
 });
 
-export default CodeCard;
+export default TextCard;

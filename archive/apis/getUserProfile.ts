@@ -4,7 +4,7 @@ import { isAxiosError } from "axios";
 
 export const getUserProfile = async (): Promise<IUser> => {
   try {
-    const response = await axiosInstance.get<{ user: IUser }>(`/user/profile`);
+    const response = await axiosInstance.get<{ user: IUser }>(`/api/user/profile`);
     return response.data.user;
   } catch (error) {
     if (isAxiosError(error)) {
