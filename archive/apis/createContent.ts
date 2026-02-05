@@ -22,7 +22,10 @@ export const createContent = async (content: {
       throw new Error("Invalid content type");
     }
 
-    const response = await axiosInstance.post("/api/content", { ...content, type });
+    const response = await axiosInstance.post("/api/content", {
+      ...content,
+      type,
+    });
     return response.data.content;
   } catch (error) {
     console.error("Error creating content:", error);

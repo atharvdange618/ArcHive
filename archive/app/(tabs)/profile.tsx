@@ -153,7 +153,6 @@ export default function ProfileScreen() {
         </Text>
       </View>
 
-      {/* Stats Section */}
       {statsLoading ? (
         <View style={styles.statsLoadingContainer}>
           <ActivityIndicator size="large" color={colors.tint} />
@@ -164,7 +163,6 @@ export default function ProfileScreen() {
             Your Archive Statistics
           </Text>
 
-          {/* Total Items Card */}
           <View style={[styles.statCard, { backgroundColor: colors.card }]}>
             <View style={styles.statHeader}>
               <FontAwesome5 name="archive" size={24} color={colors.tint} />
@@ -177,7 +175,6 @@ export default function ProfileScreen() {
             </Text>
           </View>
 
-          {/* Content Type Breakdown */}
           <View style={[styles.statCard, { backgroundColor: colors.card }]}>
             <Text style={[styles.statCardTitle, { color: colors.text }]}>
               Content Breakdown
@@ -213,7 +210,6 @@ export default function ProfileScreen() {
             </View>
           </View>
 
-          {/* Recent Activity */}
           {stats.recentActivity > 0 && (
             <View style={[styles.statCard, { backgroundColor: colors.card }]}>
               <View style={styles.statHeader}>
@@ -228,7 +224,6 @@ export default function ProfileScreen() {
             </View>
           )}
 
-          {/* Top Tags */}
           {stats.topTags && stats.topTags.length > 0 && (
             <View style={[styles.statCard, { backgroundColor: colors.card }]}>
               <Text style={[styles.statCardTitle, { color: colors.text }]}>

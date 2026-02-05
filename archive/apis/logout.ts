@@ -3,7 +3,9 @@ import { isAxiosError } from "axios";
 
 export const logout = async (refreshToken: string) => {
   try {
-    const response = await axiosInstance.post(`/api/auth/logout`, { refreshToken });
+    const response = await axiosInstance.post(`/api/auth/logout`, {
+      refreshToken,
+    });
 
     return response.data;
   } catch (error: any) {

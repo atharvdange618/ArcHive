@@ -4,10 +4,7 @@ import { isAxiosError } from "axios";
 
 export const updateProfile = async (userData: Partial<IUser>) => {
   try {
-    const response = await axiosInstance.put(
-      `/api/user/profile`,
-      userData
-    );
+    const response = await axiosInstance.put(`/api/user/profile`, userData);
     return response.data;
   } catch (error) {
     if (isAxiosError(error)) {
@@ -44,7 +41,7 @@ export const uploadProfilePicture = async (imageUri: string) => {
         headers: {
           "Content-Type": "multipart/form-data",
         },
-      }
+      },
     );
     return response.data;
   } catch (error) {

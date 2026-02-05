@@ -11,7 +11,7 @@ const axiosInstance = axios.create({
 
 export const setupAxiosInterceptors = (
   setTokens: (accessToken: string, refreshToken: string) => void,
-  logout: () => Promise<void>
+  logout: () => Promise<void>,
 ) => {
   axiosInstance.interceptors.request.use(
     async (config) => {
@@ -23,7 +23,7 @@ export const setupAxiosInterceptors = (
     },
     (error) => {
       return Promise.reject(error);
-    }
+    },
   );
 
   axiosInstance.interceptors.response.use(
@@ -41,9 +41,12 @@ export const setupAxiosInterceptors = (
             return Promise.reject(error);
           }
 
-          const response = await axios.post(`${API_BASE_URL}/api/auth/refresh`, {
-            refreshToken,
-          });
+          const response = await axios.post(
+            `${API_BASE_URL}/api/auth/refresh`,
+            {
+              refreshToken,
+            },
+          );
 
           const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
             response.data;
@@ -59,7 +62,7 @@ export const setupAxiosInterceptors = (
         }
       }
       return Promise.reject(error);
-    }
+    },
   );
 };
 

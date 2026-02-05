@@ -4,12 +4,16 @@ import { isAxiosError } from "axios";
 
 export const getUserProfile = async (): Promise<IUser> => {
   try {
-    const response = await axiosInstance.get<{ user: IUser }>(`/api/user/profile`);
+    const response = await axiosInstance.get<{ user: IUser }>(
+      `/api/user/profile`,
+    );
     return response.data.user;
   } catch (error) {
     if (isAxiosError(error)) {
       const message =
-        error.response?.data?.message || error.message || "Failed to fetch user profile";
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to fetch user profile";
       const status = error.response?.status;
 
       const err = new Error(message);

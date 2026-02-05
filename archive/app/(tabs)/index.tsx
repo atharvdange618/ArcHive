@@ -68,7 +68,7 @@ export default function TabOneScreen() {
         10,
         selectedContentType === "All"
           ? undefined
-          : selectedContentType.toLowerCase()
+          : selectedContentType.toLowerCase(),
       );
       return response;
     },
@@ -205,8 +205,8 @@ export default function TabOneScreen() {
                 debouncedSearchQuery
                   ? "search"
                   : selectedContentType !== "All"
-                  ? "filter"
-                  : "default"
+                    ? "filter"
+                    : "default"
               }
               filterType={selectedContentType}
               onEndReached={() => {

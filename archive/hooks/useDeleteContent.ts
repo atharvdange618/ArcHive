@@ -7,7 +7,6 @@ export const useDeleteContent = (onSuccess?: () => void) => {
   return useMutation({
     mutationFn: (contentId: string) => deleteContent(contentId),
     onSuccess: () => {
-      // Invalidate and refetch the content list query
       queryClient.invalidateQueries({ queryKey: ["contents"] });
       if (onSuccess) {
         onSuccess();

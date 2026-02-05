@@ -32,20 +32,17 @@ export const addRecentSearch = async (term: string): Promise<void> => {
   try {
     const currentSearches = await getRecentSearches();
 
-    // Remove the term if it already exists to move it to the top
     const filteredSearches = currentSearches.filter(
-      (search) => search.toLowerCase() !== trimmedTerm.toLowerCase()
+      (search) => search.toLowerCase() !== trimmedTerm.toLowerCase(),
     );
 
-    // Add the new term to the beginning of the array
     const newSearches = [trimmedTerm, ...filteredSearches];
 
-    // Limit the number of recent searches
     const limitedSearches = newSearches.slice(0, MAX_RECENT_SEARCHES);
 
     await SecureStore.setItemAsync(
       RECENT_SEARCHES_KEY,
-      JSON.stringify(limitedSearches)
+      JSON.stringify(limitedSearches),
     );
   } catch (error) {
     console.error("Failed to add recent search", error);
