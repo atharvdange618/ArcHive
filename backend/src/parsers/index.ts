@@ -17,14 +17,16 @@ import { xParser } from "./x.parser";
  */
 
 export const parseUrl = async (url: string) => {
-  const youtubeRegex = /^http:\/\/googleusercontent\.com\/youtube\.com\/\d+$/;
   let parsedResult = null;
+
+  console.log(url);
 
   if (url.includes("github.com")) {
     parsedResult = await githubParser(url);
   } else if (url.includes("instagram.com")) {
     parsedResult = await instagramParser(url);
-  } else if (youtubeRegex.test(url)) {
+  } else if (url.includes("youtube.com")) {
+    console.log("using youtube parser");
     parsedResult = await youtubeParser(url);
   } else if (url.includes("linkedin.com")) {
     parsedResult = await linkedInParser(url);
@@ -35,6 +37,8 @@ export const parseUrl = async (url: string) => {
   if (parsedResult) {
     return parsedResult;
   }
+
+  console.log("did not get parsed result, using generic parser");
 
   return genericParser(url);
 };

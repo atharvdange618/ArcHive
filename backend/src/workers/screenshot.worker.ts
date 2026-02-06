@@ -28,7 +28,17 @@ import { Readable } from "stream";
       const page = await browser.newPage();
 
       try {
-        await page.goto(url, { waitUntil: "networkidle2", timeout: 30000 });
+        await page.goto(url, { waitUntil: "networkidle2", timeout: 60000 });
+
+        const contentItem = await ContentItem.findById(contentId);
+
+        if (contentItem && contentItem.previewImageUrl) {
+          console.log(
+            `ContentId: ${contentId} already has a previewImageUrl. Skipping screenshot generation.`,
+          );
+          await browser.close();
+          return;
+        }
 
         let screenshotBuffer: Buffer;
 
@@ -36,7 +46,7 @@ import { Readable } from "stream";
           screenshotBuffer = await extractInstagramImage(page);
         } else {
           screenshotBuffer = (await page.screenshot({
-            fullPage: false,
+            fullPage: true,
             type: "png",
           })) as Buffer;
         }
