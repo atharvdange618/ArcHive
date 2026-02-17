@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ArcHIve</title>
+    <link rel="shortcut icon" href="logo.png" type="image/png" />
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h3>ArcHIve</h3>
+
+      <div id="loginSection">
+        <input id="email" type="email" placeholder="Email" />
+        <input id="password" type="password" placeholder="Password" />
+        <button id="loginBtn">Login</button>
+      </div>
+
+      <div id="loggedInSection" style="display: none">
+        <p id="userInfo">Logged in</p>
+        <button id="logoutBtn">Logout</button>
+      </div>
+
+      <hr />
+
+      <button id="saveBtn">Save Current Page</button>
+
+      <p id="status"></p>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
