@@ -36,13 +36,11 @@ export const youtubeParser = async (url: string) => {
       );
     }
 
-    // Check if API key is configured
     if (!process.env.YOUTUBE_API_KEY) {
       console.error("YOUTUBE_API_KEY not configured");
       throw new Error("YouTube API key not configured");
     }
 
-    // Fetch video details from YouTube Data API
     const response = await youtube.videos.list({
       part: ["snippet"],
       id: [videoId],
@@ -55,7 +53,6 @@ export const youtubeParser = async (url: string) => {
     const video = response.data.items[0];
     const snippet = video.snippet!;
 
-    // Get the best quality thumbnail
     const thumbnail =
       snippet.thumbnails?.maxres?.url ||
       snippet.thumbnails?.high?.url ||

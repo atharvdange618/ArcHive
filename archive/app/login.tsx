@@ -53,7 +53,6 @@ export default function LoginScreen() {
       router.replace("/(tabs)");
     },
     onError: (err: any) => {
-      console.log(err);
       setError("root", {
         type: "manual",
         message: err.message || "An error occurred.",

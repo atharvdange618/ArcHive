@@ -127,7 +127,6 @@ app.onError((err, c) => {
   }
 
   if (err instanceof HTTPException) {
-    console.log(`HTTPException: ${err.message}`);
     return c.json({ success: false, message: err.message }, err.status);
   }
 

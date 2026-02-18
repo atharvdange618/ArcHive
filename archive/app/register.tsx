@@ -62,7 +62,6 @@ export default function RegisterScreen() {
       router.replace("/(tabs)");
     },
     onError: (err: any) => {
-      console.log(err);
       setError("root", {
         type: "manual",
         message: err.message || "An error occurred.",

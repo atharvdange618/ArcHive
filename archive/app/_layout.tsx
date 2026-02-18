@@ -77,7 +77,6 @@ function InitialLayout() {
 
     if (pendingUrl) {
       if (accessToken) {
-        console.log("Processing pending URL (logged in):", pendingUrl);
         handleCreateContent(pendingUrl).finally(() => {
           clearPendingUrl();
           if (inAuthGroup) {

@@ -40,8 +40,6 @@ async function createContent(
       userId: new mongoose.Types.ObjectId(userId),
     });
 
-    console.log(newContent);
-
     if (newContent.url) {
       screenshotQueue
         .add("screenshot-queue", {
