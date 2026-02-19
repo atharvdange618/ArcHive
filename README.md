@@ -32,6 +32,9 @@ My goal with ArcHive is to empower creators, thinkers, and anyone passionate abo
 - **Powerful Organization & Retrieval:**
   - **Full-Text Search:** Find exactly what you need with a powerful search that scans the entire content of your saved items, not just titles. Matching keywords are highlighted for context.
   - **Content Type Filtering:** Quickly filter your content by type (All, Link, Text, Code) for focused browsing.
+  - **Platform Categorization:** Automatically categorizes links by their source platform (GitHub, YouTube, Twitter, etc.) with visual badges and icons.
+  - **Browse by Platform:** Dedicated browse tab to view and filter content by platform, making it easy to find all your saved GitHub repos, YouTube videos, or tweets in one place.
+  - **Platform Statistics:** See at a glance how many items you have saved from each platform.
   - **Infinite Scroll:** Seamlessly load more content as you scroll with optimized pagination using TanStack Query.
   - **Recent Search History:** Quick access to your recent searches for faster navigation.
   - **Rich Metadata:** Organize your content with custom titles, descriptions, and flexible tagging.
@@ -42,12 +45,52 @@ My goal with ArcHive is to empower creators, thinkers, and anyone passionate abo
   - **Usage Statistics:** Track your content creation with detailed stats showing total items and breakdown by type.
   - **Account Customization:** Update your first name and last name to personalize your experience.
 
-## v1.0.0 Android APK Release!
+## Releases
 
-We are excited to announce the official release of ArcHive v1.0.0 for Android! Download the APK directly from [here](https://github.com/atharvdange618/ArcHive/releases/tag/v1.0.0) and start archiving your digital life today.
+### v1.1.0 - Platform Categorization (Latest)
 
-### Web (Planned)
+New features in this release:
 
-- The project structure includes a placeholder for a future web application, aiming for a consistent experience across all platforms.
+- **Platform Categorization:** Links are automatically categorized by their source platform
+- **Browse by Platform:** New dedicated browse tab to view content organized by platform
+- **Platform Badges:** Visual platform indicators on link cards with brand colors and icons
+- **Platform Statistics:** See your content distribution across different platforms
+- **Platform Filtering:** Filter content by specific platforms for focused browsing
+
+Download: [v1.1.0 APK](https://github.com/atharvdange618/ArcHive/releases/tag/v1.1.0)
+
+### v1.0.0 - Initial Release
+
+The first official release of ArcHive for Android! Includes core features like multi-content support, intelligent parsing, auto-tagging, full-text search, and profile management.
+
+Download: [v1.0.0 APK](https://github.com/atharvdange618/ArcHive/releases/tag/v1.0.0)
+
+## Chrome Extension
+
+**Save content directly from your browser!**
+
+ArcHive now has a Chrome extension that allows you to quickly save web pages to your personal knowledge base without switching apps. Simply click the extension icon while browsing any webpage to instantly archive it.
+
+### Features:
+
+- One-click page saving from any website
+- Secure JWT-based authentication
+- Automatic token refresh
+- Persistent login sessions
+- Clean, intuitive interface
+
+### Installation:
+
+**From Source (Development):**
+
+1. Clone the repository and navigate to the `web` folder
+2. Open Chrome and go to `chrome://extensions/`
+3. Enable "Developer mode"
+4. Click "Load unpacked" and select the `web` folder
+
+**From Chrome Web Store:**
+_(Coming soon)_
+
+For detailed instructions and usage guide, see the [Chrome Extension README](web/README.md).
 
 ---
