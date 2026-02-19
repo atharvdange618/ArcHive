@@ -9,7 +9,7 @@ interface AuthState {
   refreshToken: string | null;
   user: IUser | null;
   isAuthInitialized: boolean;
-  setTokens: (accessToken: string, refreshToken: string) => void;
+  setTokens: (accessToken: string, refreshToken: string) => Promise<void>;
   setUser: (user: IUser) => void;
   updateUser: (user: Partial<IUser>) => void;
   logout: () => Promise<void>;
@@ -23,10 +23,16 @@ const useAuthStore = create<AuthState>((set, get) => ({
   refreshToken: null,
   user: null,
   isAuthInitialized: false,
-  setTokens: (accessToken, refreshToken) => {
+  setTokens: async (accessToken, refreshToken) => {
     set({ accessToken, refreshToken });
-    SecureStore.setItemAsync("accessToken", accessToken);
-    SecureStore.setItemAsync("refreshToken", refreshToken);
+    try {
+      await Promise.all([
+        SecureStore.setItemAsync("accessToken", accessToken),
+        SecureStore.setItemAsync("refreshToken", refreshToken),
+      ]);
+    } catch (error) {
+      console.error("Failed to persist tokens to SecureStore:", error);
+    }
   },
   setUser: (user) => set({ user }),
   updateUser: (user) =>
@@ -48,8 +54,14 @@ const useAuthStore = create<AuthState>((set, get) => ({
       user: null,
       isAuthInitialized: true,
     });
-    SecureStore.deleteItemAsync("accessToken");
-    SecureStore.deleteItemAsync("refreshToken");
+    try {
+      await Promise.all([
+        SecureStore.deleteItemAsync("accessToken"),
+        SecureStore.deleteItemAsync("refreshToken"),
+      ]);
+    } catch (error) {
+      console.error("Failed to clear tokens from SecureStore:", error);
+    }
   },
   initializeAuth: async () => {
     const accessToken = await SecureStore.getItemAsync("accessToken");

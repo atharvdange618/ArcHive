@@ -20,7 +20,6 @@ import { logoutSchema, LogoutInput } from "../validation/logout.validation";
 import {
   registerUser,
   loginUser,
-  OAuthHandler,
   refreshAccessToken,
   logoutUser,
 } from "../services/auth.service";
@@ -115,35 +114,6 @@ authRoutes.post(
   },
 );
 
-// Google OAuth
-// authRoutes.get("/google", (c) => {
-//   if (!config.GOOGLE_CLIENT_ID || !config.OAUTH_REDIRECT_BASE_URL) {
-//     throw new ServiceUnavailableError("Google OAuth is not configured.");
-//   }
-//   const redirectUri = encodeURIComponent(
-//     `${config.OAUTH_REDIRECT_BASE_URL}/api/auth/google/callback`
-//   );
-//   const clientId = config.GOOGLE_CLIENT_ID;
-//   const scope = encodeURIComponent("openid profile email");
-
-//   const appRedirectPrefix = c.req.query("appRedirectPrefix") || "archive://";
-//   const statePayload = JSON.stringify({ appRedirectPrefix });
-//   const state = encodeURIComponent(statePayload);
-
-//   const url =
-//     `https://accounts.google.com/o/oauth2/v2/auth` +
-//     `?client_id=${clientId}` +
-//     `&redirect_uri=${redirectUri}` +
-//     `&response_type=code` +
-//     `&scope=${scope}` +
-//     `&state=${state}`;
-
-//   return c.redirect(url);
-// });
-
-// Google OAuth callback
-// authRoutes.get("/google/callback", OAuthHandler);
-
 // Refresh Access Token
 authRoutes.post(
   "/refresh",
@@ -153,8 +123,13 @@ authRoutes.post(
     const { refreshToken } = c.req.valid("json") as RefreshTokenInput;
 
     try {
-      const { accessToken } = await refreshAccessToken(refreshToken);
-      return c.json({ message: "Token refreshed successfully!", accessToken });
+      const { accessToken, refreshToken: newRefreshToken } =
+        await refreshAccessToken(refreshToken);
+      return c.json({
+        message: "Token refreshed successfully!",
+        accessToken,
+        refreshToken: newRefreshToken,
+      });
     } catch (error) {
       if (error instanceof AppError) {
         throw error;

@@ -47,8 +47,8 @@ export default function LoginScreen() {
 
   const loginMutation = useMutation({
     mutationFn: login,
-    onSuccess: (data) => {
-      setTokens(data.accessToken, data.refreshToken);
+    onSuccess: async (data) => {
+      await setTokens(data.accessToken, data.refreshToken);
       setUser(data.user);
       router.replace("/(tabs)");
     },

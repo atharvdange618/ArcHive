@@ -56,8 +56,8 @@ export default function RegisterScreen() {
 
   const registerMutation = useMutation({
     mutationFn: register,
-    onSuccess: (data) => {
-      setTokens(data.accessToken, data.refreshToken);
+    onSuccess: async (data) => {
+      await setTokens(data.accessToken, data.refreshToken);
       setUser(data.user);
       router.replace("/(tabs)");
     },
