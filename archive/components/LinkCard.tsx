@@ -3,6 +3,7 @@ import React from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useThemeColors } from "../constants/useColorScheme";
 import { IContentItem } from "../types";
+import { formatDate } from "../utils/helpers";
 import ContentCard from "./ContentCard";
 import HighlightText from "./HighlightText";
 
@@ -51,6 +52,11 @@ const LinkCard: React.FC<LinkCardProps> = ({ item, searchQuery, onDelete }) => {
             style={[styles.description, { color: colors.text }]}
           />
         )}
+        {item.createdAt && (
+          <Text style={[styles.date, { color: colors.text, opacity: 0.6 }]}>
+            {formatDate(item.createdAt)}
+          </Text>
+        )}
         {item.tags && item.tags.length > 0 && (
           <View style={styles.tagsContainer}>
             {item.tags.map((tag, index) => (
@@ -91,6 +97,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 24,
     marginBottom: 8,
+  },
+  date: {
+    fontSize: 12,
+    marginTop: 4,
+    marginBottom: 4,
   },
   tagsContainer: {
     flexDirection: "row",

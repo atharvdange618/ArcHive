@@ -22,6 +22,6 @@ export interface IContentItem {
   url?: string;
   tags: string[];
   previewImageUrl?: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
