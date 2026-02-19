@@ -27,6 +27,15 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="browse"
+        options={{
+          tabBarLabel: "",
+          tabBarIcon: ({ color }) => (
+            <FontAwesome size={28} name="th-large" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="profile"
         options={{
           title: "Profile",

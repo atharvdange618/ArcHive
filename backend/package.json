@@ -6,7 +6,8 @@
     "start": "bun run src/index.ts",
     "test": "bun run vitest",
     "start:worker": "bun run src/workers/screenshot.worker.ts",
-    "start:tag-worker": "bun run src/workers/tag.worker.ts"
+    "start:tag-worker": "bun run src/workers/tag.worker.ts",
+    "migrate:platforms": "bun run src/scripts/migratePlatforms.ts"
   },
   "dependencies": {
     "@mozilla/readability": "^0.6.0",

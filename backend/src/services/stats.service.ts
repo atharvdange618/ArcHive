@@ -31,6 +31,18 @@ export async function getUserStats(userId: string) {
       { $limit: 5 },
     ]);
 
+    const platformBreakdown = await ContentItem.aggregate([
+      {
+        $match: {
+          userId: userObjectId,
+          platform: { $ne: null },
+        },
+      },
+      { $group: { _id: "$platform", count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: 10 },
+    ]);
+
     const oldestContent = await ContentItem.findOne({ userId: userObjectId })
       .sort({ createdAt: 1 })
       .select("createdAt");
@@ -58,6 +70,10 @@ export async function getUserStats(userId: string) {
       topTags: topTags.map((tag) => ({
         name: tag._id,
         count: tag.count,
+      })),
+      platformBreakdown: platformBreakdown.map((platform) => ({
+        platform: platform._id,
+        count: platform.count,
       })),
       firstItemDate: oldestContent?.createdAt || null,
       lastItemDate: newestContent?.createdAt || null,

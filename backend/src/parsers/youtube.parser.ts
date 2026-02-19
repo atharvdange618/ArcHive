@@ -1,5 +1,6 @@
 import { google } from "googleapis";
 import { AppError } from "../utils/errors";
+import { PLATFORMS } from "../constants/platforms";
 
 const youtube = google.youtube({
   version: "v3",
@@ -66,6 +67,7 @@ export const youtubeParser = async (url: string) => {
       description: "",
       url: url,
       previewImageUrl: thumbnail,
+      platform: PLATFORMS.YOUTUBE,
     };
   } catch (error: any) {
     console.error(`Failed to parse YouTube URL ${url}:`, error);

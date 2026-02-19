@@ -1,5 +1,6 @@
 import axios from "axios";
 import * as cheerio from "cheerio";
+import { extractPlatformFromUrl } from "../constants/platforms";
 
 export const genericParser = async (url: string, headers?: any) => {
   const response = await axios.get(url, { headers });
@@ -20,5 +21,6 @@ export const genericParser = async (url: string, headers?: any) => {
     description: description ? description.trim() : "",
     url: url,
     previewImageUrl: previewImageUrl || "",
+    platform: extractPlatformFromUrl(url),
   };
 };

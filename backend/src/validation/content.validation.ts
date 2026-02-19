@@ -92,6 +92,7 @@ export const updateContentSchema = z
       .url("Invalid URL for preview image")
       .optional()
       .nullable(),
+    platform: z.string().trim().optional().nullable(),
   })
   .partial();
 
@@ -102,6 +103,7 @@ export const searchContentQuerySchema = z
     q: z.string().trim().min(1, "Search query cannot be empty").optional(),
     type: z.nativeEnum(ContentType).optional(),
     tag: z.string().trim().min(1, "Tag cannot be empty").optional(),
+    platform: z.string().trim().min(1, "Platform cannot be empty").optional(),
     limit: z.coerce.number().int().min(1).max(100).default(20).optional(),
     page: z.coerce.number().int().min(1).default(1).optional(),
   })

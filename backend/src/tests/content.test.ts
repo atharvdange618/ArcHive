@@ -10,7 +10,7 @@ const getAuthToken = async (
   emailPrefix = "test",
   password = "Password123!",
   firstName = "Test",
-  lastName = "User"
+  lastName = "User",
 ): Promise<{ accessToken: string; email: string; userId: string }> => {
   const uniqueId = Date.now();
   const email = `${emailPrefix}_${uniqueId}@example.com`;
@@ -46,7 +46,11 @@ const getAuthToken = async (
   expect(loginRes.status).toBe(200);
 
   const loginData = (await loginRes.json()) as { accessToken: string };
-  return { accessToken: loginData.accessToken, email, userId: registerData.user._id };
+  return {
+    accessToken: loginData.accessToken,
+    email,
+    userId: registerData.user._id,
+  };
 };
 
 let authToken: string;
@@ -56,12 +60,22 @@ let otherAuthToken: string;
 let otherUserId: string;
 
 beforeAll(async () => {
-  const result1 = await getAuthToken("contentuser", "Password123!", "Test", "User");
+  const result1 = await getAuthToken(
+    "contentuser",
+    "Password123!",
+    "Test",
+    "User",
+  );
   authToken = result1.accessToken;
   testEmail = result1.email;
   userId = result1.userId;
 
-  const result2 = await getAuthToken("otheruser", "Password123!", "Other", "User");
+  const result2 = await getAuthToken(
+    "otheruser",
+    "Password123!",
+    "Other",
+    "User",
+  );
   otherAuthToken = result2.accessToken;
   otherUserId = result2.userId;
 });
@@ -149,10 +163,34 @@ describe("Content Creation", () => {
 describe("Content Retrieval", () => {
   beforeEach(async () => {
     await ContentItem.insertMany([
-      { userId, type: "text", title: "Note A", content: "abc", tags: ["dev", "testing"] },
-      { userId, type: "text", title: "Note B", content: "bcd", tags: ["design"] },
-      { userId, type: "code", title: "Code Snippet", content: "console.log()", tags: ["dev", "javascript"] },
-      { userId: otherUserId, type: "text", title: "Other User's Note", content: "secret", tags: ["private"] },
+      {
+        userId,
+        type: "text",
+        title: "Note A",
+        content: "abc",
+        tags: ["dev", "testing"],
+      },
+      {
+        userId,
+        type: "text",
+        title: "Note B",
+        content: "bcd",
+        tags: ["design"],
+      },
+      {
+        userId,
+        type: "code",
+        title: "Code Snippet",
+        content: "console.log()",
+        tags: ["dev", "javascript"],
+      },
+      {
+        userId: otherUserId,
+        type: "text",
+        title: "Other User's Note",
+        content: "secret",
+        tags: ["private"],
+      },
     ]);
   });
 
@@ -166,7 +204,9 @@ describe("Content Retrieval", () => {
     expect(res.status).toBe(200);
     const data = await res.json();
     expect(data.data.length).toBe(3);
-    expect(data.data.some((item: any) => item.title === "Other User's Note")).toBe(false);
+    expect(
+      data.data.some((item: any) => item.title === "Other User's Note"),
+    ).toBe(false);
   });
 
   test("GET /api/content - filters by case-insensitive search query", async () => {
@@ -218,7 +258,12 @@ describe("Content Retrieval", () => {
   });
 
   test("GET /api/content/:id - retrieves one item", async () => {
-    const item = await ContentItem.create({ userId, type: "text", title: "Single", content: "One" });
+    const item = await ContentItem.create({
+      userId,
+      type: "text",
+      title: "Single",
+      content: "One",
+    });
     const req = new Request(`http://localhost/api/content/${item._id}`, {
       method: "GET",
       headers: { Authorization: `Bearer ${authToken}` },
@@ -232,10 +277,18 @@ describe("Content Retrieval", () => {
 
 describe("Content Update", () => {
   test("PUT /api/content/:id - success", async () => {
-    const item = await ContentItem.create({ userId, type: "text", title: "Old", content: "Old" });
+    const item = await ContentItem.create({
+      userId,
+      type: "text",
+      title: "Old",
+      content: "Old",
+    });
     const req = new Request(`http://localhost/api/content/${item._id}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken}`,
+      },
       body: JSON.stringify({ title: "Updated" }),
     });
     const res = await handler(req);
@@ -245,10 +298,18 @@ describe("Content Update", () => {
   });
 
   test("PUT /api/content/:id - fails when trying to change content type", async () => {
-    const item = await ContentItem.create({ userId, type: "text", title: "Old", content: "Old" });
+    const item = await ContentItem.create({
+      userId,
+      type: "text",
+      title: "Old",
+      content: "Old",
+    });
     const req = new Request(`http://localhost/api/content/${item._id}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken}`,
+      },
       body: JSON.stringify({ type: "code" }),
     });
     const res = await handler(req);
@@ -260,7 +321,12 @@ describe("Content Update", () => {
 
 describe("Content Deletion", () => {
   test("DELETE /api/content/:id - deletes item", async () => {
-    const item = await ContentItem.create({ userId, type: "text", title: "To Delete", content: "Bye" });
+    const item = await ContentItem.create({
+      userId,
+      type: "text",
+      title: "To Delete",
+      content: "Bye",
+    });
     const req = new Request(`http://localhost/api/content/${item._id}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${authToken}` },
@@ -285,29 +351,41 @@ describe("Security & Ownership", () => {
   });
 
   test("GET /api/content/:id - fails to get another user's item", async () => {
-    const req = new Request(`http://localhost/api/content/${otherUserItem._id}`, {
-      method: "GET",
-      headers: { Authorization: `Bearer ${authToken}` },
-    });
+    const req = new Request(
+      `http://localhost/api/content/${otherUserItem._id}`,
+      {
+        method: "GET",
+        headers: { Authorization: `Bearer ${authToken}` },
+      },
+    );
     const res = await handler(req);
     expect(res.status).toBe(404);
   });
 
   test("PUT /api/content/:id - fails to update another user's item", async () => {
-    const req = new Request(`http://localhost/api/content/${otherUserItem._id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
-      body: JSON.stringify({ title: "Hacked" }),
-    });
+    const req = new Request(
+      `http://localhost/api/content/${otherUserItem._id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({ title: "Hacked" }),
+      },
+    );
     const res = await handler(req);
     expect(res.status).toBe(404);
   });
 
   test("DELETE /api/content/:id - fails to delete another user's item", async () => {
-    const req = new Request(`http://localhost/api/content/${otherUserItem._id}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${authToken}` },
-    });
+    const req = new Request(
+      `http://localhost/api/content/${otherUserItem._id}`,
+      {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${authToken}` },
+      },
+    );
     const res = await handler(req);
     expect(res.status).toBe(404);
   });
@@ -342,7 +420,10 @@ describe("Edge Cases & Validation", () => {
     };
     const req = new Request("http://localhost/api/content", {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken}`,
+      },
       body: JSON.stringify(maliciousContent),
     });
     const res = await handler(req);
@@ -350,5 +431,152 @@ describe("Edge Cases & Validation", () => {
     const data = await res.json();
     expect(data.content.title).toBe(maliciousContent.title);
     expect(data.content.content).toBe(maliciousContent.content);
+  });
+});
+
+describe("Platform Categorization", () => {
+  test("POST /api/content - link type auto-assigns platform from GitHub URL", async () => {
+    const newContent = {
+      type: "link",
+      url: "https://github.com/facebook/react",
+    };
+
+    const req = new Request("http://localhost/api/content", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken}`,
+      },
+      body: JSON.stringify(newContent),
+    });
+    const res = await handler(req);
+
+    expect(res.status).toBe(201);
+    const data = await res.json();
+    expect(data.content.platform).toBe("github");
+  });
+
+  test("POST /api/content - text type has null platform", async () => {
+    const newContent = {
+      type: "text",
+      content: "Just a text note",
+    };
+
+    const req = new Request("http://localhost/api/content", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken}`,
+      },
+      body: JSON.stringify(newContent),
+    });
+    const res = await handler(req);
+
+    expect(res.status).toBe(201);
+    const data = await res.json();
+    expect(data.content.platform).toBeUndefined();
+  });
+
+  test("GET /api/content - filters by platform", async () => {
+    await ContentItem.insertMany([
+      {
+        userId,
+        type: "link",
+        url: "https://github.com/test/repo",
+        platform: "github",
+        title: "GitHub Repo",
+      },
+      {
+        userId,
+        type: "link",
+        url: "https://youtube.com/watch?v=123",
+        platform: "youtube",
+        title: "YouTube Video",
+      },
+      {
+        userId,
+        type: "link",
+        url: "https://twitter.com/test",
+        platform: "twitter",
+        title: "Tweet",
+      },
+      { userId, type: "text", content: "Text note", platform: null },
+    ]);
+
+    const req = new Request(`http://localhost/api/content?platform=github`, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${authToken}` },
+    });
+    const res = await handler(req);
+    const data = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(data.data.length).toBe(1);
+    expect(data.data[0].platform).toBe("github");
+    expect(data.data[0].title).toBe("GitHub Repo");
+  });
+
+  test("GET /api/content/platforms - returns platform statistics", async () => {
+    await ContentItem.insertMany([
+      {
+        userId,
+        type: "link",
+        url: "https://github.com/test/repo1",
+        platform: "github",
+        title: "Repo 1",
+      },
+      {
+        userId,
+        type: "link",
+        url: "https://github.com/test/repo2",
+        platform: "github",
+        title: "Repo 2",
+      },
+      {
+        userId,
+        type: "link",
+        url: "https://youtube.com/watch?v=123",
+        platform: "youtube",
+        title: "Video",
+      },
+      { userId, type: "text", content: "Text note", platform: null },
+    ]);
+
+    const req = new Request(`http://localhost/api/content/platforms`, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${authToken}` },
+    });
+    const res = await handler(req);
+    const data = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(data.platforms).toHaveLength(2);
+    expect(data.platforms[0]).toMatchObject({ platform: "github", count: 2 });
+    expect(data.platforms[1]).toMatchObject({ platform: "youtube", count: 1 });
+  });
+
+  test("GET /api/content/platforms - excludes null platforms", async () => {
+    await ContentItem.insertMany([
+      { userId, type: "text", content: "Text 1", platform: null },
+      { userId, type: "text", content: "Text 2", platform: null },
+      {
+        userId,
+        type: "link",
+        url: "https://github.com/test",
+        platform: "github",
+        title: "Repo",
+      },
+    ]);
+
+    const req = new Request(`http://localhost/api/content/platforms`, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${authToken}` },
+    });
+    const res = await handler(req);
+    const data = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(data.platforms).toHaveLength(1);
+    expect(data.platforms[0].platform).toBe("github");
   });
 });

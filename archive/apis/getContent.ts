@@ -17,6 +17,7 @@ export const getContent = async (
   page: number = 1,
   limit: number = 20,
   type?: string,
+  platform?: string,
 ): Promise<ApiResponse> => {
   let endpoint = `/api/content?page=${page}&limit=${limit}`;
 
@@ -26,6 +27,10 @@ export const getContent = async (
 
   if (type) {
     endpoint += `&type=${type}`;
+  }
+
+  if (platform) {
+    endpoint += `&platform=${platform}`;
   }
 
   try {

@@ -1,5 +1,6 @@
 import axios from "axios";
 import * as cheerio from "cheerio";
+import { PLATFORMS } from "../constants/platforms";
 
 export const instagramParser = async (url: string) => {
   try {
@@ -44,6 +45,7 @@ export const instagramParser = async (url: string) => {
       url,
       previewImageUrl,
       tags: [],
+      platform: PLATFORMS.INSTAGRAM,
     };
   } catch (error) {
     console.error(`[instagramParser] Failed to parse ${url}:`, error);
@@ -55,6 +57,7 @@ export const instagramParser = async (url: string) => {
       url,
       previewImageUrl: "",
       tags: [],
+      platform: PLATFORMS.INSTAGRAM,
     };
   }
 };

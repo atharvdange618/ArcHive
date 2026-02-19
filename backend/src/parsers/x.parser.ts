@@ -1,5 +1,6 @@
 import { browserManager } from "../utils/browserManager";
 import { AppError } from "../utils/errors";
+import { PLATFORMS } from "../constants/platforms";
 
 /**
  * Parses an X/Twitter URL to extract content details using a headless browser.
@@ -58,6 +59,7 @@ export const xParser = async (url: string) => {
       description: metadata.description ? metadata.description.trim() : "",
       url: url,
       previewImageUrl: metadata.previewImageUrl || "",
+      platform: PLATFORMS.TWITTER,
     };
   } catch (error) {
     console.error(`Failed to parse X/Twitter URL ${url}:`, error);

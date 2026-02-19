@@ -11,6 +11,7 @@ import {
   getContents,
   updateContent,
   deleteContent,
+  getPlatforms,
 } from "../services/content.service";
 import {
   createContentSchema,
@@ -137,6 +138,27 @@ contentRoutes.get(
     }
   },
 );
+
+// GET All Platforms with Counts (GET /api/content/platforms)
+contentRoutes.get("/platforms", async (c) => {
+  const userId = c.get("user")?._id;
+
+  try {
+    const platforms = await getPlatforms(userId);
+    return c.json(
+      {
+        message: "Platforms retrieved successfully",
+        platforms: platforms,
+      },
+      200,
+    );
+  } catch (error) {
+    if (error instanceof AppError) {
+      throw error;
+    }
+    throw new AppError(500, "Internal Server Error");
+  }
+});
 
 // GET Single Content Item by ID (GET /api/content/:id)
 contentRoutes.get("/:id", async (c) => {

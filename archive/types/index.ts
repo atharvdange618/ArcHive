@@ -22,6 +22,12 @@ export interface IContentItem {
   url?: string;
   tags: string[];
   previewImageUrl?: string;
+  platform?: string | null;
   createdAt?: string;
   updatedAt?: string;
+}
+
+export interface PlatformStat {
+  platform: string;
+  count: number;
 }

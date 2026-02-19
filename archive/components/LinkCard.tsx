@@ -1,11 +1,13 @@
 import * as WebBrowser from "expo-web-browser";
 import React from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { useThemeColors } from "../constants/useColorScheme";
 import { IContentItem } from "../types";
 import { formatDate } from "../utils/helpers";
 import ContentCard from "./ContentCard";
 import HighlightText from "./HighlightText";
+import { getPlatformIcon, getPlatformColor } from "../constants/platforms";
 
 interface LinkCardProps {
   item: IContentItem;
@@ -25,6 +27,20 @@ const LinkCard: React.FC<LinkCardProps> = ({ item, searchQuery, onDelete }) => {
   return (
     <ContentCard onDelete={onDelete}>
       <TouchableOpacity onPress={handlePress}>
+        {item.platform && (
+          <View
+            style={[
+              styles.platformBadge,
+              { backgroundColor: getPlatformColor(item.platform) },
+            ]}
+          >
+            <Ionicons
+              name={getPlatformIcon(item.platform) as any}
+              size={14}
+              color="#fff"
+            />
+          </View>
+        )}
         {item.previewImageUrl && (
           <Image
             source={{ uri: item.previewImageUrl }}
@@ -77,6 +93,22 @@ const LinkCard: React.FC<LinkCardProps> = ({ item, searchQuery, onDelete }) => {
 };
 
 const styles = StyleSheet.create({
+  platformBadge: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3,
+    elevation: 5,
+  },
   previewImage: {
     width: "100%",
     height: 150,

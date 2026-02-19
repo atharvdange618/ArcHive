@@ -15,6 +15,7 @@ export interface IContentItem extends Document {
   url?: string;
   tags: string[];
   previewImageUrl?: string;
+  platform?: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -64,6 +65,12 @@ const ContentItemSchema: Schema = new Schema(
       type: String,
       trim: true,
     },
+    platform: {
+      type: String,
+      trim: true,
+      default: null,
+      index: true,
+    },
   },
   {
     timestamps: true,
@@ -89,6 +96,8 @@ ContentItemSchema.index(
     },
   },
 );
+
+ContentItemSchema.index({ userId: 1, platform: 1 });
 
 const ContentItem = mongoose.model<IContentItem>(
   "ContentItem",

@@ -1,4 +1,5 @@
 import axios from "axios";
+import { PLATFORMS } from "../constants/platforms";
 
 export const githubParser = async (url: string) => {
   const parts = url.split("/");
@@ -15,6 +16,7 @@ export const githubParser = async (url: string) => {
       title: repoData.full_name,
       description: repoData.description,
       url: repoData.html_url,
+      platform: PLATFORMS.GITHUB,
     };
   }
 

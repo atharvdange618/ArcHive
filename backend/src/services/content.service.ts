@@ -129,7 +129,7 @@ async function getContentById(
  * @throws HTTPException if retrieval fails.
  */
 async function getContents(userId: string, query: SearchContentQuery) {
-  const { q, type, tag, limit = 20, page = 1 } = query;
+  const { q, type, tag, platform, limit = 20, page = 1 } = query;
 
   const findCriteria: mongoose.FilterQuery<IContentItem> = {
     userId: new mongoose.Types.ObjectId(userId),
@@ -153,6 +153,10 @@ async function getContents(userId: string, query: SearchContentQuery) {
   if (tag) {
     const stemmedTag = natural.PorterStemmer.stem(tag.toLowerCase());
     findCriteria.tags = { $in: [stemmedTag] };
+  }
+
+  if (platform) {
+    findCriteria.platform = platform;
   }
 
   try {
@@ -283,10 +287,53 @@ async function deleteContent(userId: string, contentId: string): Promise<void> {
   }
 }
 
+/**
+ * Retrieves all platforms with content counts for a specific user.
+ * Returns aggregated data showing how many items per platform.
+ * @param userId The ID of the authenticated user.
+ * @returns Array of platform statistics with counts.
+ */
+async function getPlatforms(userId: string) {
+  try {
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+
+    const platformStats = await ContentItem.aggregate([
+      {
+        $match: {
+          userId: userObjectId,
+          platform: { $ne: null },
+        },
+      },
+      {
+        $group: {
+          _id: "$platform",
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $sort: { count: -1 },
+      },
+      {
+        $project: {
+          _id: 0,
+          platform: "$_id",
+          count: 1,
+        },
+      },
+    ]);
+
+    return platformStats;
+  } catch (error) {
+    console.error(`Error getting platforms for user ${userId}:`, error);
+    throw new AppError(500, "Failed to retrieve platform statistics.");
+  }
+}
+
 export {
   createContent,
   getContentById,
   getContents,
   updateContent,
   deleteContent,
+  getPlatforms,
 };
