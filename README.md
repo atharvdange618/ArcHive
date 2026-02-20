@@ -45,6 +45,15 @@ My goal with ArcHive is to empower creators, thinkers, and anyone passionate abo
   - **Usage Statistics:** Track your content creation with detailed stats showing total items and breakdown by type.
   - **Account Customization:** Update your first name and last name to personalize your experience.
 
+## Roadmap
+
+We are constantly working to improve ArcHive and make it the ultimate digital sanctuary. Here are some of the key features planned for the near future:
+
+- **Custom Collections / Folders:** Create dedicated, customized spaces to organize your saved links, text bits, and code snippets by specific topics (e.g., "Web Dev", "DSA", "ML", "Inspiration").
+- **Web Application:** A fully fledged web dashboard allowing you to view and manage your entire saved knowledge base seamlessly from a desktop browser.
+- **Spaced Repetition / Resurfacing:** A subtle notification system designed to gently remind you to revisit older or unread saved items, turning your archive into an active learning tool rather than a forgotten storage bin.
+- **Shared Collections:** Following the release of the Web App, you will be able to select specific collections of resources and generate public, shareable links to effortlessly distribute curated knowledge with other developers.
+
 ## Releases
 
 ### v1.1.0 - Platform Categorization (Latest)

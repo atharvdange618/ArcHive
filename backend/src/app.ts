@@ -36,12 +36,16 @@ app.use(
         return origin;
       }
 
-      if (
-        config.NODE_ENV === "development" &&
-        (origin.startsWith("http://localhost:") ||
-          origin.startsWith("http://127.0.0.1:"))
-      ) {
-        return origin;
+      if (config.NODE_ENV === "development") {
+        if (
+          origin.startsWith("http://localhost:") ||
+          origin.startsWith("http://127.0.0.1:") ||
+          origin.startsWith("http://192.168.") ||
+          origin.startsWith("http://10.") ||
+          /^http:\/\/172\.(1[6-9]|2[0-9]|3[0-1])\./.test(origin)
+        ) {
+          return origin;
+        }
       }
 
       return null;

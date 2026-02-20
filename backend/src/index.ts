@@ -9,11 +9,11 @@ import { connectDB, disconnectDB } from "./db";
 
   Bun.serve({
     fetch: app.fetch,
-    hostname:"0.0.0.0",
+    hostname: "0.0.0.0",
     port: port,
   });
 
-  console.log(`Server starting on http://localhost:${port}`);
+  console.log(`Server starting on http://0.0.0.0:${port}`);
 
   process.on("SIGINT", async () => {
     console.log("Shutting down server...");
